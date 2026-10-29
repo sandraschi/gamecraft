@@ -1,0 +1,26 @@
+/target/
+**/*.rs.bk
+*.bak
+*.bak.*
+*.pdb
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+dist/
+
+# Godot import cache (regenerated on first editor open)
+.godot/
+
+# Fleet defaults (future-proofing; nothing here yet)
+node_modules/
+**/node_modules/
+.venv/
+.env
+.env.local
+*.mcpb
+*.sqlite3
+*.db
+__pycache__/
+.coverage

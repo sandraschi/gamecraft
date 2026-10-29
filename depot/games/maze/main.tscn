@@ -1,0 +1,1353 @@
+[gd_scene load_steps=201 format=3 uid="uid://3g7kz9uogx4nh"]
+
+[ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
+
+[ext_resource type="Script" path="res://scripts/grid_walker.gd" id="2_walker"]
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 1
+background_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_energy = 1.0
+
+[sub_resource type="BoxMesh" id="Tile0_0_mesh0"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_0_mat1"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_1_mesh2"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_1_mat3"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_2_mesh4"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_2_mat5"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_3_mesh6"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_3_mat7"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_4_mesh8"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_4_mat9"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_5_mesh10"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_5_mat11"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_6_mesh12"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_6_mat13"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_0_mesh14"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_0_mat15"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_1_mesh16"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_1_mat17"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_2_mesh18"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_2_mat19"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_3_mesh20"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_3_mat21"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_4_mesh22"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_4_mat23"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_5_mesh24"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_5_mat25"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_6_mesh26"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_6_mat27"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_0_mesh28"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_0_mat29"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_1_mesh30"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_1_mat31"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_2_mesh32"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_2_mat33"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_3_mesh34"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_3_mat35"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_4_mesh36"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_4_mat37"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_5_mesh38"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_5_mat39"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_6_mesh40"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_6_mat41"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_0_mesh42"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_0_mat43"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_1_mesh44"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_1_mat45"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_2_mesh46"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_2_mat47"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_3_mesh48"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_3_mat49"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_4_mesh50"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_4_mat51"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_5_mesh52"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_5_mat53"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_6_mesh54"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_6_mat55"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_0_mesh56"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_0_mat57"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_1_mesh58"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_1_mat59"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_2_mesh60"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_2_mat61"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_3_mesh62"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_3_mat63"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_4_mesh64"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_4_mat65"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_5_mesh66"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_5_mat67"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_6_mesh68"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_6_mat69"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_0_mesh70"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_0_mat71"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_1_mesh72"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_1_mat73"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_2_mesh74"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_2_mat75"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_3_mesh76"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_3_mat77"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_4_mesh78"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_4_mat79"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_5_mesh80"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_5_mat81"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_6_mesh82"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_6_mat83"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_0_mesh84"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_0_mat85"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_1_mesh86"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_1_mat87"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_2_mesh88"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_2_mat89"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_3_mesh90"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_3_mat91"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_4_mesh92"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_4_mat93"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_5_mesh94"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_5_mat95"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_6_mesh96"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_6_mat97"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Wall0_mesh98"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall0_mat99"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall0_shape100"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall1_mesh101"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall1_mat102"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall1_shape103"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall2_mesh104"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall2_mat105"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall2_shape106"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall3_mesh107"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall3_mat108"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall3_shape109"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall4_mesh110"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall4_mat111"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall4_shape112"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall5_mesh113"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall5_mat114"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall5_shape115"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall6_mesh116"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall6_mat117"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall6_shape118"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall7_mesh119"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall7_mat120"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall7_shape121"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall8_mesh122"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall8_mat123"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall8_shape124"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall9_mesh125"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall9_mat126"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall9_shape127"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall10_mesh128"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall10_mat129"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall10_shape130"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall11_mesh131"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall11_mat132"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall11_shape133"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall12_mesh134"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall12_mat135"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall12_shape136"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall13_mesh137"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall13_mat138"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall13_shape139"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall14_mesh140"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall14_mat141"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall14_shape142"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall15_mesh143"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall15_mat144"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall15_shape145"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall16_mesh146"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall16_mat147"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall16_shape148"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall17_mesh149"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall17_mat150"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall17_shape151"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall18_mesh152"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall18_mat153"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall18_shape154"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall19_mesh155"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall19_mat156"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall19_shape157"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall20_mesh158"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall20_mat159"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall20_shape160"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall21_mesh161"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall21_mat162"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall21_shape163"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall22_mesh164"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall22_mat165"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall22_shape166"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall23_mesh167"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall23_mat168"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall23_shape169"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall24_mesh170"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall24_mat171"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall24_shape172"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall25_mesh173"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall25_mat174"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall25_shape175"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall26_mesh176"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall26_mat177"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall26_shape178"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall27_mesh179"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall27_mat180"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall27_shape181"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall28_mesh182"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall28_mat183"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall28_shape184"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall29_mesh185"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall29_mat186"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall29_shape187"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall30_mesh188"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall30_mat189"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall30_shape190"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="Wall31_mesh191"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Wall31_mat192"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Wall31_shape193"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="CapsuleMesh" id="walker_capsule194"]
+radius = 0.3
+height = 0.8
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="walker_mat195"]
+shading_mode = 0
+albedo_color = Color(0.35, 0.59, 1.0, 1)
+
+[sub_resource type="BoxShape3D" id="Goal_shape196"]
+size = Vector3(1.0, 2.0, 1.0)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_runtime")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+environment = SubResource("environment")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1.0, -0.0, 0.0, 0.0, 5.9604645e-8, 0.99999994, -0.0, -0.99999994, 5.9604645e-8, 3.0, 12.0, 3.01)
+current = true
+fov = 55.0
+
+[node name="Tile0_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 0.0)
+material_override = SubResource("Tile0_0_mat1")
+mesh = SubResource("Tile0_0_mesh0")
+
+[node name="Tile0_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 1.0)
+material_override = SubResource("Tile0_1_mat3")
+mesh = SubResource("Tile0_1_mesh2")
+
+[node name="Tile0_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 2.0)
+material_override = SubResource("Tile0_2_mat5")
+mesh = SubResource("Tile0_2_mesh4")
+
+[node name="Tile0_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 3.0)
+material_override = SubResource("Tile0_3_mat7")
+mesh = SubResource("Tile0_3_mesh6")
+
+[node name="Tile0_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 4.0)
+material_override = SubResource("Tile0_4_mat9")
+mesh = SubResource("Tile0_4_mesh8")
+
+[node name="Tile0_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 5.0)
+material_override = SubResource("Tile0_5_mat11")
+mesh = SubResource("Tile0_5_mesh10")
+
+[node name="Tile0_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 6.0)
+material_override = SubResource("Tile0_6_mat13")
+mesh = SubResource("Tile0_6_mesh12")
+
+[node name="Tile1_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 0.0)
+material_override = SubResource("Tile1_0_mat15")
+mesh = SubResource("Tile1_0_mesh14")
+
+[node name="Tile1_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 1.0)
+material_override = SubResource("Tile1_1_mat17")
+mesh = SubResource("Tile1_1_mesh16")
+
+[node name="Tile1_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 2.0)
+material_override = SubResource("Tile1_2_mat19")
+mesh = SubResource("Tile1_2_mesh18")
+
+[node name="Tile1_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 3.0)
+material_override = SubResource("Tile1_3_mat21")
+mesh = SubResource("Tile1_3_mesh20")
+
+[node name="Tile1_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 4.0)
+material_override = SubResource("Tile1_4_mat23")
+mesh = SubResource("Tile1_4_mesh22")
+
+[node name="Tile1_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 5.0)
+material_override = SubResource("Tile1_5_mat25")
+mesh = SubResource("Tile1_5_mesh24")
+
+[node name="Tile1_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 6.0)
+material_override = SubResource("Tile1_6_mat27")
+mesh = SubResource("Tile1_6_mesh26")
+
+[node name="Tile2_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 0.0)
+material_override = SubResource("Tile2_0_mat29")
+mesh = SubResource("Tile2_0_mesh28")
+
+[node name="Tile2_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 1.0)
+material_override = SubResource("Tile2_1_mat31")
+mesh = SubResource("Tile2_1_mesh30")
+
+[node name="Tile2_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 2.0)
+material_override = SubResource("Tile2_2_mat33")
+mesh = SubResource("Tile2_2_mesh32")
+
+[node name="Tile2_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 3.0)
+material_override = SubResource("Tile2_3_mat35")
+mesh = SubResource("Tile2_3_mesh34")
+
+[node name="Tile2_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 4.0)
+material_override = SubResource("Tile2_4_mat37")
+mesh = SubResource("Tile2_4_mesh36")
+
+[node name="Tile2_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 5.0)
+material_override = SubResource("Tile2_5_mat39")
+mesh = SubResource("Tile2_5_mesh38")
+
+[node name="Tile2_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 6.0)
+material_override = SubResource("Tile2_6_mat41")
+mesh = SubResource("Tile2_6_mesh40")
+
+[node name="Tile3_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 0.0)
+material_override = SubResource("Tile3_0_mat43")
+mesh = SubResource("Tile3_0_mesh42")
+
+[node name="Tile3_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 1.0)
+material_override = SubResource("Tile3_1_mat45")
+mesh = SubResource("Tile3_1_mesh44")
+
+[node name="Tile3_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 2.0)
+material_override = SubResource("Tile3_2_mat47")
+mesh = SubResource("Tile3_2_mesh46")
+
+[node name="Tile3_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 3.0)
+material_override = SubResource("Tile3_3_mat49")
+mesh = SubResource("Tile3_3_mesh48")
+
+[node name="Tile3_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 4.0)
+material_override = SubResource("Tile3_4_mat51")
+mesh = SubResource("Tile3_4_mesh50")
+
+[node name="Tile3_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 5.0)
+material_override = SubResource("Tile3_5_mat53")
+mesh = SubResource("Tile3_5_mesh52")
+
+[node name="Tile3_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 6.0)
+material_override = SubResource("Tile3_6_mat55")
+mesh = SubResource("Tile3_6_mesh54")
+
+[node name="Tile4_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 0.0)
+material_override = SubResource("Tile4_0_mat57")
+mesh = SubResource("Tile4_0_mesh56")
+
+[node name="Tile4_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 1.0)
+material_override = SubResource("Tile4_1_mat59")
+mesh = SubResource("Tile4_1_mesh58")
+
+[node name="Tile4_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 2.0)
+material_override = SubResource("Tile4_2_mat61")
+mesh = SubResource("Tile4_2_mesh60")
+
+[node name="Tile4_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 3.0)
+material_override = SubResource("Tile4_3_mat63")
+mesh = SubResource("Tile4_3_mesh62")
+
+[node name="Tile4_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 4.0)
+material_override = SubResource("Tile4_4_mat65")
+mesh = SubResource("Tile4_4_mesh64")
+
+[node name="Tile4_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 5.0)
+material_override = SubResource("Tile4_5_mat67")
+mesh = SubResource("Tile4_5_mesh66")
+
+[node name="Tile4_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 6.0)
+material_override = SubResource("Tile4_6_mat69")
+mesh = SubResource("Tile4_6_mesh68")
+
+[node name="Tile5_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 0.0)
+material_override = SubResource("Tile5_0_mat71")
+mesh = SubResource("Tile5_0_mesh70")
+
+[node name="Tile5_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 1.0)
+material_override = SubResource("Tile5_1_mat73")
+mesh = SubResource("Tile5_1_mesh72")
+
+[node name="Tile5_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 2.0)
+material_override = SubResource("Tile5_2_mat75")
+mesh = SubResource("Tile5_2_mesh74")
+
+[node name="Tile5_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 3.0)
+material_override = SubResource("Tile5_3_mat77")
+mesh = SubResource("Tile5_3_mesh76")
+
+[node name="Tile5_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 4.0)
+material_override = SubResource("Tile5_4_mat79")
+mesh = SubResource("Tile5_4_mesh78")
+
+[node name="Tile5_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 5.0)
+material_override = SubResource("Tile5_5_mat81")
+mesh = SubResource("Tile5_5_mesh80")
+
+[node name="Tile5_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 6.0)
+material_override = SubResource("Tile5_6_mat83")
+mesh = SubResource("Tile5_6_mesh82")
+
+[node name="Tile6_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 0.0)
+material_override = SubResource("Tile6_0_mat85")
+mesh = SubResource("Tile6_0_mesh84")
+
+[node name="Tile6_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 1.0)
+material_override = SubResource("Tile6_1_mat87")
+mesh = SubResource("Tile6_1_mesh86")
+
+[node name="Tile6_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 2.0)
+material_override = SubResource("Tile6_2_mat89")
+mesh = SubResource("Tile6_2_mesh88")
+
+[node name="Tile6_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 3.0)
+material_override = SubResource("Tile6_3_mat91")
+mesh = SubResource("Tile6_3_mesh90")
+
+[node name="Tile6_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 4.0)
+material_override = SubResource("Tile6_4_mat93")
+mesh = SubResource("Tile6_4_mesh92")
+
+[node name="Tile6_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 5.0)
+material_override = SubResource("Tile6_5_mat95")
+mesh = SubResource("Tile6_5_mesh94")
+
+[node name="Tile6_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 6.0)
+material_override = SubResource("Tile6_6_mat97")
+mesh = SubResource("Tile6_6_mesh96")
+
+[node name="Wall0" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall0_mat99")
+mesh = SubResource("Wall0_mesh98")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall0_shape100")
+
+[node name="Wall1" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 6.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall1_mat102")
+mesh = SubResource("Wall1_mesh101")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall1_shape103")
+
+[node name="Wall2" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall2_mat105")
+mesh = SubResource("Wall2_mesh104")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall2_shape106")
+
+[node name="Wall3" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, 0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall3_mat108")
+mesh = SubResource("Wall3_mesh107")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall3_shape109")
+
+[node name="Wall4" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall4_mat111")
+mesh = SubResource("Wall4_mesh110")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall4_shape112")
+
+[node name="Wall5" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5, 6.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall5"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall5_mat114")
+mesh = SubResource("Wall5_mesh113")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall5"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall5_shape115")
+
+[node name="Wall6" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 1.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall6"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall6_mat117")
+mesh = SubResource("Wall6_mesh116")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall6"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall6_shape118")
+
+[node name="Wall7" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, 0.5, 1.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall7"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall7_mat120")
+mesh = SubResource("Wall7_mesh119")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall7"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall7_shape121")
+
+[node name="Wall8" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall8"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall8_mat123")
+mesh = SubResource("Wall8_mesh122")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall8"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall8_shape124")
+
+[node name="Wall9" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 0.5, 6.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall9"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall9_mat126")
+mesh = SubResource("Wall9_mesh125")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall9"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall9_shape127")
+
+[node name="Wall10" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 2.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall10"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall10_mat129")
+mesh = SubResource("Wall10_mesh128")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall10"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall10_shape130")
+
+[node name="Wall11" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, 0.5, 2.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall11"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall11_mat132")
+mesh = SubResource("Wall11_mesh131")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall11"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall11_shape133")
+
+[node name="Wall12" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall12"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall12_mat135")
+mesh = SubResource("Wall12_mesh134")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall12"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall12_shape136")
+
+[node name="Wall13" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.5, 6.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall13"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall13_mat138")
+mesh = SubResource("Wall13_mesh137")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall13"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall13_shape139")
+
+[node name="Wall14" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 3.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall14"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall14_mat141")
+mesh = SubResource("Wall14_mesh140")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall14"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall14_shape142")
+
+[node name="Wall15" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, 0.5, 3.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall15"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall15_mat144")
+mesh = SubResource("Wall15_mesh143")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall15"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall15_shape145")
+
+[node name="Wall16" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, 0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall16"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall16_mat147")
+mesh = SubResource("Wall16_mesh146")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall16"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall16_shape148")
+
+[node name="Wall17" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, 0.5, 6.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall17"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall17_mat150")
+mesh = SubResource("Wall17_mesh149")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall17"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall17_shape151")
+
+[node name="Wall18" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 4.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall18"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall18_mat153")
+mesh = SubResource("Wall18_mesh152")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall18"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall18_shape154")
+
+[node name="Wall19" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, 0.5, 4.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall19"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall19_mat156")
+mesh = SubResource("Wall19_mesh155")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall19"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall19_shape157")
+
+[node name="Wall20" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, 0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall20"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall20_mat159")
+mesh = SubResource("Wall20_mesh158")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall20"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall20_shape160")
+
+[node name="Wall21" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, 0.5, 6.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall21"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall21_mat162")
+mesh = SubResource("Wall21_mesh161")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall21"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall21_shape163")
+
+[node name="Wall22" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 5.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall22"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall22_mat165")
+mesh = SubResource("Wall22_mesh164")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall22"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall22_shape166")
+
+[node name="Wall23" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, 0.5, 5.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall23"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall23_mat168")
+mesh = SubResource("Wall23_mesh167")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall23"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall23_shape169")
+
+[node name="Wall24" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, 0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall24"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall24_mat171")
+mesh = SubResource("Wall24_mesh170")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall24"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall24_shape172")
+
+[node name="Wall25" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, 0.5, 6.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall25"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall25_mat174")
+mesh = SubResource("Wall25_mesh173")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall25"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall25_shape175")
+
+[node name="Wall26" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 6.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall26"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall26_mat177")
+mesh = SubResource("Wall26_mesh176")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall26"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall26_shape178")
+
+[node name="Wall27" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, 0.5, 6.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall27"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall27_mat180")
+mesh = SubResource("Wall27_mesh179")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall27"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall27_shape181")
+
+[node name="Wall28" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.5, 1.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall28"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall28_mat183")
+mesh = SubResource("Wall28_mesh182")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall28"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall28_shape184")
+
+[node name="Wall29" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.5, 2.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall29"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall29_mat186")
+mesh = SubResource("Wall29_mesh185")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall29"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall29_shape187")
+
+[node name="Wall30" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.5, 3.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall30"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall30_mat189")
+mesh = SubResource("Wall30_mesh188")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall30"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall30_shape190")
+
+[node name="Wall31" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.5, 4.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall31"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wall31_mat192")
+mesh = SubResource("Wall31_mesh191")
+
+[node name="Shape" type="CollisionShape3D" parent="Wall31"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Wall31_shape193")
+
+[node name="Player" type="Node3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_walker")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5, 1.0)
+grid_h = 7
+grid_w = 7
+mode = "maze"
+step_size = 1.0
+
+[node name="Mesh" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("walker_mat195")
+mesh = SubResource("walker_capsule194")
+
+[node name="Goal" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, 0.5, 5.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Goal"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Goal_shape196")
+
+[connection signal="body_entered" from="Goal" to="." method="_on_goal"]

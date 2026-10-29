@@ -1,0 +1,20 @@
+[package]
+name = "gamecraft-forge"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "L1 depot forge: builds the 12-game Godot depot from commands + verified traces"
+
+[dependencies]
+gamecraft-core = { workspace = true }
+gamecraft-commands = { workspace = true }
+gamecraft-godot = { workspace = true }
+gamecraft-sim = { workspace = true }
+glam = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+image = { workspace = true }
+gif = { workspace = true }
+
+[lints]
+workspace = true

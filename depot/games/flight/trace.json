@@ -1,0 +1,1 @@
+{"game":"flight","win":true,"frames":501,"gates":5,"speed":12,"climb":6,"note":"autopilot tracks the next gate altitude; verified in Rust then replayed in-engine"}

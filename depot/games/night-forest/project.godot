@@ -1,0 +1,10 @@
+; Engine configuration file.
+; GameCraft depot game: night-forest
+config_version=5
+
+[application]
+
+config/name="Night Forest Run"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+config/icon="res://icon.svg"

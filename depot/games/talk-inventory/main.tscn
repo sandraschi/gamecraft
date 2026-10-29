@@ -1,0 +1,411 @@
+[gd_scene load_steps=64 format=3 uid="uid://tnmuiuqpppwp"]
+
+[ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
+
+[ext_resource type="Script" path="res://scripts/grid_walker.gd" id="2_walker"]
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 1
+background_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_energy = 1.0
+
+[sub_resource type="BoxMesh" id="Tile0_0_mesh0"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_0_mat1"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_1_mesh2"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_1_mat3"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_2_mesh4"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_2_mat5"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_3_mesh6"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_3_mat7"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile0_4_mesh8"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile0_4_mat9"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_0_mesh10"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_0_mat11"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_1_mesh12"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_1_mat13"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_2_mesh14"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_2_mat15"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_3_mesh16"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_3_mat17"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile1_4_mesh18"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile1_4_mat19"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_0_mesh20"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_0_mat21"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_1_mesh22"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_1_mat23"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_2_mesh24"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_2_mat25"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_3_mesh26"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_3_mat27"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile2_4_mesh28"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile2_4_mat29"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_0_mesh30"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_0_mat31"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_1_mesh32"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_1_mat33"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_2_mesh34"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_2_mat35"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_3_mesh36"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_3_mat37"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_4_mesh38"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_4_mat39"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_0_mesh40"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_0_mat41"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_1_mesh42"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_1_mat43"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_2_mesh44"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_2_mat45"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_3_mesh46"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_3_mat47"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_4_mesh48"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_4_mat49"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.2, 0.18, 1)
+
+[sub_resource type="CapsuleMesh" id="walker_capsule50"]
+radius = 0.3
+height = 0.8
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="walker_mat51"]
+shading_mode = 0
+albedo_color = Color(0.35, 0.59, 1.0, 1)
+
+[sub_resource type="BoxMesh" id="NPC_mesh52"]
+size = Vector3(0.8, 1.0, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="NPC_mat53"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.59, 0.78, 1)
+
+[sub_resource type="BoxShape3D" id="NPCTalk_shape54"]
+size = Vector3(1.2, 2.0, 1.2)
+
+[sub_resource type="BoxMesh" id="Key_mesh55"]
+size = Vector3(0.4, 0.2, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Key_mat56"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.8, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Door_mesh57"]
+size = Vector3(1.0, 2.0, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Door_mat58"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.36, 0.18, 1)
+
+[sub_resource type="BoxShape3D" id="DoorIn_shape59"]
+size = Vector3(1.2, 2.0, 1.2)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_runtime")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+dialogue = Array[String](["Traveler! The door east eats keys.", "I dropped mine by the old well. Shame.", "Here, take my spare. The door will listen now."])
+needs_key = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+environment = SubResource("environment")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1.0, -0.0, 0.0, 0.0, 5.9604645e-8, 0.99999994, -0.0, -0.99999994, 5.9604645e-8, 2.0, 10.0, 2.01)
+current = true
+fov = 55.0
+
+[node name="Tile0_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 0.0)
+material_override = SubResource("Tile0_0_mat1")
+mesh = SubResource("Tile0_0_mesh0")
+
+[node name="Tile0_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 1.0)
+material_override = SubResource("Tile0_1_mat3")
+mesh = SubResource("Tile0_1_mesh2")
+
+[node name="Tile0_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 2.0)
+material_override = SubResource("Tile0_2_mat5")
+mesh = SubResource("Tile0_2_mesh4")
+
+[node name="Tile0_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 3.0)
+material_override = SubResource("Tile0_3_mat7")
+mesh = SubResource("Tile0_3_mesh6")
+
+[node name="Tile0_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 4.0)
+material_override = SubResource("Tile0_4_mat9")
+mesh = SubResource("Tile0_4_mesh8")
+
+[node name="Tile1_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 0.0)
+material_override = SubResource("Tile1_0_mat11")
+mesh = SubResource("Tile1_0_mesh10")
+
+[node name="Tile1_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 1.0)
+material_override = SubResource("Tile1_1_mat13")
+mesh = SubResource("Tile1_1_mesh12")
+
+[node name="Tile1_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 2.0)
+material_override = SubResource("Tile1_2_mat15")
+mesh = SubResource("Tile1_2_mesh14")
+
+[node name="Tile1_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 3.0)
+material_override = SubResource("Tile1_3_mat17")
+mesh = SubResource("Tile1_3_mesh16")
+
+[node name="Tile1_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 4.0)
+material_override = SubResource("Tile1_4_mat19")
+mesh = SubResource("Tile1_4_mesh18")
+
+[node name="Tile2_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 0.0)
+material_override = SubResource("Tile2_0_mat21")
+mesh = SubResource("Tile2_0_mesh20")
+
+[node name="Tile2_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 1.0)
+material_override = SubResource("Tile2_1_mat23")
+mesh = SubResource("Tile2_1_mesh22")
+
+[node name="Tile2_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 2.0)
+material_override = SubResource("Tile2_2_mat25")
+mesh = SubResource("Tile2_2_mesh24")
+
+[node name="Tile2_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 3.0)
+material_override = SubResource("Tile2_3_mat27")
+mesh = SubResource("Tile2_3_mesh26")
+
+[node name="Tile2_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 4.0)
+material_override = SubResource("Tile2_4_mat29")
+mesh = SubResource("Tile2_4_mesh28")
+
+[node name="Tile3_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 0.0)
+material_override = SubResource("Tile3_0_mat31")
+mesh = SubResource("Tile3_0_mesh30")
+
+[node name="Tile3_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 1.0)
+material_override = SubResource("Tile3_1_mat33")
+mesh = SubResource("Tile3_1_mesh32")
+
+[node name="Tile3_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 2.0)
+material_override = SubResource("Tile3_2_mat35")
+mesh = SubResource("Tile3_2_mesh34")
+
+[node name="Tile3_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 3.0)
+material_override = SubResource("Tile3_3_mat37")
+mesh = SubResource("Tile3_3_mesh36")
+
+[node name="Tile3_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 4.0)
+material_override = SubResource("Tile3_4_mat39")
+mesh = SubResource("Tile3_4_mesh38")
+
+[node name="Tile4_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 0.0)
+material_override = SubResource("Tile4_0_mat41")
+mesh = SubResource("Tile4_0_mesh40")
+
+[node name="Tile4_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 1.0)
+material_override = SubResource("Tile4_1_mat43")
+mesh = SubResource("Tile4_1_mesh42")
+
+[node name="Tile4_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 2.0)
+material_override = SubResource("Tile4_2_mat45")
+mesh = SubResource("Tile4_2_mesh44")
+
+[node name="Tile4_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 3.0)
+material_override = SubResource("Tile4_3_mat47")
+mesh = SubResource("Tile4_3_mesh46")
+
+[node name="Tile4_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 4.0)
+material_override = SubResource("Tile4_4_mat49")
+mesh = SubResource("Tile4_4_mesh48")
+
+[node name="Player" type="Node3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_walker")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 0.0)
+grid_h = 5
+grid_w = 5
+mode = "talk"
+step_size = 1.0
+
+[node name="Mesh" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("walker_mat51")
+mesh = SubResource("walker_capsule50")
+
+[node name="NPC" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.5, 3.0)
+material_override = SubResource("NPC_mat53")
+mesh = SubResource("NPC_mesh52")
+
+[node name="NPCTalk" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.5, 3.0)
+
+[node name="Shape" type="CollisionShape3D" parent="NPCTalk"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("NPCTalk_shape54")
+
+[node name="Key" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.3, 4.0)
+material_override = SubResource("Key_mat56")
+mesh = SubResource("Key_mesh55")
+
+[node name="Door" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, 1.0, 4.0)
+material_override = SubResource("Door_mat58")
+mesh = SubResource("Door_mesh57")
+
+[node name="DoorIn" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, 0.5, 4.0)
+
+[node name="Shape" type="CollisionShape3D" parent="DoorIn"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("DoorIn_shape59")
+
+[connection signal="body_entered" from="NPCTalk" to="." method="_on_talk"]
+
+[connection signal="body_entered" from="DoorIn" to="." method="_on_door"]

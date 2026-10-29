@@ -1,0 +1,329 @@
+[gd_scene load_steps=44 format=3 uid="uid://358m02ggjk5w1"]
+
+[ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
+
+[ext_resource type="Script" path="res://scripts/autoplay.gd" id="3_autoplay"]
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 1
+background_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_energy = 1.0
+
+[sub_resource type="BoxMesh" id="Infield_mesh0"]
+size = Vector3(31.199999, 0.3, 31.199999)
+
+[sub_resource type="StandardMaterial3D" id="Infield_mat1"]
+shading_mode = 0
+albedo_color = Color(0.24, 0.34, 0.24, 1)
+
+[sub_resource type="TorusMesh" id="road_torus2"]
+inner_radius = 9.8
+outer_radius = 14.2
+rings = 32
+ring_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="road_mat3"]
+shading_mode = 0
+albedo_color = Color(0.26, 0.27, 0.31, 1)
+
+[sub_resource type="BoxShape3D" id="CP0_shape4"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[sub_resource type="BoxMesh" id="CP0_post_mesh5"]
+size = Vector3(0.3, 2.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="CP0_post_mat6"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="CP1_shape7"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[sub_resource type="BoxMesh" id="CP1_post_mesh8"]
+size = Vector3(0.3, 2.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="CP1_post_mat9"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="CP2_shape10"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[sub_resource type="BoxMesh" id="CP2_post_mesh11"]
+size = Vector3(0.3, 2.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="CP2_post_mat12"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="CP3_shape13"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[sub_resource type="BoxMesh" id="CP3_post_mesh14"]
+size = Vector3(0.3, 2.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="CP3_post_mat15"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="CP4_shape16"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[sub_resource type="BoxMesh" id="CP4_post_mesh17"]
+size = Vector3(0.3, 2.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="CP4_post_mat18"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="CP5_shape19"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[sub_resource type="BoxMesh" id="CP5_post_mesh20"]
+size = Vector3(0.3, 2.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="CP5_post_mat21"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="CP6_shape22"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[sub_resource type="BoxMesh" id="CP6_post_mesh23"]
+size = Vector3(0.3, 2.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="CP6_post_mat24"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="CP7_shape25"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[sub_resource type="BoxMesh" id="CP7_post_mesh26"]
+size = Vector3(0.3, 2.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="CP7_post_mat27"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.78, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="car_body_mesh28"]
+size = Vector3(1.6, 0.5, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="car_body_mat29"]
+shading_mode = 0
+albedo_color = Color(0.92, 0.3, 0.22, 1)
+
+[sub_resource type="BoxMesh" id="Wheel0_mesh30"]
+size = Vector3(0.35, 0.35, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="Wheel0_mat31"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Wheel1_mesh32"]
+size = Vector3(0.35, 0.35, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="Wheel1_mat33"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Wheel2_mesh34"]
+size = Vector3(0.35, 0.35, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="Wheel2_mat35"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Wheel3_mesh36"]
+size = Vector3(0.35, 0.35, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="Wheel3_mat37"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+
+[sub_resource type="BoxShape3D" id="car_shape38"]
+size = Vector3(1.6, 0.6, 0.9)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_runtime")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+checkpoints_to_win = 8
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+environment = SubResource("environment")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1.0, -0.0, 0.0, 0.0, 5.9604645e-8, 0.99999994, -0.0, -0.99999994, 5.9604645e-8, 0.0, 34.0, 0.01)
+current = true
+fov = 55.0
+
+[node name="Infield" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.35, 0.0)
+material_override = SubResource("Infield_mat1")
+mesh = SubResource("Infield_mesh0")
+
+[node name="Road" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.15, 0.0)
+material_override = SubResource("road_mat3")
+mesh = SubResource("road_torus2")
+
+[node name="CP0" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 12.0, 0.8, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="CP0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("CP0_shape4")
+
+[node name="CP0_post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 12.0, 1.2, 0.0)
+material_override = SubResource("CP0_post_mat6")
+mesh = SubResource("CP0_post_mesh5")
+
+[node name="CP1" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 8.485281, 0.8, 8.485281)
+
+[node name="Shape" type="CollisionShape3D" parent="CP1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("CP1_shape7")
+
+[node name="CP1_post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 8.485281, 1.2, 8.485281)
+material_override = SubResource("CP1_post_mat9")
+mesh = SubResource("CP1_post_mesh8")
+
+[node name="CP2" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -5.2453663e-7, 0.8, 12.0)
+
+[node name="Shape" type="CollisionShape3D" parent="CP2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("CP2_shape10")
+
+[node name="CP2_post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -5.2453663e-7, 1.2, 12.0)
+material_override = SubResource("CP2_post_mat12")
+mesh = SubResource("CP2_post_mesh11")
+
+[node name="CP3" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -8.485281, 0.8, 8.485281)
+
+[node name="Shape" type="CollisionShape3D" parent="CP3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("CP3_shape13")
+
+[node name="CP3_post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -8.485281, 1.2, 8.485281)
+material_override = SubResource("CP3_post_mat15")
+mesh = SubResource("CP3_post_mesh14")
+
+[node name="CP4" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -12.0, 0.8, -1.0490733e-6)
+
+[node name="Shape" type="CollisionShape3D" parent="CP4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("CP4_shape16")
+
+[node name="CP4_post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -12.0, 1.2, -1.0490733e-6)
+material_override = SubResource("CP4_post_mat18")
+mesh = SubResource("CP4_post_mesh17")
+
+[node name="CP5" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -8.48528, 0.8, -8.485283)
+
+[node name="Shape" type="CollisionShape3D" parent="CP5"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("CP5_shape19")
+
+[node name="CP5_post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -8.48528, 1.2, -8.485283)
+material_override = SubResource("CP5_post_mat21")
+mesh = SubResource("CP5_post_mesh20")
+
+[node name="CP6" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.4309856e-7, 0.8, -12.0)
+
+[node name="Shape" type="CollisionShape3D" parent="CP6"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("CP6_shape22")
+
+[node name="CP6_post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.4309856e-7, 1.2, -12.0)
+material_override = SubResource("CP6_post_mat24")
+mesh = SubResource("CP6_post_mesh23")
+
+[node name="CP7" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 8.485284, 0.8, -8.485278)
+
+[node name="Shape" type="CollisionShape3D" parent="CP7"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("CP7_shape25")
+
+[node name="CP7_post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 8.485284, 1.2, -8.485278)
+material_override = SubResource("CP7_post_mat27")
+mesh = SubResource("CP7_post_mesh26")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_player")
+transform = Transform3D(-0.38268352, -0.0, -0.9238795, 0.0, 1.0, -0.0, 0.9238795, 0.0, -0.38268352, 12.0, 0.5, 0.0)
+mode = 6
+speed = 10.0
+turn_rate = 3.0
+
+[node name="Body" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("car_body_mat29")
+mesh = SubResource("car_body_mesh28")
+
+[node name="Wheel0" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.5, -0.1, 0.45)
+material_override = SubResource("Wheel0_mat31")
+mesh = SubResource("Wheel0_mesh30")
+
+[node name="Wheel1" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.5, -0.1, -0.45)
+material_override = SubResource("Wheel1_mat33")
+mesh = SubResource("Wheel1_mesh32")
+
+[node name="Wheel2" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -0.5, -0.1, 0.45)
+material_override = SubResource("Wheel2_mat35")
+mesh = SubResource("Wheel2_mesh34")
+
+[node name="Wheel3" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -0.5, -0.1, -0.45)
+material_override = SubResource("Wheel3_mat37")
+mesh = SubResource("Wheel3_mesh36")
+
+[node name="Shape" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("car_shape38")
+
+[node name="Autoplay" type="Node3D" parent="."]
+script = ExtResource("3_autoplay")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+drive = true
+hold_action = ""
+ring_prefix = "CP"
+
+[connection signal="body_entered" from="CP0" to="." method="_on_checkpoint"]
+
+[connection signal="body_entered" from="CP1" to="." method="_on_checkpoint"]
+
+[connection signal="body_entered" from="CP2" to="." method="_on_checkpoint"]
+
+[connection signal="body_entered" from="CP3" to="." method="_on_checkpoint"]
+
+[connection signal="body_entered" from="CP4" to="." method="_on_checkpoint"]
+
+[connection signal="body_entered" from="CP5" to="." method="_on_checkpoint"]
+
+[connection signal="body_entered" from="CP6" to="." method="_on_checkpoint"]
+
+[connection signal="body_entered" from="CP7" to="." method="_on_checkpoint"]

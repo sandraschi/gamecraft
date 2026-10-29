@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://b8k2worlddemo"]
+
+[ext_resource type="Script" path="res://scripts/world.gd" id="1_world"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_main"]
+size = Vector3(2, 2, 2)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Body" type="CollisionShape3D" parent="Player"]
+shape = SubResource("BoxShape3D_main")
+
+[node name="Crate" type="RigidBody3D" parent="."]
+position = Vector3(3, 0, 0)
+
+[node name="StartButton" type="Button" parent="."]
+position = Vector3(0, 2, 0)
+
+[connection signal="pressed" from="StartButton" to="." method="start_game"]

@@ -1,0 +1,1 @@
+{"game":"driving","win":true,"frames":335,"laps":1,"speed":10,"turn_rate":3,"note":"pure-pursuit steering, verified in Rust then replayed in-engine"}

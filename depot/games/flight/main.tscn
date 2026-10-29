@@ -1,0 +1,1005 @@
+[gd_scene load_steps=153 format=3 uid="uid://2c0fxtjesrn38"]
+
+[ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
+
+[ext_resource type="Script" path="res://scripts/camera_follow.gd" id="3_camera"]
+
+[ext_resource type="Script" path="res://scripts/autoplay.gd" id="4_autoplay"]
+
+[ext_resource type="Texture2D" path="res://textures/plaster.png" id="tex_plaster"]
+
+[ext_resource type="Texture2D" path="res://textures/brick.png" id="tex_brick"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_material"]
+sky_top_color = Color(0.24, 0.42, 0.75, 1)
+sky_horizon_color = Color(0.78, 0.87, 0.96, 1)
+ground_bottom_color = Color(0.55, 0.66, 0.8, 1)
+ground_horizon_color = Color(0.78, 0.87, 0.96, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_material")
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 1.0
+
+[sub_resource type="BoxMesh" id="Terrain_mesh0"]
+size = Vector3(150.0, 1.2, 60.0)
+
+[sub_resource type="StandardMaterial3D" id="Terrain_mat1"]
+shading_mode = 0
+albedo_color = Color(0.42, 0.55, 0.32, 1)
+
+[sub_resource type="BoxMesh" id="Runway_mesh2"]
+size = Vector3(34.0, 0.06, 5.0)
+
+[sub_resource type="StandardMaterial3D" id="Runway_mat3"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.31, 0.34, 1)
+
+[sub_resource type="BoxMesh" id="farmhouse_0_mesh4"]
+size = Vector3(3.0, 1.8, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="farmhouse_0_mat5"]
+shading_mode = 0
+albedo_color = Color(0.87, 0.81, 0.69, 1)
+
+[sub_resource type="BoxShape3D" id="farmhouse_0_shape6"]
+size = Vector3(3.0, 1.8, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="wall_tex7"]
+shading_mode = 0
+albedo_color = Color(0.87, 0.81, 0.69, 1)
+albedo_texture = ExtResource("tex_plaster")
+uv1_scale = Vector3(2, 2, 1)
+
+[sub_resource type="PrismMesh" id="farmhouse_0_roof_prism8"]
+size = Vector3(3.4499998, 0.99, 2.76)
+
+[sub_resource type="StandardMaterial3D" id="farmhouse_0_roof_mat9"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.26, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="farmhouse_0_door_mesh10"]
+size = Vector3(0.65999997, 1.26, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="farmhouse_0_door_mat11"]
+shading_mode = 0
+albedo_color = Color(0.32, 0.22, 0.16, 1)
+
+[sub_resource type="BoxMesh" id="farmhouse_0_chimney_mesh12"]
+size = Vector3(0.35, 0.9, 0.35)
+
+[sub_resource type="StandardMaterial3D" id="farmhouse_0_chimney_mat13"]
+shading_mode = 0
+albedo_color = Color(0.45, 0.38, 0.34, 1)
+
+[sub_resource type="BoxMesh" id="barn_1_mesh14"]
+size = Vector3(4.0, 2.2, 3.0)
+
+[sub_resource type="StandardMaterial3D" id="barn_1_mat15"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.24, 0.22, 1)
+
+[sub_resource type="BoxShape3D" id="barn_1_shape16"]
+size = Vector3(4.0, 2.2, 3.0)
+
+[sub_resource type="StandardMaterial3D" id="wall_tex17"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.24, 0.22, 1)
+albedo_texture = ExtResource("tex_brick")
+uv1_scale = Vector3(2, 2, 1)
+
+[sub_resource type="PrismMesh" id="barn_1_roof_prism18"]
+size = Vector3(4.6, 1.21, 3.4499998)
+
+[sub_resource type="StandardMaterial3D" id="barn_1_roof_mat19"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.28, 0.3, 1)
+
+[sub_resource type="BoxMesh" id="igloo_2_mesh20"]
+size = Vector3(2.2, 1.2, 2.2)
+
+[sub_resource type="StandardMaterial3D" id="igloo_2_mat21"]
+shading_mode = 0
+albedo_color = Color(0.92, 0.94, 0.97, 1)
+
+[sub_resource type="BoxShape3D" id="igloo_2_shape22"]
+size = Vector3(2.2, 1.2, 2.2)
+
+[sub_resource type="SphereMesh" id="igloo_2_sphere23"]
+radius = 1.1
+height = 1.2
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="igloo_2_mat24"]
+shading_mode = 0
+albedo_color = Color(0.92, 0.94, 0.97, 1)
+
+[sub_resource type="BoxMesh" id="igloo_2_door_mesh25"]
+size = Vector3(0.8, 0.8, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="igloo_2_door_mat26"]
+shading_mode = 0
+albedo_color = Color(0.35, 0.4, 0.48, 1)
+
+[sub_resource type="BoxMesh" id="church_3_mesh27"]
+size = Vector3(2.6, 2.6, 4.0)
+
+[sub_resource type="StandardMaterial3D" id="church_3_mat28"]
+shading_mode = 0
+albedo_color = Color(0.82, 0.8, 0.76, 1)
+
+[sub_resource type="BoxShape3D" id="church_3_shape29"]
+size = Vector3(2.6, 2.6, 4.0)
+
+[sub_resource type="StandardMaterial3D" id="wall_tex30"]
+shading_mode = 0
+albedo_color = Color(0.82, 0.8, 0.76, 1)
+albedo_texture = ExtResource("tex_brick")
+uv1_scale = Vector3(2, 2, 1)
+
+[sub_resource type="PrismMesh" id="church_3_roof_prism31"]
+size = Vector3(2.9899998, 1.43, 4.6)
+
+[sub_resource type="StandardMaterial3D" id="church_3_roof_mat32"]
+shading_mode = 0
+albedo_color = Color(0.38, 0.42, 0.52, 1)
+
+[sub_resource type="BoxMesh" id="church_3_door_mesh33"]
+size = Vector3(0.57199997, 1.8199999, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="church_3_door_mat34"]
+shading_mode = 0
+albedo_color = Color(0.32, 0.22, 0.16, 1)
+
+[sub_resource type="BoxMesh" id="church_3_tower_mesh35"]
+size = Vector3(1.17, 4.68, 1.17)
+
+[sub_resource type="StandardMaterial3D" id="church_3_tower_mat36"]
+shading_mode = 0
+albedo_color = Color(0.82, 0.8, 0.76, 1)
+
+[sub_resource type="PrismMesh" id="church_3_spire_prism37"]
+size = Vector3(1.3, 2.34, 1.3)
+
+[sub_resource type="StandardMaterial3D" id="church_3_spire_mat38"]
+shading_mode = 0
+albedo_color = Color(0.38, 0.42, 0.52, 1)
+
+[sub_resource type="BoxMesh" id="windmill_4_mesh39"]
+size = Vector3(2.4, 3.2, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="windmill_4_mat40"]
+shading_mode = 0
+albedo_color = Color(0.92, 0.9, 0.84, 1)
+
+[sub_resource type="BoxShape3D" id="windmill_4_shape41"]
+size = Vector3(2.4, 3.2, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="wall_tex42"]
+shading_mode = 0
+albedo_color = Color(0.92, 0.9, 0.84, 1)
+albedo_texture = ExtResource("tex_plaster")
+uv1_scale = Vector3(2, 2, 1)
+
+[sub_resource type="PrismMesh" id="windmill_4_roof_prism43"]
+size = Vector3(2.76, 1.7600001, 2.76)
+
+[sub_resource type="StandardMaterial3D" id="windmill_4_roof_mat44"]
+shading_mode = 0
+albedo_color = Color(0.35, 0.3, 0.28, 1)
+
+[sub_resource type="BoxMesh" id="windmill_4_door_mesh45"]
+size = Vector3(0.528, 2.24, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="windmill_4_door_mat46"]
+shading_mode = 0
+albedo_color = Color(0.32, 0.22, 0.16, 1)
+
+[sub_resource type="BoxMesh" id="windmill_4_hub_mesh47"]
+size = Vector3(0.4, 0.4, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="windmill_4_hub_mat48"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.26, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="windmill_4_sail0_mesh49"]
+size = Vector3(0.25, 2.4, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="windmill_4_sail0_mat50"]
+shading_mode = 0
+albedo_color = Color(0.96, 0.94, 0.88, 1)
+
+[sub_resource type="BoxMesh" id="windmill_4_sail1_mesh51"]
+size = Vector3(2.4, 0.25, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="windmill_4_sail1_mat52"]
+shading_mode = 0
+albedo_color = Color(0.96, 0.94, 0.88, 1)
+
+[sub_resource type="BoxMesh" id="lighthouse_5_mesh53"]
+size = Vector3(2.0, 4.5, 2.0)
+
+[sub_resource type="StandardMaterial3D" id="lighthouse_5_mat54"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.95, 0.96, 1)
+
+[sub_resource type="BoxShape3D" id="lighthouse_5_shape55"]
+size = Vector3(2.0, 4.5, 2.0)
+
+[sub_resource type="StandardMaterial3D" id="wall_tex56"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.95, 0.96, 1)
+albedo_texture = ExtResource("tex_plaster")
+uv1_scale = Vector3(2, 2, 1)
+
+[sub_resource type="PrismMesh" id="lighthouse_5_roof_prism57"]
+size = Vector3(2.3, 2.4750001, 2.3)
+
+[sub_resource type="StandardMaterial3D" id="lighthouse_5_roof_mat58"]
+shading_mode = 0
+albedo_color = Color(0.82, 0.2, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="lighthouse_5_door_mesh59"]
+size = Vector3(0.44, 3.1499999, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="lighthouse_5_door_mat60"]
+shading_mode = 0
+albedo_color = Color(0.32, 0.22, 0.16, 1)
+
+[sub_resource type="BoxMesh" id="lighthouse_5_lantern_mesh61"]
+size = Vector3(1.0, 0.9, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="lighthouse_5_lantern_mat62"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.88, 0.42, 1)
+
+[sub_resource type="BoxMesh" id="lighthouse_5_band_mesh63"]
+size = Vector3(2.04, 0.35, 2.04)
+
+[sub_resource type="StandardMaterial3D" id="lighthouse_5_band_mat64"]
+shading_mode = 0
+albedo_color = Color(0.82, 0.2, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_mesh65"]
+size = Vector3(5.0, 3.0, 5.0)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_mat66"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="BoxShape3D" id="castle_6_shape67"]
+size = Vector3(5.0, 3.0, 5.0)
+
+[sub_resource type="StandardMaterial3D" id="wall_tex68"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+albedo_texture = ExtResource("tex_brick")
+uv1_scale = Vector3(2, 2, 1)
+
+[sub_resource type="PrismMesh" id="castle_6_roof_prism69"]
+size = Vector3(5.75, 1.6500001, 5.75)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_roof_mat70"]
+shading_mode = 0
+albedo_color = Color(0.38, 0.4, 0.45, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_door_mesh71"]
+size = Vector3(1.1, 2.1, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_door_mat72"]
+shading_mode = 0
+albedo_color = Color(0.32, 0.22, 0.16, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_turret0_mesh73"]
+size = Vector3(0.9, 4.5, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_turret0_mat74"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_turret1_mesh75"]
+size = Vector3(0.9, 4.5, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_turret1_mat76"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_turret2_mesh77"]
+size = Vector3(0.9, 4.5, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_turret2_mat78"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_turret3_mesh79"]
+size = Vector3(0.9, 4.5, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_turret3_mat80"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_crenel0_mesh81"]
+size = Vector3(0.5, 0.6, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_crenel0_mat82"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_crenel1_mesh83"]
+size = Vector3(0.5, 0.6, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_crenel1_mat84"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_crenel2_mesh85"]
+size = Vector3(0.5, 0.6, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_crenel2_mat86"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_crenel3_mesh87"]
+size = Vector3(0.5, 0.6, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_crenel3_mat88"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="BoxMesh" id="castle_6_crenel4_mesh89"]
+size = Vector3(0.5, 0.6, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="castle_6_crenel4_mat90"]
+shading_mode = 0
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+
+[sub_resource type="CapsuleMesh" id="person_0_body_capsule91"]
+radius = 0.22
+height = 1.1
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="person_0_body_mat92"]
+shading_mode = 0
+albedo_color = Color(0.36, 0.6, 1.0, 1)
+
+[sub_resource type="SphereMesh" id="person_0_head_sphere93"]
+radius = 0.18
+height = 0.36
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="person_0_head_mat94"]
+shading_mode = 0
+albedo_color = Color(0.93, 0.78, 0.64, 1)
+
+[sub_resource type="StandardMaterial3D" id="cow_1_hide_mat95"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.95, 0.93, 1)
+
+[sub_resource type="StandardMaterial3D" id="cow_1_spots_mat96"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="cow_1_torso_mesh97"]
+size = Vector3(1.3, 0.7, 0.7)
+
+[sub_resource type="BoxMesh" id="cow_1_headm_mesh98"]
+size = Vector3(0.45, 0.45, 0.45)
+
+[sub_resource type="BoxMesh" id="cow_1_leg00_mesh99"]
+size = Vector3(0.18, 0.7, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="cow_1_leg00_mat100"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="cow_1_leg01_mesh101"]
+size = Vector3(0.18, 0.7, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="cow_1_leg01_mat102"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="cow_1_leg10_mesh103"]
+size = Vector3(0.18, 0.7, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="cow_1_leg10_mat104"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="cow_1_leg11_mesh105"]
+size = Vector3(0.18, 0.7, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="cow_1_leg11_mat106"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="CapsuleMesh" id="person_2_body_capsule107"]
+radius = 0.22
+height = 1.1
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="person_2_body_mat108"]
+shading_mode = 0
+albedo_color = Color(0.36, 0.6, 1.0, 1)
+
+[sub_resource type="SphereMesh" id="person_2_head_sphere109"]
+radius = 0.18
+height = 0.36
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="person_2_head_mat110"]
+shading_mode = 0
+albedo_color = Color(0.93, 0.78, 0.64, 1)
+
+[sub_resource type="StandardMaterial3D" id="cow_3_hide_mat111"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.95, 0.93, 1)
+
+[sub_resource type="StandardMaterial3D" id="cow_3_spots_mat112"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="cow_3_torso_mesh113"]
+size = Vector3(1.3, 0.7, 0.7)
+
+[sub_resource type="BoxMesh" id="cow_3_headm_mesh114"]
+size = Vector3(0.45, 0.45, 0.45)
+
+[sub_resource type="BoxMesh" id="cow_3_leg00_mesh115"]
+size = Vector3(0.18, 0.7, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="cow_3_leg00_mat116"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="cow_3_leg01_mesh117"]
+size = Vector3(0.18, 0.7, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="cow_3_leg01_mat118"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="cow_3_leg10_mesh119"]
+size = Vector3(0.18, 0.7, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="cow_3_leg10_mat120"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="cow_3_leg11_mesh121"]
+size = Vector3(0.18, 0.7, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="cow_3_leg11_mat122"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.18, 0.2, 1)
+
+[sub_resource type="TorusMesh" id="Ring0_torus123"]
+inner_radius = 1.5
+outer_radius = 2.1
+rings = 32
+ring_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="Ring0_mat124"]
+shading_mode = 0
+albedo_color = Color(0.98, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="Ring0_shape125"]
+size = Vector3(2.4, 3.0, 1.2)
+
+[sub_resource type="TorusMesh" id="Ring1_torus126"]
+inner_radius = 1.5
+outer_radius = 2.1
+rings = 32
+ring_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="Ring1_mat127"]
+shading_mode = 0
+albedo_color = Color(0.98, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="Ring1_shape128"]
+size = Vector3(2.4, 3.0, 1.2)
+
+[sub_resource type="TorusMesh" id="Ring2_torus129"]
+inner_radius = 1.5
+outer_radius = 2.1
+rings = 32
+ring_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="Ring2_mat130"]
+shading_mode = 0
+albedo_color = Color(0.98, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="Ring2_shape131"]
+size = Vector3(2.4, 3.0, 1.2)
+
+[sub_resource type="TorusMesh" id="Ring3_torus132"]
+inner_radius = 1.5
+outer_radius = 2.1
+rings = 32
+ring_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="Ring3_mat133"]
+shading_mode = 0
+albedo_color = Color(0.98, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="Ring3_shape134"]
+size = Vector3(2.4, 3.0, 1.2)
+
+[sub_resource type="TorusMesh" id="Ring4_torus135"]
+inner_radius = 1.5
+outer_radius = 2.1
+rings = 32
+ring_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="Ring4_mat136"]
+shading_mode = 0
+albedo_color = Color(0.98, 0.78, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="Ring4_shape137"]
+size = Vector3(2.4, 3.0, 1.2)
+
+[sub_resource type="BoxMesh" id="plane_body_mesh138"]
+size = Vector3(1.4, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="plane_body_mat139"]
+shading_mode = 0
+albedo_color = Color(0.88, 0.3, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Wing_mesh140"]
+size = Vector3(0.5, 0.12, 2.6)
+
+[sub_resource type="StandardMaterial3D" id="Wing_mat141"]
+shading_mode = 0
+albedo_color = Color(0.92, 0.92, 0.95, 1)
+
+[sub_resource type="BoxShape3D" id="plane_shape142"]
+size = Vector3(1.4, 0.5, 2.6)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_runtime")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+rings_to_win = 5
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+environment = SubResource("environment")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8525245, 0.4251619, -0.3040383, -1.4901161e-8, 0.5816831, 0.8134155, 0.5226872, -0.69345665, 0.49589908, 0.0, 0.0, 0.0)
+light_energy = 1.149999976158142
+shadow_enabled = true
+
+[node name="Terrain" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 60.0, -0.6, 0.0)
+material_override = SubResource("Terrain_mat1")
+mesh = SubResource("Terrain_mesh0")
+
+[node name="Runway" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 8.0, -0.02, 0.0)
+material_override = SubResource("Runway_mat3")
+mesh = SubResource("Runway_mesh2")
+
+[node name="farmhouse_0" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 16.0, 0.9, -7.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="farmhouse_0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("wall_tex7")
+mesh = SubResource("farmhouse_0_mesh4")
+
+[node name="Shape" type="CollisionShape3D" parent="farmhouse_0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.3499999, 0.0)
+shape = SubResource("farmhouse_0_shape6")
+
+[node name="Roof" type="MeshInstance3D" parent="farmhouse_0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("farmhouse_0_roof_mat9")
+mesh = SubResource("farmhouse_0_roof_prism8")
+
+[node name="farmhouse_0_door" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 16.0, 0.63, -5.8)
+material_override = SubResource("farmhouse_0_door_mat11")
+mesh = SubResource("farmhouse_0_door_mesh10")
+
+[node name="farmhouse_0_chimney" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 15.1, 2.16, -7.0)
+material_override = SubResource("farmhouse_0_chimney_mat13")
+mesh = SubResource("farmhouse_0_chimney_mesh12")
+
+[node name="barn_1" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 34.0, 1.1, -9.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="barn_1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("wall_tex17")
+mesh = SubResource("barn_1_mesh14")
+
+[node name="Shape" type="CollisionShape3D" parent="barn_1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.6500001, 0.0)
+shape = SubResource("barn_1_shape16")
+
+[node name="Roof" type="MeshInstance3D" parent="barn_1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("barn_1_roof_mat19")
+mesh = SubResource("barn_1_roof_prism18")
+
+[node name="igloo_2" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 54.0, 0.6, -6.0)
+name = "igloo_2"
+
+[node name="Mesh" type="MeshInstance3D" parent="igloo_2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("igloo_2_mat24")
+mesh = SubResource("igloo_2_sphere23")
+
+[node name="Shape" type="CollisionShape3D" parent="igloo_2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("igloo_2_shape22")
+
+[node name="igloo_2_door" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 54.88, 0.4, -6.0)
+material_override = SubResource("igloo_2_door_mat26")
+mesh = SubResource("igloo_2_door_mesh25")
+
+[node name="church_3" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 74.0, 1.3, -8.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="church_3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("wall_tex30")
+mesh = SubResource("church_3_mesh27")
+
+[node name="Shape" type="CollisionShape3D" parent="church_3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.9499999, 0.0)
+shape = SubResource("church_3_shape29")
+
+[node name="Roof" type="MeshInstance3D" parent="church_3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("church_3_roof_mat32")
+mesh = SubResource("church_3_roof_prism31")
+
+[node name="church_3_door" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 74.0, 0.90999997, -6.0)
+material_override = SubResource("church_3_door_mat34")
+mesh = SubResource("church_3_door_mesh33")
+
+[node name="church_3_tower" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 74.0, 2.34, -9.4)
+material_override = SubResource("church_3_tower_mat36")
+mesh = SubResource("church_3_tower_mesh35")
+
+[node name="church_3_spire_node" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 74.0, 5.85, -9.4)
+material_override = SubResource("church_3_spire_mat38")
+mesh = SubResource("church_3_spire_prism37")
+
+[node name="windmill_4" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 26.0, 1.6, -14.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="windmill_4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("wall_tex42")
+mesh = SubResource("windmill_4_mesh39")
+
+[node name="Shape" type="CollisionShape3D" parent="windmill_4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.4, 0.0)
+shape = SubResource("windmill_4_shape41")
+
+[node name="Roof" type="MeshInstance3D" parent="windmill_4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("windmill_4_roof_mat44")
+mesh = SubResource("windmill_4_roof_prism43")
+
+[node name="windmill_4_door" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 26.0, 1.12, -12.8)
+material_override = SubResource("windmill_4_door_mat46")
+mesh = SubResource("windmill_4_door_mesh45")
+
+[node name="windmill_4_hub" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 26.0, 3.68, -12.68)
+material_override = SubResource("windmill_4_hub_mat48")
+mesh = SubResource("windmill_4_hub_mesh47")
+
+[node name="windmill_4_sail0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 26.0, 3.68, -12.559999)
+material_override = SubResource("windmill_4_sail0_mat50")
+mesh = SubResource("windmill_4_sail0_mesh49")
+
+[node name="windmill_4_sail1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 26.0, 3.68, -12.559999)
+material_override = SubResource("windmill_4_sail1_mat52")
+mesh = SubResource("windmill_4_sail1_mesh51")
+
+[node name="lighthouse_5" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 48.0, 2.25, -16.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="lighthouse_5"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("wall_tex56")
+mesh = SubResource("lighthouse_5_mesh53")
+
+[node name="Shape" type="CollisionShape3D" parent="lighthouse_5"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 3.375, 0.0)
+shape = SubResource("lighthouse_5_shape55")
+
+[node name="Roof" type="MeshInstance3D" parent="lighthouse_5"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("lighthouse_5_roof_mat58")
+mesh = SubResource("lighthouse_5_roof_prism57")
+
+[node name="lighthouse_5_door" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 48.0, 1.5749999, -15.0)
+material_override = SubResource("lighthouse_5_door_mat60")
+mesh = SubResource("lighthouse_5_door_mesh59")
+
+[node name="lighthouse_5_lantern" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 48.0, 4.725, -16.0)
+material_override = SubResource("lighthouse_5_lantern_mat62")
+mesh = SubResource("lighthouse_5_lantern_mesh61")
+
+[node name="lighthouse_5_band" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 48.0, 2.4750001, -16.0)
+material_override = SubResource("lighthouse_5_band_mat64")
+mesh = SubResource("lighthouse_5_band_mesh63")
+
+[node name="castle_6" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 92.0, 1.5, -11.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="castle_6"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("wall_tex68")
+mesh = SubResource("castle_6_mesh65")
+
+[node name="Shape" type="CollisionShape3D" parent="castle_6"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.25, 0.0)
+shape = SubResource("castle_6_shape67")
+
+[node name="Roof" type="MeshInstance3D" parent="castle_6"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("castle_6_roof_mat70")
+mesh = SubResource("castle_6_roof_prism69")
+
+[node name="castle_6_door" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 92.0, 1.05, -8.5)
+material_override = SubResource("castle_6_door_mat72")
+mesh = SubResource("castle_6_door_mesh71")
+
+[node name="castle_6_turret0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 89.5, 2.25, -13.5)
+material_override = SubResource("castle_6_turret0_mat74")
+mesh = SubResource("castle_6_turret0_mesh73")
+
+[node name="castle_6_turret1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 94.5, 2.25, -13.5)
+material_override = SubResource("castle_6_turret1_mat76")
+mesh = SubResource("castle_6_turret1_mesh75")
+
+[node name="castle_6_turret2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 89.5, 2.25, -8.5)
+material_override = SubResource("castle_6_turret2_mat78")
+mesh = SubResource("castle_6_turret2_mesh77")
+
+[node name="castle_6_turret3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 94.5, 2.25, -8.5)
+material_override = SubResource("castle_6_turret3_mat80")
+mesh = SubResource("castle_6_turret3_mesh79")
+
+[node name="castle_6_crenel0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 88.0, 3.3600001, -8.5)
+material_override = SubResource("castle_6_crenel0_mat82")
+mesh = SubResource("castle_6_crenel0_mesh81")
+
+[node name="castle_6_crenel1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 90.0, 3.3600001, -8.5)
+material_override = SubResource("castle_6_crenel1_mat84")
+mesh = SubResource("castle_6_crenel1_mesh83")
+
+[node name="castle_6_crenel2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 92.0, 3.3600001, -8.5)
+material_override = SubResource("castle_6_crenel2_mat86")
+mesh = SubResource("castle_6_crenel2_mesh85")
+
+[node name="castle_6_crenel3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 94.0, 3.3600001, -8.5)
+material_override = SubResource("castle_6_crenel3_mat88")
+mesh = SubResource("castle_6_crenel3_mesh87")
+
+[node name="castle_6_crenel4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 96.0, 3.3600001, -8.5)
+material_override = SubResource("castle_6_crenel4_mat90")
+mesh = SubResource("castle_6_crenel4_mesh89")
+
+[node name="person_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 17.0, 0.75, -4.0)
+material_override = SubResource("person_0_body_mat92")
+mesh = SubResource("person_0_body_capsule91")
+
+[node name="person_0_head_node" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 17.0, 1.45, -4.0)
+material_override = SubResource("person_0_head_mat94")
+mesh = SubResource("person_0_head_sphere93")
+
+[node name="cow_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 35.0, 0.85, -5.5)
+material_override = SubResource("cow_1_hide_mat95")
+mesh = SubResource("cow_1_torso_mesh97")
+
+[node name="cow_1_head_node" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 35.85, 0.95, -5.5)
+material_override = SubResource("cow_1_spots_mat96")
+mesh = SubResource("cow_1_headm_mesh98")
+
+[node name="cow_1_leg00" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 34.55, 0.35, -5.75)
+material_override = SubResource("cow_1_leg00_mat100")
+mesh = SubResource("cow_1_leg00_mesh99")
+
+[node name="cow_1_leg01" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 34.55, 0.35, -5.25)
+material_override = SubResource("cow_1_leg01_mat102")
+mesh = SubResource("cow_1_leg01_mesh101")
+
+[node name="cow_1_leg10" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 35.45, 0.35, -5.75)
+material_override = SubResource("cow_1_leg10_mat104")
+mesh = SubResource("cow_1_leg10_mesh103")
+
+[node name="cow_1_leg11" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 35.45, 0.35, -5.25)
+material_override = SubResource("cow_1_leg11_mat106")
+mesh = SubResource("cow_1_leg11_mesh105")
+
+[node name="person_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 55.0, 0.75, -3.5)
+material_override = SubResource("person_2_body_mat108")
+mesh = SubResource("person_2_body_capsule107")
+
+[node name="person_2_head_node" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 55.0, 1.45, -3.5)
+material_override = SubResource("person_2_head_mat110")
+mesh = SubResource("person_2_head_sphere109")
+
+[node name="cow_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 75.0, 0.85, -5.0)
+material_override = SubResource("cow_3_hide_mat111")
+mesh = SubResource("cow_3_torso_mesh113")
+
+[node name="cow_3_head_node" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 75.85, 0.95, -5.0)
+material_override = SubResource("cow_3_spots_mat112")
+mesh = SubResource("cow_3_headm_mesh114")
+
+[node name="cow_3_leg00" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 74.55, 0.35, -5.25)
+material_override = SubResource("cow_3_leg00_mat116")
+mesh = SubResource("cow_3_leg00_mesh115")
+
+[node name="cow_3_leg01" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 74.55, 0.35, -4.75)
+material_override = SubResource("cow_3_leg01_mat118")
+mesh = SubResource("cow_3_leg01_mesh117")
+
+[node name="cow_3_leg10" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 75.45, 0.35, -5.25)
+material_override = SubResource("cow_3_leg10_mat120")
+mesh = SubResource("cow_3_leg10_mesh119")
+
+[node name="cow_3_leg11" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 75.45, 0.35, -4.75)
+material_override = SubResource("cow_3_leg11_mat122")
+mesh = SubResource("cow_3_leg11_mesh121")
+
+[node name="Ring0" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 20.0, 4.0, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ring0"]
+transform = Transform3D(5.9604645e-8, -0.99999994, 0.0, 0.99999994, 5.9604645e-8, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Ring0_mat124")
+mesh = SubResource("Ring0_torus123")
+
+[node name="Shape" type="CollisionShape3D" parent="Ring0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Ring0_shape125")
+
+[node name="Ring1" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 40.0, 6.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ring1"]
+transform = Transform3D(5.9604645e-8, -0.99999994, 0.0, 0.99999994, 5.9604645e-8, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Ring1_mat127")
+mesh = SubResource("Ring1_torus126")
+
+[node name="Shape" type="CollisionShape3D" parent="Ring1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Ring1_shape128")
+
+[node name="Ring2" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 60.0, 4.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ring2"]
+transform = Transform3D(5.9604645e-8, -0.99999994, 0.0, 0.99999994, 5.9604645e-8, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Ring2_mat130")
+mesh = SubResource("Ring2_torus129")
+
+[node name="Shape" type="CollisionShape3D" parent="Ring2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Ring2_shape131")
+
+[node name="Ring3" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 80.0, 8.0, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ring3"]
+transform = Transform3D(5.9604645e-8, -0.99999994, 0.0, 0.99999994, 5.9604645e-8, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Ring3_mat133")
+mesh = SubResource("Ring3_torus132")
+
+[node name="Shape" type="CollisionShape3D" parent="Ring3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Ring3_shape134")
+
+[node name="Ring4" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 100.0, 5.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ring4"]
+transform = Transform3D(5.9604645e-8, -0.99999994, 0.0, 0.99999994, 5.9604645e-8, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Ring4_mat136")
+mesh = SubResource("Ring4_torus135")
+
+[node name="Shape" type="CollisionShape3D" parent="Ring4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Ring4_shape137")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_player")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 3.0, 0.0)
+climb_speed = 6.0
+mode = 5
+speed = 12.0
+
+[node name="Fuselage" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("plane_body_mat139")
+mesh = SubResource("plane_body_mesh138")
+
+[node name="Wing" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Wing_mat141")
+mesh = SubResource("Wing_mesh140")
+
+[node name="Shape" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("plane_shape142")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("3_camera")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 3.6, 16.0)
+current = true
+fov = 42.0
+
+[node name="Autoplay" type="Node3D" parent="."]
+script = ExtResource("4_autoplay")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+flight = true
+hold_action = ""
+
+[connection signal="body_entered" from="Ring0" to="." method="_on_ring"]
+
+[connection signal="body_entered" from="Ring1" to="." method="_on_ring"]
+
+[connection signal="body_entered" from="Ring2" to="." method="_on_ring"]
+
+[connection signal="body_entered" from="Ring3" to="." method="_on_ring"]
+
+[connection signal="body_entered" from="Ring4" to="." method="_on_ring"]

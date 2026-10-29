@@ -1,0 +1,108 @@
+{
+  "uid": "uid://exportdemo",
+  "nodes": [
+    {
+      "name": "World",
+      "type": "Node3D",
+      "properties": {
+        "script": { "raw": "ExtResource(\"1_world\")" }
+      }
+    },
+    {
+      "name": "Camera3D",
+      "type": "Camera3D",
+      "parent": ".",
+      "position": [0.0, 3.0, 8.0],
+      "rotation_degrees": [-20.0, 0.0, 0.0],
+      "properties": {
+        "current": true,
+        "fov": 55.0
+      }
+    },
+    {
+      "name": "Body",
+      "type": "StaticBody3D",
+      "parent": ".",
+      "position": [0.0, 0.5, 0.0]
+    },
+    {
+      "name": "Mesh",
+      "type": "MeshInstance3D",
+      "parent": "Body",
+      "properties": {
+        "mesh": { "raw": "SubResource(\"box_mesh\")" },
+        "material_override": { "raw": "SubResource(\"box_mat\")" }
+      }
+    },
+    {
+      "name": "Shape",
+      "type": "CollisionShape3D",
+      "parent": "Body",
+      "properties": {
+        "shape": { "raw": "SubResource(\"box_shape\")" }
+      }
+    },
+    {
+      "name": "Player",
+      "type": "CharacterBody3D",
+      "parent": ".",
+      "unique": true,
+      "position": [2.0, 0.6, 0.0],
+      "properties": {
+        "speed": 4.5,
+        "mode": "platform"
+      }
+    },
+    {
+      "name": "Shape",
+      "type": "CollisionShape3D",
+      "parent": "Player",
+      "properties": {
+        "shape": { "raw": "SubResource(\"box_shape\")" }
+      }
+    },
+    {
+      "name": "Goal",
+      "type": "Area3D",
+      "parent": ".",
+      "position": [5.0, 1.0, 0.0],
+      "properties": {
+        "monitoring": true
+      }
+    }
+  ],
+  "connections": [
+    {
+      "signal": "body_entered",
+      "from": "Goal",
+      "to": ".",
+      "method": "_on_goal"
+    }
+  ],
+  "ext_resources": [
+    { "type": "Script", "path": "res://scripts/world.gd", "id": "1_world" }
+  ],
+  "sub_resources": [
+    {
+      "type": "BoxMesh",
+      "id": "box_mesh",
+      "properties": {
+        "size": "Vector3(1, 1, 1)"
+      }
+    },
+    {
+      "type": "StandardMaterial3D",
+      "id": "box_mat",
+      "properties": {
+        "albedo_color": "Color(0.6, 0.4, 0.2, 1)"
+      }
+    },
+    {
+      "type": "BoxShape3D",
+      "id": "box_shape",
+      "properties": {
+        "size": "Vector3(1, 1, 1)"
+      }
+    }
+  ]
+}

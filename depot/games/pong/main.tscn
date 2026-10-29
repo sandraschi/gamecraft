@@ -1,0 +1,175 @@
+[gd_scene load_steps=22 format=3 uid="uid://1dtu5oo9hzp1s"]
+
+[ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
+
+[ext_resource type="Script" path="res://scripts/ball.gd" id="2_ball"]
+
+[ext_resource type="Script" path="res://scripts/tracker.gd" id="3_track"]
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 1
+background_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_energy = 1.0
+
+[sub_resource type="BoxMesh" id="PaddleL_mesh0"]
+size = Vector3(0.5, 1.0, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="PaddleL_mat1"]
+shading_mode = 0
+albedo_color = Color(0.43, 0.86, 1.0, 1)
+
+[sub_resource type="BoxShape3D" id="PaddleL_shape2"]
+size = Vector3(0.5, 1.0, 2.4)
+
+[sub_resource type="BoxMesh" id="PaddleR_mesh3"]
+size = Vector3(0.5, 1.0, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="PaddleR_mat4"]
+shading_mode = 0
+albedo_color = Color(0.43, 0.86, 1.0, 1)
+
+[sub_resource type="BoxShape3D" id="PaddleR_shape5"]
+size = Vector3(0.5, 1.0, 2.4)
+
+[sub_resource type="SphereMesh" id="ball_sphere6"]
+radius = 0.25
+height = 0.5
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="ball_mat7"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.6, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="ball_shape8"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="BoxMesh" id="WallN_mesh9"]
+size = Vector3(17.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="WallN_mat10"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="WallN_shape11"]
+size = Vector3(17.0, 1.0, 1.0)
+
+[sub_resource type="BoxMesh" id="WallS_mesh12"]
+size = Vector3(17.0, 1.0, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="WallS_mat13"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="WallS_shape14"]
+size = Vector3(17.0, 1.0, 1.0)
+
+[sub_resource type="BoxShape3D" id="GoalL_shape15"]
+size = Vector3(1.0, 1.0, 11.0)
+
+[sub_resource type="BoxShape3D" id="GoalR_shape16"]
+size = Vector3(1.0, 1.0, 11.0)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_runtime")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+environment = SubResource("environment")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1.0, -0.0, 0.0, 0.0, 5.9604645e-8, 0.99999994, -0.0, -0.99999994, 5.9604645e-8, 0.0, 18.0, 0.01)
+current = true
+fov = 55.0
+
+[node name="PaddleL" type="StaticBody3D" parent="."]
+script = ExtResource("3_track")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -7.5, 0.5, 0.0)
+axis = "z"
+max_speed = 3.0
+target_path = NodePath("../Ball")
+
+[node name="Mesh" type="MeshInstance3D" parent="PaddleL"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("PaddleL_mat1")
+mesh = SubResource("PaddleL_mesh0")
+
+[node name="Shape" type="CollisionShape3D" parent="PaddleL"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("PaddleL_shape2")
+
+[node name="PaddleR" type="StaticBody3D" parent="."]
+script = ExtResource("3_track")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 7.5, 0.5, 0.0)
+axis = "z"
+max_speed = 6.5
+target_path = NodePath("../Ball")
+
+[node name="Mesh" type="MeshInstance3D" parent="PaddleR"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("PaddleR_mat4")
+mesh = SubResource("PaddleR_mesh3")
+
+[node name="Shape" type="CollisionShape3D" parent="PaddleR"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("PaddleR_shape5")
+
+[node name="Ball" type="CharacterBody3D" parent="."]
+script = ExtResource("2_ball")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 0.0)
+mode = 0
+speed = 14.0
+
+[node name="Mesh" type="MeshInstance3D" parent="Ball"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("ball_mat7")
+mesh = SubResource("ball_sphere6")
+
+[node name="Shape" type="CollisionShape3D" parent="Ball"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("ball_shape8")
+
+[node name="WallN" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, -5.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallN"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("WallN_mat10")
+mesh = SubResource("WallN_mesh9")
+
+[node name="Shape" type="CollisionShape3D" parent="WallN"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("WallN_shape11")
+
+[node name="WallS" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 5.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallS"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("WallS_mat13")
+mesh = SubResource("WallS_mesh12")
+
+[node name="Shape" type="CollisionShape3D" parent="WallS"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("WallS_shape14")
+
+[node name="GoalL" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -8.5, 0.5, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="GoalL"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("GoalL_shape15")
+
+[node name="GoalR" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 8.5, 0.5, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="GoalR"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("GoalR_shape16")
+
+[connection signal="body_entered" from="GoalL" to="." method="_on_point_right"]
+
+[connection signal="body_entered" from="GoalR" to="." method="_on_point_left"]

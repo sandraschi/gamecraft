@@ -1,0 +1,16 @@
+[package]
+name = "gamecraft-godot"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "L1 deterministic nom parser for Godot 4 .tscn/.tres text plus UID hashing"
+
+[dependencies]
+gamecraft-core = { workspace = true }
+glam = { workspace = true }
+nom = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

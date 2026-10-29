@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gamecraft": {
+      "command": "D:\\Dev\\repos\\gamecraft\\target\\release\\gamecraft-mcp.exe",
+      "args": []
+    }
+  }
+}

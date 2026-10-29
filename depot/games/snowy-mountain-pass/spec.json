@@ -1,0 +1,85 @@
+{
+  "slug": "snowy-mountain-pass",
+  "title": "Snowy Mountain Pass",
+  "archetype": "platformer",
+  "theme": {
+    "sky_top": [
+      0.8,
+      0.9,
+      1.0
+    ],
+    "sky_horizon": [
+      0.6,
+      0.8,
+      1.0
+    ],
+    "ground": [
+      0.9,
+      0.9,
+      1.0
+    ],
+    "platform": [
+      0.7,
+      0.8,
+      1.0
+    ],
+    "player": [
+      1.0,
+      0.2,
+      0.2
+    ],
+    "coin": [
+      0.0,
+      0.8,
+      1.0
+    ]
+  },
+  "physics": {
+    "speed": 4.5,
+    "jump_velocity": 10.5,
+    "gravity": 24.0
+  },
+  "level": {
+    "grounds": [
+      {
+        "x": -6.0,
+        "w": 12.0
+      },
+      {
+        "x": 9.0,
+        "w": 12.0
+      }
+    ],
+    "platforms": [
+      {
+        "x": 2.0,
+        "y": 3.0,
+        "w": 2.5
+      },
+      {
+        "x": 6.0,
+        "y": 5.0,
+        "w": 2.0
+      }
+    ],
+    "coins": [
+      [
+        2.5,
+        3.5
+      ],
+      [
+        5.0,
+        5.5
+      ],
+      [
+        7.0,
+        6.0
+      ],
+      [
+        8.0,
+        7.0
+      ]
+    ],
+    "goal_x": 15.0
+  }
+}

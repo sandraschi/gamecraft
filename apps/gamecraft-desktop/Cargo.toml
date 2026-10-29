@@ -1,0 +1,21 @@
+[package]
+name = "gamecraft-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "L3 GameCraft egui/wgpu viewport shell, in-process on gamecraft-core"
+
+[dependencies]
+gamecraft-core = { workspace = true }
+gamecraft-commands = { workspace = true }
+gamecraft-godot = { workspace = true }
+gamecraft-mcp = { path = "../../crates/gamecraft-mcp" }
+glam = { workspace = true }
+eframe = "0.37"
+egui = "0.37"
+wgpu = "30"
+futures = "0.3"
+rfd = "0.15"
+
+[lints]
+workspace = true

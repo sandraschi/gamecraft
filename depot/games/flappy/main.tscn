@@ -1,0 +1,818 @@
+[gd_scene load_steps=106 format=3 uid="uid://xy6b0g0gd41w"]
+
+[ext_resource type="Script" uid="uid://bw16t3mymdexv" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
+[ext_resource type="Script" uid="uid://c3rib6boyggu8" path="res://scripts/player_controller.gd" id="2_player"]
+[ext_resource type="Script" uid="uid://boop4vsjwxxmw" path="res://scripts/camera_follow.gd" id="9_camera"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_material"]
+sky_top_color = Color(0.24, 0.42, 0.75, 1)
+sky_horizon_color = Color(0.78, 0.87, 0.96, 1)
+ground_bottom_color = Color(0.55, 0.66, 0.8, 1)
+ground_horizon_color = Color(0.78, 0.87, 0.96, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_material")
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+
+[sub_resource type="StandardMaterial3D" id="player_mat1"]
+shading_mode = 0
+albedo_color = Color(0.35, 0.59, 1, 1)
+
+[sub_resource type="BoxMesh" id="player_mesh0"]
+size = Vector3(0.6, 1, 0.6)
+
+[sub_resource type="BoxShape3D" id="player_shape2"]
+size = Vector3(0.6, 1, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow0_mat4"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow0_mesh3"]
+size = Vector3(1, 7.1, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow0_shape5"]
+size = Vector3(1, 7.1, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh0_mat7"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh0_mesh6"]
+size = Vector3(1, 6.1, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh0_shape8"]
+size = Vector3(1, 6.1, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow1_mat10"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow1_mesh9"]
+size = Vector3(1, 7.8, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow1_shape11"]
+size = Vector3(1, 7.8, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh1_mat13"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh1_mesh12"]
+size = Vector3(1, 5.4, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh1_shape14"]
+size = Vector3(1, 5.4, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow2_mat16"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow2_mesh15"]
+size = Vector3(1, 8.4, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow2_shape17"]
+size = Vector3(1, 8.4, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh2_mat19"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh2_mesh18"]
+size = Vector3(1, 4.8, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh2_shape20"]
+size = Vector3(1, 4.8, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow3_mat22"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow3_mesh21"]
+size = Vector3(1, 8, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow3_shape23"]
+size = Vector3(1, 8, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh3_mat25"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh3_mesh24"]
+size = Vector3(1, 5.2, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh3_shape26"]
+size = Vector3(1, 5.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow4_mat28"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow4_mesh27"]
+size = Vector3(1, 7.2, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow4_shape29"]
+size = Vector3(1, 7.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh4_mat31"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh4_mesh30"]
+size = Vector3(1, 6, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh4_shape32"]
+size = Vector3(1, 6, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow5_mat34"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow5_mesh33"]
+size = Vector3(1, 6.6, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow5_shape35"]
+size = Vector3(1, 6.6, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh5_mat37"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh5_mesh36"]
+size = Vector3(1, 6.6, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh5_shape38"]
+size = Vector3(1, 6.6, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow6_mat40"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow6_mesh39"]
+size = Vector3(1, 7, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow6_shape41"]
+size = Vector3(1, 7, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh6_mat43"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh6_mesh42"]
+size = Vector3(1, 6.2, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh6_shape44"]
+size = Vector3(1, 6.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow7_mat46"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow7_mesh45"]
+size = Vector3(1, 7.6, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow7_shape47"]
+size = Vector3(1, 7.6, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh7_mat49"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh7_mesh48"]
+size = Vector3(1, 5.6, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh7_shape50"]
+size = Vector3(1, 5.6, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow8_mat52"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow8_mesh51"]
+size = Vector3(1, 8.2, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow8_shape53"]
+size = Vector3(1, 8.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh8_mat55"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh8_mesh54"]
+size = Vector3(1, 5, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh8_shape56"]
+size = Vector3(1, 5, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeLow9_mat58"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeLow9_mesh57"]
+size = Vector3(1, 7.8, 1)
+
+[sub_resource type="BoxShape3D" id="PipeLow9_shape59"]
+size = Vector3(1, 7.8, 1)
+
+[sub_resource type="StandardMaterial3D" id="PipeHigh9_mat61"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxMesh" id="PipeHigh9_mesh60"]
+size = Vector3(1, 5.4, 1)
+
+[sub_resource type="BoxShape3D" id="PipeHigh9_shape62"]
+size = Vector3(1, 5.4, 1)
+
+[sub_resource type="BoxShape3D" id="Hint0_shape63"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint1_shape64"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint2_shape65"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint3_shape66"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint4_shape67"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint5_shape68"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint6_shape69"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint7_shape70"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint8_shape71"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint9_shape72"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint10_shape73"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint11_shape74"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint12_shape75"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint13_shape76"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint14_shape77"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint15_shape78"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint16_shape79"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint17_shape80"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint18_shape81"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint19_shape82"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint20_shape83"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint21_shape84"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint22_shape85"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint23_shape86"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint24_shape87"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint25_shape88"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint26_shape89"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint27_shape90"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint28_shape91"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint29_shape92"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint30_shape93"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint31_shape94"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint32_shape95"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Hint33_shape96"]
+size = Vector3(0.6, 2, 2)
+
+[sub_resource type="BoxShape3D" id="Kill_shape97"]
+size = Vector3(70, 1, 8)
+
+[sub_resource type="BoxShape3D" id="Goal_shape98"]
+size = Vector3(1.5, 12, 2)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_runtime")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("environment")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 2.4, 14)
+current = true
+fov = 34.0
+script = ExtResource("9_camera")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+script = ExtResource("2_player")
+mode = 2
+speed = 6.0
+jump_velocity = 6.5
+gravity = 18.0
+
+[node name="Mesh" type="MeshInstance3D" parent="Player"]
+material_override = SubResource("player_mat1")
+mesh = SubResource("player_mesh0")
+
+[node name="Shape" type="CollisionShape3D" parent="Player"]
+shape = SubResource("player_shape2")
+
+[node name="PipeLow0" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, -3.45, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow0"]
+material_override = SubResource("PipeLow0_mat4")
+mesh = SubResource("PipeLow0_mesh3")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow0"]
+shape = SubResource("PipeLow0_shape5")
+
+[node name="PipeHigh0" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 5.95, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh0"]
+material_override = SubResource("PipeHigh0_mat7")
+mesh = SubResource("PipeHigh0_mesh6")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh0"]
+shape = SubResource("PipeHigh0_shape8")
+
+[node name="PipeLow1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, -3.1, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow1"]
+material_override = SubResource("PipeLow1_mat10")
+mesh = SubResource("PipeLow1_mesh9")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow1"]
+shape = SubResource("PipeLow1_shape11")
+
+[node name="PipeHigh1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 6.3, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh1"]
+material_override = SubResource("PipeHigh1_mat13")
+mesh = SubResource("PipeHigh1_mesh12")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh1"]
+shape = SubResource("PipeHigh1_shape14")
+
+[node name="PipeLow2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, -2.8, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow2"]
+material_override = SubResource("PipeLow2_mat16")
+mesh = SubResource("PipeLow2_mesh15")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow2"]
+shape = SubResource("PipeLow2_shape17")
+
+[node name="PipeHigh2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 6.6, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh2"]
+material_override = SubResource("PipeHigh2_mat19")
+mesh = SubResource("PipeHigh2_mesh18")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh2"]
+shape = SubResource("PipeHigh2_shape20")
+
+[node name="PipeLow3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.5, -3, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow3"]
+material_override = SubResource("PipeLow3_mat22")
+mesh = SubResource("PipeLow3_mesh21")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow3"]
+shape = SubResource("PipeLow3_shape23")
+
+[node name="PipeHigh3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.5, 6.4, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh3"]
+material_override = SubResource("PipeHigh3_mat25")
+mesh = SubResource("PipeHigh3_mesh24")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh3"]
+shape = SubResource("PipeHigh3_shape26")
+
+[node name="PipeLow4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, -3.4, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow4"]
+material_override = SubResource("PipeLow4_mat28")
+mesh = SubResource("PipeLow4_mesh27")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow4"]
+shape = SubResource("PipeLow4_shape29")
+
+[node name="PipeHigh4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 6, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh4"]
+material_override = SubResource("PipeHigh4_mat31")
+mesh = SubResource("PipeHigh4_mesh30")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh4"]
+shape = SubResource("PipeHigh4_shape32")
+
+[node name="PipeLow5" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, -3.7, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow5"]
+material_override = SubResource("PipeLow5_mat34")
+mesh = SubResource("PipeLow5_mesh33")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow5"]
+shape = SubResource("PipeLow5_shape35")
+
+[node name="PipeHigh5" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, 5.7, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh5"]
+material_override = SubResource("PipeHigh5_mat37")
+mesh = SubResource("PipeHigh5_mesh36")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh5"]
+shape = SubResource("PipeHigh5_shape38")
+
+[node name="PipeLow6" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, -3.5, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow6"]
+material_override = SubResource("PipeLow6_mat40")
+mesh = SubResource("PipeLow6_mesh39")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow6"]
+shape = SubResource("PipeLow6_shape41")
+
+[node name="PipeHigh6" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 5.9, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh6"]
+material_override = SubResource("PipeHigh6_mat43")
+mesh = SubResource("PipeHigh6_mesh42")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh6"]
+shape = SubResource("PipeHigh6_shape44")
+
+[node name="PipeLow7" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.5, -3.2, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow7"]
+material_override = SubResource("PipeLow7_mat46")
+mesh = SubResource("PipeLow7_mesh45")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow7"]
+shape = SubResource("PipeLow7_shape47")
+
+[node name="PipeHigh7" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.5, 6.2, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh7"]
+material_override = SubResource("PipeHigh7_mat49")
+mesh = SubResource("PipeHigh7_mesh48")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh7"]
+shape = SubResource("PipeHigh7_shape50")
+
+[node name="PipeLow8" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, -2.9, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow8"]
+material_override = SubResource("PipeLow8_mat52")
+mesh = SubResource("PipeLow8_mesh51")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow8"]
+shape = SubResource("PipeLow8_shape53")
+
+[node name="PipeHigh8" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 6.5, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh8"]
+material_override = SubResource("PipeHigh8_mat55")
+mesh = SubResource("PipeHigh8_mesh54")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh8"]
+shape = SubResource("PipeHigh8_shape56")
+
+[node name="PipeLow9" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.5, -3.1, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeLow9"]
+material_override = SubResource("PipeLow9_mat58")
+mesh = SubResource("PipeLow9_mesh57")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeLow9"]
+shape = SubResource("PipeLow9_shape59")
+
+[node name="PipeHigh9" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.5, 6.3, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="PipeHigh9"]
+material_override = SubResource("PipeHigh9_mat61")
+mesh = SubResource("PipeHigh9_mesh60")
+
+[node name="Shape" type="CollisionShape3D" parent="PipeHigh9"]
+shape = SubResource("PipeHigh9_shape62")
+
+[node name="Hint0" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 1.145, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint0"]
+shape = SubResource("Hint0_shape63")
+
+[node name="Hint1" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9, 1.24833, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint1"]
+shape = SubResource("Hint1_shape64")
+
+[node name="Hint2" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.35167, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint2"]
+shape = SubResource("Hint2_shape65")
+
+[node name="Hint3" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.4, 1.16833, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint3"]
+shape = SubResource("Hint3_shape66")
+
+[node name="Hint4" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5, 1.27167, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint4"]
+shape = SubResource("Hint4_shape67")
+
+[node name="Hint5" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.6, 1.375, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint5"]
+shape = SubResource("Hint5_shape68")
+
+[node name="Hint6" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.3, 1.86833, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint6"]
+shape = SubResource("Hint6_shape69")
+
+[node name="Hint7" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.4, 1.97167, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint7"]
+shape = SubResource("Hint7_shape70")
+
+[node name="Hint8" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 2.075, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint8"]
+shape = SubResource("Hint8_shape71")
+
+[node name="Hint9" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.3, 2.48667, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint9"]
+shape = SubResource("Hint9_shape72")
+
+[node name="Hint10" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.4, 2.59, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint10"]
+shape = SubResource("Hint10_shape73")
+
+[node name="Hint11" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 2.69333, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint11"]
+shape = SubResource("Hint11_shape74")
+
+[node name="Hint12" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.3, 2.01333, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint12"]
+shape = SubResource("Hint12_shape75")
+
+[node name="Hint13" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.4, 2.11666, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint13"]
+shape = SubResource("Hint13_shape76")
+
+[node name="Hint14" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.5, 2.22, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint14"]
+shape = SubResource("Hint14_shape77")
+
+[node name="Hint15" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.6001, 1.115, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint15"]
+shape = SubResource("Hint15_shape78")
+
+[node name="Hint16" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.7001, 1.21833, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint16"]
+shape = SubResource("Hint16_shape79")
+
+[node name="Hint17" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.8001, 1.32166, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint17"]
+shape = SubResource("Hint17_shape80")
+
+[node name="Hint18" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.9001, 1.425, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint18"]
+shape = SubResource("Hint18_shape81")
+
+[node name="Hint19" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.8001, 0.608329, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint19"]
+shape = SubResource("Hint19_shape82")
+
+[node name="Hint20" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.9001, 0.711662, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint20"]
+shape = SubResource("Hint20_shape83")
+
+[node name="Hint21" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.0001, 0.814995, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint21"]
+shape = SubResource("Hint21_shape84")
+
+[node name="Hint22" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.0001, 1.04833, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint22"]
+shape = SubResource("Hint22_shape85")
+
+[node name="Hint23" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.1001, 1.15166, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint23"]
+shape = SubResource("Hint23_shape86")
+
+[node name="Hint24" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.2001, 1.25499, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint24"]
+shape = SubResource("Hint24_shape87")
+
+[node name="Hint25" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 1.66666, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint25"]
+shape = SubResource("Hint25_shape88")
+
+[node name="Hint26" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.1, 1.76999, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint26"]
+shape = SubResource("Hint26_shape89")
+
+[node name="Hint27" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.2, 1.87333, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint27"]
+shape = SubResource("Hint27_shape90")
+
+[node name="Hint28" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.9999, 2.28499, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint28"]
+shape = SubResource("Hint28_shape91")
+
+[node name="Hint29" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.0999, 2.38833, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint29"]
+shape = SubResource("Hint29_shape92")
+
+[node name="Hint30" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.1999, 2.49166, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint30"]
+shape = SubResource("Hint30_shape93")
+
+[node name="Hint31" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.9999, 1.81166, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint31"]
+shape = SubResource("Hint31_shape94")
+
+[node name="Hint32" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.0999, 1.91499, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint32"]
+shape = SubResource("Hint32_shape95")
+
+[node name="Hint33" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.1999, 2.01833, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint33"]
+shape = SubResource("Hint33_shape96")
+
+[node name="Kill" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, -7, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Kill"]
+shape = SubResource("Kill_shape97")
+
+[node name="Goal" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 2, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Goal"]
+shape = SubResource("Goal_shape98")
+
+[connection signal="body_entered" from="Hint0" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint1" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint2" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint3" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint4" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint5" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint6" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint7" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint8" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint9" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint10" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint11" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint12" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint13" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint14" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint15" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint16" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint17" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint18" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint19" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint20" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint21" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint22" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint23" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint24" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint25" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint26" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint27" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint28" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint29" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint30" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint31" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint32" to="." method="_on_hint"]
+[connection signal="body_entered" from="Hint33" to="." method="_on_hint"]
+[connection signal="body_entered" from="Kill" to="." method="_on_kill"]
+[connection signal="body_entered" from="Goal" to="." method="_on_goal"]

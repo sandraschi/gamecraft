@@ -1,0 +1,344 @@
+[gd_scene load_steps=39 format=3 uid="uid://2a472tbylbi3t"]
+
+[ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
+
+[ext_resource type="Script" path="res://scripts/tower.gd" id="2_tower"]
+
+[ext_resource type="Script" path="res://scripts/enemy.gd" id="3_enemy"]
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 1
+background_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.09, 0.11, 0.16, 1)
+ambient_light_energy = 1.0
+
+[sub_resource type="BoxMesh" id="Floor_mesh0"]
+size = Vector3(24.0, 1.0, 10.0)
+
+[sub_resource type="StandardMaterial3D" id="Floor_mat1"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Base_mesh2"]
+size = Vector3(1.0, 2.0, 4.0)
+
+[sub_resource type="StandardMaterial3D" id="Base_mat3"]
+shading_mode = 0
+albedo_color = Color(0.35, 0.59, 1.0, 1)
+
+[sub_resource type="CylinderMesh" id="Tower0_cylinder4"]
+top_radius = 0.35
+bottom_radius = 0.5
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="Tower0_mat5"]
+shading_mode = 0
+albedo_color = Color(0.59, 0.59, 0.63, 1)
+
+[sub_resource type="CylinderMesh" id="Tower1_cylinder6"]
+top_radius = 0.35
+bottom_radius = 0.5
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="Tower1_mat7"]
+shading_mode = 0
+albedo_color = Color(0.59, 0.59, 0.63, 1)
+
+[sub_resource type="CylinderMesh" id="Tower2_cylinder8"]
+top_radius = 0.35
+bottom_radius = 0.5
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="Tower2_mat9"]
+shading_mode = 0
+albedo_color = Color(0.59, 0.59, 0.63, 1)
+
+[sub_resource type="CapsuleMesh" id="Enemy0_capsule10"]
+radius = 0.4
+height = 0.9
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Enemy0_mat11"]
+shading_mode = 0
+albedo_color = Color(0.65, 0.43, 0.85, 1)
+
+[sub_resource type="BoxShape3D" id="Enemy0_shape12"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="CapsuleMesh" id="Enemy1_capsule13"]
+radius = 0.4
+height = 0.9
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Enemy1_mat14"]
+shading_mode = 0
+albedo_color = Color(0.65, 0.43, 0.85, 1)
+
+[sub_resource type="BoxShape3D" id="Enemy1_shape15"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="CapsuleMesh" id="Enemy2_capsule16"]
+radius = 0.4
+height = 0.9
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Enemy2_mat17"]
+shading_mode = 0
+albedo_color = Color(0.65, 0.43, 0.85, 1)
+
+[sub_resource type="BoxShape3D" id="Enemy2_shape18"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="CapsuleMesh" id="Enemy3_capsule19"]
+radius = 0.4
+height = 0.9
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Enemy3_mat20"]
+shading_mode = 0
+albedo_color = Color(0.65, 0.43, 0.85, 1)
+
+[sub_resource type="BoxShape3D" id="Enemy3_shape21"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="CapsuleMesh" id="Enemy4_capsule22"]
+radius = 0.4
+height = 0.9
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Enemy4_mat23"]
+shading_mode = 0
+albedo_color = Color(0.65, 0.43, 0.85, 1)
+
+[sub_resource type="BoxShape3D" id="Enemy4_shape24"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="CapsuleMesh" id="Enemy5_capsule25"]
+radius = 0.4
+height = 0.9
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Enemy5_mat26"]
+shading_mode = 0
+albedo_color = Color(0.65, 0.43, 0.85, 1)
+
+[sub_resource type="BoxShape3D" id="Enemy5_shape27"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="CapsuleMesh" id="Enemy6_capsule28"]
+radius = 0.4
+height = 0.9
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Enemy6_mat29"]
+shading_mode = 0
+albedo_color = Color(0.65, 0.43, 0.85, 1)
+
+[sub_resource type="BoxShape3D" id="Enemy6_shape30"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="CapsuleMesh" id="Enemy7_capsule31"]
+radius = 0.4
+height = 0.9
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Enemy7_mat32"]
+shading_mode = 0
+albedo_color = Color(0.65, 0.43, 0.85, 1)
+
+[sub_resource type="BoxShape3D" id="Enemy7_shape33"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_runtime")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+total_to_win = 8
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+environment = SubResource("environment")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1.0, -0.0, 0.0, 0.0, 5.9604645e-8, 0.99999994, -0.0, -0.99999994, 5.9604645e-8, 0.0, 20.0, 0.01)
+current = true
+fov = 55.0
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.5, 0.0)
+material_override = SubResource("Floor_mat1")
+mesh = SubResource("Floor_mesh0")
+
+[node name="Base" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 10.5, 0.5, 0.0)
+material_override = SubResource("Base_mat3")
+mesh = SubResource("Base_mesh2")
+
+[node name="Tower0" type="Node3D" parent="."]
+script = ExtResource("2_tower")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -4.0, 0.5, 2.0)
+cooldown = 0.6
+fire_range = 6.0
+
+[node name="Mesh" type="MeshInstance3D" parent="Tower0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Tower0_mat5")
+mesh = SubResource("Tower0_cylinder4")
+
+[node name="Tower1" type="Node3D" parent="."]
+script = ExtResource("2_tower")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, -2.0)
+cooldown = 0.6
+fire_range = 6.0
+
+[node name="Mesh" type="MeshInstance3D" parent="Tower1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Tower1_mat7")
+mesh = SubResource("Tower1_cylinder6")
+
+[node name="Tower2" type="Node3D" parent="."]
+script = ExtResource("2_tower")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, 0.5, 2.0)
+cooldown = 0.6
+fire_range = 6.0
+
+[node name="Mesh" type="MeshInstance3D" parent="Tower2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Tower2_mat9")
+mesh = SubResource("Tower2_cylinder8")
+
+[node name="Enemy0" type="CharacterBody3D" parent="."]
+script = ExtResource("3_enemy")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -10.0, 0.6, 0.0)
+hp = 2
+mode = 1
+speed = 1.2000000476837158
+
+[node name="Mesh" type="MeshInstance3D" parent="Enemy0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Enemy0_mat11")
+mesh = SubResource("Enemy0_capsule10")
+
+[node name="Shape" type="CollisionShape3D" parent="Enemy0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Enemy0_shape12")
+
+[node name="Enemy1" type="CharacterBody3D" parent="."]
+script = ExtResource("3_enemy")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -10.0, 0.6, 0.0)
+hp = 2
+mode = 1
+speed = 1.2000000476837158
+
+[node name="Mesh" type="MeshInstance3D" parent="Enemy1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Enemy1_mat14")
+mesh = SubResource("Enemy1_capsule13")
+
+[node name="Shape" type="CollisionShape3D" parent="Enemy1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Enemy1_shape15")
+
+[node name="Enemy2" type="CharacterBody3D" parent="."]
+script = ExtResource("3_enemy")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -10.0, 0.6, 0.0)
+hp = 2
+mode = 1
+speed = 1.2000000476837158
+
+[node name="Mesh" type="MeshInstance3D" parent="Enemy2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Enemy2_mat17")
+mesh = SubResource("Enemy2_capsule16")
+
+[node name="Shape" type="CollisionShape3D" parent="Enemy2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Enemy2_shape18")
+
+[node name="Enemy3" type="CharacterBody3D" parent="."]
+script = ExtResource("3_enemy")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -10.0, 0.6, 0.0)
+hp = 2
+mode = 1
+speed = 1.2000000476837158
+
+[node name="Mesh" type="MeshInstance3D" parent="Enemy3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Enemy3_mat20")
+mesh = SubResource("Enemy3_capsule19")
+
+[node name="Shape" type="CollisionShape3D" parent="Enemy3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Enemy3_shape21")
+
+[node name="Enemy4" type="CharacterBody3D" parent="."]
+script = ExtResource("3_enemy")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -10.0, 0.6, 0.0)
+hp = 2
+mode = 1
+speed = 1.2000000476837158
+
+[node name="Mesh" type="MeshInstance3D" parent="Enemy4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Enemy4_mat23")
+mesh = SubResource("Enemy4_capsule22")
+
+[node name="Shape" type="CollisionShape3D" parent="Enemy4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Enemy4_shape24")
+
+[node name="Enemy5" type="CharacterBody3D" parent="."]
+script = ExtResource("3_enemy")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -10.0, 0.6, 0.0)
+hp = 2
+mode = 1
+speed = 1.2000000476837158
+
+[node name="Mesh" type="MeshInstance3D" parent="Enemy5"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Enemy5_mat26")
+mesh = SubResource("Enemy5_capsule25")
+
+[node name="Shape" type="CollisionShape3D" parent="Enemy5"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Enemy5_shape27")
+
+[node name="Enemy6" type="CharacterBody3D" parent="."]
+script = ExtResource("3_enemy")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -10.0, 0.6, 0.0)
+hp = 2
+mode = 1
+speed = 1.2000000476837158
+
+[node name="Mesh" type="MeshInstance3D" parent="Enemy6"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Enemy6_mat29")
+mesh = SubResource("Enemy6_capsule28")
+
+[node name="Shape" type="CollisionShape3D" parent="Enemy6"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Enemy6_shape30")
+
+[node name="Enemy7" type="CharacterBody3D" parent="."]
+script = ExtResource("3_enemy")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -10.0, 0.6, 0.0)
+hp = 2
+mode = 1
+speed = 1.2000000476837158
+
+[node name="Mesh" type="MeshInstance3D" parent="Enemy7"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Enemy7_mat32")
+mesh = SubResource("Enemy7_capsule31")
+
+[node name="Shape" type="CollisionShape3D" parent="Enemy7"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Enemy7_shape33")

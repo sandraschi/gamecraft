@@ -1,0 +1,16 @@
+[package]
+name = "gamecraft-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "L3 GameCraft scene verification CLI (lint/query/uid)"
+
+[dependencies]
+gamecraft-mcp = { path = "../../crates/gamecraft-mcp" }
+gamecraft-godot = { path = "../../crates/gamecraft-godot" }
+gamecraft-forge = { path = "../../crates/gamecraft-forge" }
+clap = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

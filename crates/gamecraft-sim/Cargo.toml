@@ -1,0 +1,11 @@
+[package]
+name = "gamecraft-sim"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "L1 deterministic gameplay sims: kinematic stepper, BFS maze/crate solvers"
+
+[dependencies]
+
+[lints]
+workspace = true

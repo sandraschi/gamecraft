@@ -1,0 +1,306 @@
+[gd_scene load_steps=40 format=3 uid="uid://3zfyjz5a19p6"]
+
+[ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
+
+[ext_resource type="Script" path="res://scripts/coin.gd" id="3_coin"]
+
+[ext_resource type="Script" path="res://scripts/camera_follow.gd" id="4_camera"]
+
+[ext_resource type="Script" path="res://scripts/autoplay.gd" id="5_autoplay"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_material"]
+sky_top_color = Color(0.05, 0.07, 0.2, 1)
+sky_horizon_color = Color(0.25, 0.3, 0.55, 1)
+ground_bottom_color = Color(0.55, 0.66, 0.8, 1)
+ground_horizon_color = Color(0.25, 0.3, 0.55, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_material")
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 1.0
+
+[sub_resource type="BoxMesh" id="Ground0_mesh0"]
+size = Vector3(12.0, 1.0, 4.0)
+
+[sub_resource type="StandardMaterial3D" id="Ground0_mat1"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.22, 0.16, 1)
+
+[sub_resource type="BoxShape3D" id="Ground0_shape2"]
+size = Vector3(12.0, 1.0, 4.0)
+
+[sub_resource type="BoxMesh" id="Ground1_mesh3"]
+size = Vector3(12.0, 1.0, 4.0)
+
+[sub_resource type="StandardMaterial3D" id="Ground1_mat4"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.22, 0.16, 1)
+
+[sub_resource type="BoxShape3D" id="Ground1_shape5"]
+size = Vector3(12.0, 1.0, 4.0)
+
+[sub_resource type="BoxMesh" id="Ground2_mesh6"]
+size = Vector3(10.0, 1.0, 4.0)
+
+[sub_resource type="StandardMaterial3D" id="Ground2_mat7"]
+shading_mode = 0
+albedo_color = Color(0.18, 0.22, 0.16, 1)
+
+[sub_resource type="BoxShape3D" id="Ground2_shape8"]
+size = Vector3(10.0, 1.0, 4.0)
+
+[sub_resource type="BoxMesh" id="Platform0_mesh9"]
+size = Vector3(2.5, 0.4, 2.0)
+
+[sub_resource type="StandardMaterial3D" id="Platform0_mat10"]
+shading_mode = 0
+albedo_color = Color(0.22, 0.45, 0.3, 1)
+
+[sub_resource type="BoxShape3D" id="Platform0_shape11"]
+size = Vector3(2.5, 0.4, 2.0)
+
+[sub_resource type="BoxMesh" id="Platform1_mesh12"]
+size = Vector3(2.0, 0.4, 2.0)
+
+[sub_resource type="StandardMaterial3D" id="Platform1_mat13"]
+shading_mode = 0
+albedo_color = Color(0.22, 0.45, 0.3, 1)
+
+[sub_resource type="BoxShape3D" id="Platform1_shape14"]
+size = Vector3(2.0, 0.4, 2.0)
+
+[sub_resource type="CapsuleMesh" id="player_capsule15"]
+radius = 0.3
+height = 1
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="player_mat16"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.72, 0.3, 1)
+
+[sub_resource type="CapsuleShape3D" id="player_capsule_shape17"]
+radius = 0.3
+height = 1
+
+[sub_resource type="BoxShape3D" id="Coin0_shape18"]
+size = Vector3(0.6, 0.6, 0.6)
+
+[sub_resource type="SphereMesh" id="Coin0_sphere19"]
+radius = 0.28
+height = 0.56
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Coin0_mat20"]
+shading_mode = 0
+albedo_color = Color(0.6, 0.95, 1.0, 1)
+
+[sub_resource type="BoxShape3D" id="Coin1_shape21"]
+size = Vector3(0.6, 0.6, 0.6)
+
+[sub_resource type="SphereMesh" id="Coin1_sphere22"]
+radius = 0.28
+height = 0.56
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Coin1_mat23"]
+shading_mode = 0
+albedo_color = Color(0.6, 0.95, 1.0, 1)
+
+[sub_resource type="BoxShape3D" id="Coin2_shape24"]
+size = Vector3(0.6, 0.6, 0.6)
+
+[sub_resource type="SphereMesh" id="Coin2_sphere25"]
+radius = 0.28
+height = 0.56
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Coin2_mat26"]
+shading_mode = 0
+albedo_color = Color(0.6, 0.95, 1.0, 1)
+
+[sub_resource type="BoxShape3D" id="Goal_shape27"]
+size = Vector3(1.5, 3.0, 2.0)
+
+[sub_resource type="BoxMesh" id="goal_pole_mesh28"]
+size = Vector3(0.25, 3.0, 0.25)
+
+[sub_resource type="StandardMaterial3D" id="goal_pole_mat29"]
+shading_mode = 0
+albedo_color = Color(0.6, 0.95, 1.0, 1)
+
+[sub_resource type="BoxShape3D" id="Kill_shape30"]
+size = Vector3(100.0, 1.0, 6.0)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_runtime")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+environment = SubResource("environment")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8525245, 0.4251619, -0.3040383, -1.4901161e-8, 0.5816831, 0.8134155, 0.5226872, -0.69345665, 0.49589908, 0.0, 0.0, 0.0)
+light_energy = 1.149999976158142
+shadow_enabled = true
+
+[node name="Ground0" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Ground0_mat1")
+mesh = SubResource("Ground0_mesh0")
+
+[node name="Shape" type="CollisionShape3D" parent="Ground0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Ground0_shape2")
+
+[node name="Ground1" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 15.0, -0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Ground1_mat4")
+mesh = SubResource("Ground1_mesh3")
+
+[node name="Shape" type="CollisionShape3D" parent="Ground1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Ground1_shape5")
+
+[node name="Ground2" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 29.0, -0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Ground2_mat7")
+mesh = SubResource("Ground2_mesh6")
+
+[node name="Shape" type="CollisionShape3D" parent="Ground2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Ground2_shape8")
+
+[node name="Platform0" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.4, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Platform0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Platform0_mat10")
+mesh = SubResource("Platform0_mesh9")
+
+[node name="Shape" type="CollisionShape3D" parent="Platform0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Platform0_shape11")
+
+[node name="Platform1" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 14.0, 1.6999999, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Platform1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Platform1_mat13")
+mesh = SubResource("Platform1_mesh12")
+
+[node name="Shape" type="CollisionShape3D" parent="Platform1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Platform1_shape14")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_player")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -5.0, 0.5, 0.0)
+gravity = 26.0
+jump_velocity = 11.0
+speed = 5.0
+
+[node name="Mesh" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("player_mat16")
+mesh = SubResource("player_capsule15")
+
+[node name="Shape" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("player_capsule_shape17")
+
+[node name="Coin0" type="Area3D" parent="."]
+script = ExtResource("3_coin")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.2, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Coin0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Coin0_shape18")
+
+[node name="Mesh" type="MeshInstance3D" parent="Coin0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Coin0_mat20")
+mesh = SubResource("Coin0_sphere19")
+
+[node name="Coin1" type="Area3D" parent="."]
+script = ExtResource("3_coin")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 14.0, 2.6, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Coin1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Coin1_shape21")
+
+[node name="Mesh" type="MeshInstance3D" parent="Coin1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Coin1_mat23")
+mesh = SubResource("Coin1_sphere22")
+
+[node name="Coin2" type="Area3D" parent="."]
+script = ExtResource("3_coin")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 20.0, 1.4, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Coin2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Coin2_shape24")
+
+[node name="Mesh" type="MeshInstance3D" parent="Coin2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Coin2_mat26")
+mesh = SubResource("Coin2_sphere25")
+
+[node name="Goal" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 30.0, 1.5, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Goal"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Goal_shape27")
+
+[node name="Pole" type="MeshInstance3D" parent="Goal"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("goal_pole_mat29")
+mesh = SubResource("goal_pole_mesh28")
+
+[node name="Kill" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 15.0, -7.0, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Kill"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Kill_shape30")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("4_camera")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -5.0, 2.4, 14.0)
+current = true
+fov = 34.0
+
+[node name="Autoplay" type="Node3D" parent="."]
+script = ExtResource("5_autoplay")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+hold_action = "ui_right"
+jump_frames = Array[int]([])
+
+[connection signal="body_entered" from="Goal" to="." method="_on_goal"]
+
+[connection signal="body_entered" from="Kill" to="." method="_on_kill"]

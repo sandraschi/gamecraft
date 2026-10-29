@@ -1,0 +1,25 @@
+[package]
+name = "gamecraft-mcp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "L2 hand-rolled MCP 2024-11-05 stdio server: scene_lint + spatial_query"
+
+[[bin]]
+name = "gamecraft-mcp"
+path = "src/main.rs"
+
+[lib]
+name = "gamecraft_mcp"
+path = "src/lib.rs"
+
+[dependencies]
+gamecraft-core = { workspace = true }
+gamecraft-commands = { workspace = true }
+gamecraft-godot = { workspace = true }
+glam = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

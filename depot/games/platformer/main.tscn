@@ -1,0 +1,481 @@
+[gd_scene load_steps=57 format=3 uid="uid://2yn7t8rmgjdva"]
+
+[ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
+
+[ext_resource type="Script" path="res://scripts/coin.gd" id="3_coin"]
+
+[ext_resource type="Script" path="res://scripts/camera_follow.gd" id="4_camera"]
+
+[ext_resource type="Script" path="res://scripts/autoplay.gd" id="5_autoplay"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_material"]
+sky_top_color = Color(0.24, 0.42, 0.75, 1)
+sky_horizon_color = Color(0.78, 0.87, 0.96, 1)
+ground_bottom_color = Color(0.55, 0.66, 0.8, 1)
+ground_horizon_color = Color(0.78, 0.87, 0.96, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_material")
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 1.0
+
+[sub_resource type="BoxMesh" id="GroundA_mesh0"]
+size = Vector3(14.0, 1.0, 4.0)
+
+[sub_resource type="StandardMaterial3D" id="GroundA_mat1"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.36, 0.18, 1)
+
+[sub_resource type="BoxShape3D" id="GroundA_shape2"]
+size = Vector3(14.0, 1.0, 4.0)
+
+[sub_resource type="BoxMesh" id="GroundB_mesh3"]
+size = Vector3(11.5, 1.0, 4.0)
+
+[sub_resource type="StandardMaterial3D" id="GroundB_mat4"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.36, 0.18, 1)
+
+[sub_resource type="BoxShape3D" id="GroundB_shape5"]
+size = Vector3(11.5, 1.0, 4.0)
+
+[sub_resource type="BoxMesh" id="GroundC_mesh6"]
+size = Vector3(11.5, 1.0, 4.0)
+
+[sub_resource type="StandardMaterial3D" id="GroundC_mat7"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.36, 0.18, 1)
+
+[sub_resource type="BoxShape3D" id="GroundC_shape8"]
+size = Vector3(11.5, 1.0, 4.0)
+
+[sub_resource type="BoxMesh" id="Plat1_mesh9"]
+size = Vector3(3.0, 0.4, 2.0)
+
+[sub_resource type="StandardMaterial3D" id="Plat1_mat10"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Plat1_shape11"]
+size = Vector3(3.0, 0.4, 2.0)
+
+[sub_resource type="BoxMesh" id="Plat2_mesh12"]
+size = Vector3(4.0, 0.4, 2.0)
+
+[sub_resource type="StandardMaterial3D" id="Plat2_mat13"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Plat2_shape14"]
+size = Vector3(4.0, 0.4, 2.0)
+
+[sub_resource type="BoxMesh" id="Plat3_mesh15"]
+size = Vector3(2.0, 0.4, 2.0)
+
+[sub_resource type="StandardMaterial3D" id="Plat3_mat16"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="BoxShape3D" id="Plat3_shape17"]
+size = Vector3(2.0, 0.4, 2.0)
+
+[sub_resource type="CapsuleMesh" id="player_capsule18"]
+radius = 0.3
+height = 1
+radial_segments = 20
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="player_mat19"]
+shading_mode = 0
+albedo_color = Color(0.35, 0.59, 1.0, 1)
+
+[sub_resource type="CapsuleShape3D" id="player_capsule_shape20"]
+radius = 0.3
+height = 1
+
+[sub_resource type="SphereMesh" id="Coin0_sphere21"]
+radius = 0.28
+height = 0.56
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Coin0_mat22"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.8, 0.24, 1)
+
+[sub_resource type="SphereShape3D" id="Coin0_sphere_shape23"]
+radius = 0.28
+
+[sub_resource type="SphereMesh" id="Coin1_sphere24"]
+radius = 0.28
+height = 0.56
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Coin1_mat25"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.8, 0.24, 1)
+
+[sub_resource type="SphereShape3D" id="Coin1_sphere_shape26"]
+radius = 0.28
+
+[sub_resource type="SphereMesh" id="Coin2_sphere27"]
+radius = 0.28
+height = 0.56
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Coin2_mat28"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.8, 0.24, 1)
+
+[sub_resource type="SphereShape3D" id="Coin2_sphere_shape29"]
+radius = 0.28
+
+[sub_resource type="SphereMesh" id="Coin3_sphere30"]
+radius = 0.28
+height = 0.56
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Coin3_mat31"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.8, 0.24, 1)
+
+[sub_resource type="SphereShape3D" id="Coin3_sphere_shape32"]
+radius = 0.28
+
+[sub_resource type="BoxMesh" id="pole_mesh33"]
+size = Vector3(0.3, 3.0, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="pole_mat34"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.36, 0.18, 1)
+
+[sub_resource type="PrismMesh" id="flag_prism35"]
+size = Vector3(1.6, 1.0, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="flag_mat36"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.8, 0.24, 1)
+
+[sub_resource type="BoxShape3D" id="goal_shape37"]
+size = Vector3(1.5, 3.0, 1.5)
+
+[sub_resource type="BoxShape3D" id="kill_shape38"]
+size = Vector3(50.0, 1.0, 6.0)
+
+[sub_resource type="SphereMesh" id="bush_sphere39"]
+radius = 0.55
+height = 0.75
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="bush_mat40"]
+shading_mode = 0
+albedo_color = Color(0.29, 0.63, 0.35, 1)
+
+[sub_resource type="SphereMesh" id="cloud_sphere41"]
+radius = 1.6
+height = 1.1
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="cloud_mat42"]
+shading_mode = 0
+albedo_color = Color(0.94, 0.94, 0.96, 1)
+
+[sub_resource type="BoxShape3D" id="Hint0_shape43"]
+size = Vector3(0.6, 2.0, 2.0)
+
+[sub_resource type="BoxShape3D" id="Hint1_shape44"]
+size = Vector3(0.6, 2.0, 2.0)
+
+[sub_resource type="BoxShape3D" id="Hint2_shape45"]
+size = Vector3(0.6, 2.0, 2.0)
+
+[sub_resource type="BoxShape3D" id="Hint3_shape46"]
+size = Vector3(0.6, 2.0, 2.0)
+
+[sub_resource type="BoxShape3D" id="Hint4_shape47"]
+size = Vector3(0.6, 2.0, 2.0)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_runtime")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+environment = SubResource("environment")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8525245, 0.4251619, -0.3040383, -1.4901161e-8, 0.5816831, 0.8134155, 0.5226872, -0.69345665, 0.49589908, 0.0, 0.0, 0.0)
+light_energy = 1.149999976158142
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("4_camera")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.4, 14.0)
+current = true
+fov = 34.0
+
+[node name="Autoplay" type="Node3D" parent="."]
+script = ExtResource("5_autoplay")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+hold_action = "ui_right"
+jump_frames = Array[int]([0, 75, 147, 260, 327])
+
+[node name="GroundA" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -1.0, -0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="GroundA"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("GroundA_mat1")
+mesh = SubResource("GroundA_mesh0")
+
+[node name="Shape" type="CollisionShape3D" parent="GroundA"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("GroundA_shape2")
+
+[node name="GroundB" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 14.25, -0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="GroundB"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("GroundB_mat4")
+mesh = SubResource("GroundB_mesh3")
+
+[node name="Shape" type="CollisionShape3D" parent="GroundB"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("GroundB_shape5")
+
+[node name="GroundC" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 28.25, -0.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="GroundC"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("GroundC_mat7")
+mesh = SubResource("GroundC_mesh6")
+
+[node name="Shape" type="CollisionShape3D" parent="GroundC"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("GroundC_shape8")
+
+[node name="Plat1" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.5, 0.7, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Plat1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Plat1_mat10")
+mesh = SubResource("Plat1_mesh9")
+
+[node name="Shape" type="CollisionShape3D" parent="Plat1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Plat1_shape11")
+
+[node name="Plat2" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 13.0, 0.8, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Plat2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Plat2_mat13")
+mesh = SubResource("Plat2_mesh12")
+
+[node name="Shape" type="CollisionShape3D" parent="Plat2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Plat2_shape14")
+
+[node name="Plat3" type="StaticBody3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 26.0, 0.9, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Plat3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Plat3_mat16")
+mesh = SubResource("Plat3_mesh15")
+
+[node name="Shape" type="CollisionShape3D" parent="Plat3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Plat3_shape17")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_player")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 0.0)
+gravity = 22.0
+jump_velocity = 9.0
+speed = 4.5
+
+[node name="Mesh" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("player_mat19")
+mesh = SubResource("player_capsule18")
+
+[node name="Shape" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("player_capsule_shape20")
+
+[node name="Coin0" type="Area3D" parent="."]
+script = ExtResource("3_coin")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.9, 2.3, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Coin0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Coin0_mat22")
+mesh = SubResource("Coin0_sphere21")
+
+[node name="Shape" type="CollisionShape3D" parent="Coin0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Coin0_sphere_shape23")
+
+[node name="Coin1" type="Area3D" parent="."]
+script = ExtResource("3_coin")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 12.8, 2.3, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Coin1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Coin1_mat25")
+mesh = SubResource("Coin1_sphere24")
+
+[node name="Shape" type="CollisionShape3D" parent="Coin1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Coin1_sphere_shape26")
+
+[node name="Coin2" type="Area3D" parent="."]
+script = ExtResource("3_coin")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 26.0, 2.4, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Coin2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Coin2_mat28")
+mesh = SubResource("Coin2_sphere27")
+
+[node name="Shape" type="CollisionShape3D" parent="Coin2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Coin2_sphere_shape29")
+
+[node name="Coin3" type="Area3D" parent="."]
+script = ExtResource("3_coin")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 21.25, 1.5, 0.0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Coin3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+material_override = SubResource("Coin3_mat31")
+mesh = SubResource("Coin3_sphere30")
+
+[node name="Shape" type="CollisionShape3D" parent="Coin3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Coin3_sphere_shape32")
+
+[node name="Goal" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 31.0, 1.5, 0.0)
+
+[node name="Pole" type="MeshInstance3D" parent="Goal"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.5, 0.0)
+material_override = SubResource("pole_mat34")
+mesh = SubResource("pole_mesh33")
+
+[node name="Flag" type="MeshInstance3D" parent="Goal"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.8, 0.8, 0.0)
+material_override = SubResource("flag_mat36")
+mesh = SubResource("flag_prism35")
+
+[node name="Shape" type="CollisionShape3D" parent="Goal"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("goal_shape37")
+
+[node name="Kill" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 13.0, -7.0, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Kill"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("kill_shape38")
+
+[node name="Bush0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -6.5, 0.42, 0.0)
+material_override = SubResource("bush_mat40")
+mesh = SubResource("bush_sphere39")
+
+[node name="Bush1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 10.0, 0.42, 0.0)
+material_override = SubResource("bush_mat40")
+mesh = SubResource("bush_sphere39")
+
+[node name="Bush2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 17.0, 0.42, 0.0)
+material_override = SubResource("bush_mat40")
+mesh = SubResource("bush_sphere39")
+
+[node name="Bush3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 32.0, 0.42, 0.0)
+material_override = SubResource("bush_mat40")
+mesh = SubResource("bush_sphere39")
+
+[node name="Cloud0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 5.2, -3.5)
+material_override = SubResource("cloud_mat42")
+mesh = SubResource("cloud_sphere41")
+
+[node name="Cloud1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 15.0, 5.2, -3.5)
+material_override = SubResource("cloud_mat42")
+mesh = SubResource("cloud_sphere41")
+
+[node name="Cloud2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 28.0, 5.2, -3.5)
+material_override = SubResource("cloud_mat42")
+mesh = SubResource("cloud_sphere41")
+
+[node name="Hint0" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.1, 1.0, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint0"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Hint0_shape43")
+
+[node name="Hint1" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.6, 1.0, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint1"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Hint1_shape44")
+
+[node name="Hint2" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 11.0, 1.0, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint2"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Hint2_shape45")
+
+[node name="Hint3" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 19.5, 1.0, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint3"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Hint3_shape46")
+
+[node name="Hint4" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 24.5, 1.0, 0.0)
+
+[node name="Shape" type="CollisionShape3D" parent="Hint4"]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+shape = SubResource("Hint4_shape47")
+
+[connection signal="body_entered" from="Hint0" to="." method="_on_hint"]
+
+[connection signal="body_entered" from="Hint1" to="." method="_on_hint"]
+
+[connection signal="body_entered" from="Hint2" to="." method="_on_hint"]
+
+[connection signal="body_entered" from="Hint3" to="." method="_on_hint"]
+
+[connection signal="body_entered" from="Hint4" to="." method="_on_hint"]
+
+[connection signal="body_entered" from="Goal" to="." method="_on_goal"]
+
+[connection signal="body_entered" from="Kill" to="." method="_on_kill"]
