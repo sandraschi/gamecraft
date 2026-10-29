@@ -226,10 +226,25 @@ fn cmd_new(
         eprintln!("pass --prompt \"...\" or --from-spec <file.json>");
         std::process::exit(1);
     };
-    let discovered = if provider == "auto" {
-        gamecraft_forge::llm::auto(model)
+    // Flags win; the config file fills what the flags leave out, so a key entered
+    // once in the viewer Settings works for `new` without retyping.
+    let file_config = gamecraft_core::config::AppConfig::load();
+    let provider_name = if provider == "auto" && file_config.provider != "auto" {
+        file_config.provider.clone()
     } else {
-        gamecraft_forge::llm::LlmConfig::new(provider, model)
+        provider.to_string()
+    };
+    let model_name: Option<String> = model
+        .map(str::to_string)
+        .or_else(|| file_config.effective_model().map(str::to_string));
+    let endpoint_name: Option<String> = endpoint.map(str::to_string).or_else(|| {
+        (!file_config.ollama_endpoint.trim().is_empty())
+            .then(|| file_config.ollama_endpoint.clone())
+    });
+    let discovered = if provider_name == "auto" {
+        gamecraft_forge::llm::auto(model_name.as_deref())
+    } else {
+        gamecraft_forge::llm::LlmConfig::new(provider_name.as_str(), model_name.as_deref())
     };
     let mut config = match discovered {
         Ok(config) => config,
@@ -238,7 +253,7 @@ fn cmd_new(
             std::process::exit(1);
         }
     };
-    if let Some(url) = endpoint {
+    if let Some(url) = endpoint_name.as_deref() {
         config = config.at(url);
     }
     match gamecraft_forge::create::generate(idea.as_str(), &config, out) {

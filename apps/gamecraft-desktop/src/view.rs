@@ -88,6 +88,22 @@ pub(crate) fn menu_bar(state: &mut DesktopState, ui: &mut egui::Ui) {
             menu.checkbox(&mut state.recording, "Record trace");
             menu.checkbox(&mut state.follow, "Follow newest frame");
         });
+        bar.menu_button("Settings", |menu| {
+            if menu.button("App settings").clicked() {
+                state.dialog = Some(Dialog::AppSettings);
+                menu.close();
+            }
+            if menu
+                .add_enabled(
+                    state.selected_game.is_some(),
+                    egui::Button::new("Game settings"),
+                )
+                .clicked()
+            {
+                state.dialog = Some(Dialog::GameOverlay);
+                menu.close();
+            }
+        });
         bar.menu_button("Help", |menu| {
             if menu.button("About / controls").clicked() {
                 state.dialog = Some(Dialog::About);
@@ -151,29 +167,111 @@ pub(crate) fn dialogs(state: &mut DesktopState, ctx: &egui::Context) {
     };
     let mut open = true;
     match dialog {
-        Dialog::About => {
-            egui::Window::new("About GameCraft")
-                .collapsible(false)
-                .resizable(false)
-                .open(&mut open)
-                .show(ctx, |ui| {
-                    ui.strong(format!("GameCraft {}", env!("CARGO_PKG_VERSION")));
-                    ui.label("Spatial compiler and scene verifier for Godot 4.");
-                    ui.separator();
-                    ui.monospace(format!("scene: {}", state.scene_uid));
-                    ui.monospace(format!("nodes: {}", state.graph.nodes.len()));
-                    ui.monospace(format!("findings: {}", state.diags.len()));
-                    ui.monospace(format!("renderer: {}", state.adapter_label));
-                    ui.separator();
-                    ui.label("Drag the viewport to orbit, scroll to zoom.");
-                    ui.label("Click a finding to select its node.");
-                    ui.label("Ctrl+Z / Ctrl+Y undo and redo. Esc clears the palette.");
-                });
-        }
+        Dialog::About => about_window(state, ctx, &mut open),
+        Dialog::AppSettings => app_settings_window(state, ctx, &mut open),
+        Dialog::GameOverlay => game_overlay_window(state, ctx, &mut open),
     }
     if !open {
         state.dialog = None;
     }
+}
+
+/// About window.
+fn about_window(state: &mut DesktopState, ctx: &egui::Context, open: &mut bool) {
+    egui::Window::new("About GameCraft")
+        .collapsible(false)
+        .resizable(false)
+        .open(open)
+        .show(ctx, |ui| {
+            ui.strong(format!("GameCraft {}", env!("CARGO_PKG_VERSION")));
+            ui.label("Spatial compiler and scene verifier for Godot 4.");
+            ui.separator();
+            ui.monospace(format!("scene: {}", state.scene_uid));
+            ui.monospace(format!("nodes: {}", state.graph.nodes.len()));
+            ui.monospace(format!("findings: {}", state.diags.len()));
+            ui.monospace(format!("renderer: {}", state.adapter_label));
+            ui.separator();
+            ui.label("Drag the viewport to orbit, scroll to zoom.");
+            ui.label("Click a finding to select its node.");
+            ui.label("Ctrl+Z / Ctrl+Y undo and redo. Esc clears the palette.");
+        });
+}
+
+/// App settings window: provider, model, keys, binaries.
+fn app_settings_window(state: &mut DesktopState, ctx: &egui::Context, open: &mut bool) {
+    egui::Window::new("App settings")
+        .collapsible(false)
+        .resizable(false)
+        .open(open)
+        .show(ctx, |ui| {
+            ui.label("Provider");
+            egui::ComboBox::from_id_salt("app_provider")
+                .selected_text(state.app_cfg.provider.as_str())
+                .show_ui(ui, |combo| {
+                    for name in ["auto", "local", "openai", "anthropic"] {
+                        combo.selectable_value(&mut state.app_cfg.provider, name.to_string(), name);
+                    }
+                });
+            ui.label("Model (empty = auto-pick, gemma4 family preferred)");
+            ui.text_edit_singleline(&mut state.app_cfg.model);
+            ui.label("Local endpoint (empty = provider default)");
+            ui.text_edit_singleline(&mut state.app_cfg.ollama_endpoint);
+            ui.label("OpenAI API key (empty = OPENAI_API_KEY env)");
+            ui.add(egui::TextEdit::singleline(&mut state.app_cfg.openai_api_key).password(true));
+            ui.label("Anthropic API key (empty = ANTHROPIC_API_KEY env)");
+            ui.add(egui::TextEdit::singleline(&mut state.app_cfg.anthropic_api_key).password(true));
+            ui.label("Godot binary (empty = godot)");
+            ui.text_edit_singleline(&mut state.app_cfg.godot_binary);
+            ui.separator();
+            ui.horizontal(|row| {
+                if row.button("Save").clicked() {
+                    state.save_app_config();
+                    state.dialog = None;
+                }
+                if row.button("Cancel").clicked() {
+                    state.dialog = None;
+                }
+            });
+        });
+}
+
+/// Per-game overlay window: speed, gravity, jump, autoplay.
+fn game_overlay_window(state: &mut DesktopState, ctx: &egui::Context, open: &mut bool) {
+    let title = state
+        .selected_game
+        .and_then(|index| state.depot_games.get(index))
+        .map_or_else(String::new, |game| game.title.clone());
+    egui::Window::new(format!("Game settings - {title}"))
+        .collapsible(false)
+        .resizable(false)
+        .open(open)
+        .show(ctx, |ui| {
+            ui.label("Multipliers applied to the baked-in base values.");
+            ui.add(egui::Slider::new(&mut state.overlay.speed_mult, 0.25..=2.0).text("Speed"));
+            ui.add(egui::Slider::new(&mut state.overlay.gravity_mult, 0.25..=2.0).text("Gravity"));
+            ui.add(egui::Slider::new(&mut state.overlay.jump_mult, 0.25..=2.0).text("Jump"));
+            ui.label("Autoplay (Default follows the demo switch)");
+            ui.horizontal(|row| {
+                row.selectable_value(&mut state.overlay.autoplay, None, "Default");
+                row.selectable_value(&mut state.overlay.autoplay, Some(true), "On");
+                row.selectable_value(&mut state.overlay.autoplay, Some(false), "Off");
+            });
+            ui.separator();
+            ui.horizontal(|row| {
+                if row.button("Save").clicked() {
+                    state.save_overlay();
+                    state.dialog = None;
+                }
+                if row.button("Save & play").clicked() {
+                    state.save_overlay();
+                    state.dialog = None;
+                    state.start_game();
+                }
+                if row.button("Cancel").clicked() {
+                    state.dialog = None;
+                }
+            });
+        });
 }
 
 /// Palette entry: label plus what running it does.

@@ -155,6 +155,37 @@ D-pad or stick vertical moves the depot selection, **A** starts the highlighted
 game, **B** returns selection to the scene root. Keyboard and mouse still work; a
 missing pad degrades to "not connected".
 
+## Settings
+
+One config file feeds every entry point: `%USERPROFILE%\.gamecraft\config.json`
+(`~/.gamecraft/config.json`). The CLI reads it, the viewer edits it through
+Settings > App settings. Precedence for every field: **CLI flag > config file >
+environment variable > built-in default.**
+
+| Field | What it does | Default |
+|---|---|---|
+| `provider` | `auto` / `local` / `openai` / `anthropic` | `auto` |
+| `model` | model id; empty = auto-pick (gemma4 family) | empty |
+| `ollama_endpoint` | local server URL; empty = provider default | empty |
+| `openai_api_key` | cloud key; empty = `OPENAI_API_KEY` env | empty |
+| `anthropic_api_key` | cloud key; empty = `ANTHROPIC_API_KEY` env | empty |
+| `godot_binary` | override for launching games | empty = `godot` |
+
+Keys are never printed or logged; the file inherits your profile's permissions.
+
+**Per-game tuning** lives next to each game as `settings.json` (gitignored - local
+tuning, not content). Settings > Game settings writes it for the highlighted game;
+Save & play launches immediately. The shared runtime reads it at startup:
+
+```json
+{"speed_mult": 1.2, "gravity_mult": 1.0, "jump_mult": 1.1, "autoplay": null}
+```
+
+Multipliers scale the baked-in base values, so one schema fits all fifteen games.
+`autoplay: null` means "whatever the environment says" - the verifier and the demo
+button win over the file. Backgrounds and level geometry are baked in and still
+need regeneration.
+
 ## Depot
 
 `depot/games/` holds 15 standalone Godot 4.4 projects. Each carries `project.godot`,

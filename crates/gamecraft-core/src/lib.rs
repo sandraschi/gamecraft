@@ -7,6 +7,7 @@
 
 pub mod aabb;
 pub mod collision;
+pub mod config;
 pub mod node;
 pub mod signals;
 pub mod spatial;

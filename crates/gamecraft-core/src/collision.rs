@@ -85,6 +85,6 @@ mod tests {
     #[test]
     fn layer_decode() {
         assert_eq!(CollisionMatrix::layers_of(0b101), vec![0, 2]);
-        assert_eq!(CollisionMatrix::layers_of(0), Vec::new());
+        assert_eq!(CollisionMatrix::layers_of(0), Vec::<usize>::new());
     }
 }

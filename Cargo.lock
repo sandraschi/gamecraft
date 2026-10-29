@@ -1589,6 +1589,7 @@ name = "gamecraft-cli"
 version = "0.10.2"
 dependencies = [
  "clap",
+ "gamecraft-core",
  "gamecraft-forge",
  "gamecraft-godot",
  "gamecraft-mcp",

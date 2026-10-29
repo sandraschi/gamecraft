@@ -6,6 +6,7 @@ license.workspace = true
 description = "L3 GameCraft scene verification CLI (lint/query/uid)"
 
 [dependencies]
+gamecraft-core = { workspace = true }
 gamecraft-mcp = { path = "../../crates/gamecraft-mcp" }
 gamecraft-godot = { path = "../../crates/gamecraft-godot" }
 gamecraft-forge = { path = "../../crates/gamecraft-forge" }

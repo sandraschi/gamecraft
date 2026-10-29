@@ -138,7 +138,7 @@ mod tests {
             "_on_pressed".to_string(),
         ));
         let (ok, bad) = reg.resolve(&g, root);
-        assert_eq!(ok, Vec::new());
+        assert_eq!(ok, Vec::<usize>::new());
         assert_eq!(bad.len(), 1);
     }
 }

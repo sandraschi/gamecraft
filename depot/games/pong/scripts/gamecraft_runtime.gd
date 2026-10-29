@@ -25,6 +25,8 @@ var enemies_down: int = 0
 var total_to_win: int = 0
 
 func _ready() -> void:
+    _bind_gamepad()
+    _apply_overlay()
     for child in get_children():
         if child is Node3D and str(child.name).begins_with("Bullet"):
             bullets.append(child)
@@ -57,6 +59,51 @@ func _add_joy_button(action: String, button: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("ui_cancel"):
         get_tree().quit()
+
+func _apply_overlay() -> void:
+    # Optional per-game tuning written by the viewer (game dir + settings.json).
+    # Multiplicative, so one schema fits every game; absent or unreadable means
+    # defaults, never an error screen.
+    var file := FileAccess.open("res://settings.json", FileAccess.READ)
+    if file == null:
+        return
+    var data: Variant = JSON.parse_string(file.get_as_text())
+    if typeof(data) != TYPE_DICTIONARY:
+        return
+    var player := get_node_or_null("%Player")
+    if player == null:
+        for child in get_children():
+            if child is Node3D and str((child as Node3D).name) == "Player":
+                player = child
+                break
+    if player == null:
+        return
+    if data.has("speed_mult"):
+        _scale_if_present(player, "speed", float(data["speed_mult"]))
+    if data.has("gravity_mult"):
+        _scale_if_present(player, "gravity", float(data["gravity_mult"]))
+    if data.has("jump_mult"):
+        _scale_if_present(player, "jump_velocity", float(data["jump_mult"]))
+    # The verifier and the demo button own autoplay through the environment.
+    if data.has("autoplay") and OS.get_environment("GAMECRAFT_AUTOPLAY") == "":
+        var wanted: bool = bool(data["autoplay"])
+        _set_if_present(player, "autoplay", wanted)
+        var auto := get_node_or_null("Autoplay")
+        if auto != null:
+            _set_if_present(auto, "enabled", wanted)
+
+func _scale_if_present(node: Object, key: String, factor: float) -> void:
+    for prop in node.get_property_list():
+        if prop is Dictionary and str(prop.get("name")) == key:
+            var base: float = float(node.get(key))
+            node.set(key, base * factor)
+            return
+
+func _set_if_present(node: Object, key: String, value: Variant) -> void:
+    for prop in node.get_property_list():
+        if prop is Dictionary and str(prop.get("name")) == key:
+            node.set(key, value)
+            return
 
 func add_score() -> void:
     score += 1

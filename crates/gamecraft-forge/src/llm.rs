@@ -46,7 +46,7 @@ impl LlmConfig {
         match provider {
             "local" | "ollama" => Ok(Self {
                 kind: ProviderKind::Ollama,
-                model: model.unwrap_or("qwen3.8:27b").to_string(),
+                model: model.unwrap_or("gemma4:12b").to_string(),
                 endpoint: "http://127.0.0.1:11434".to_string(),
                 api_key: None,
             }),
@@ -54,13 +54,13 @@ impl LlmConfig {
                 kind: ProviderKind::OpenAi,
                 model: model.unwrap_or("gpt-4o-mini").to_string(),
                 endpoint: "https://api.openai.com".to_string(),
-                api_key: std::env::var("OPENAI_API_KEY").ok(),
+                api_key: gamecraft_core::config::AppConfig::load().openai_key(),
             }),
             "anthropic" => Ok(Self {
                 kind: ProviderKind::Anthropic,
                 model: model.unwrap_or("claude-sonnet-4-5").to_string(),
                 endpoint: "https://api.anthropic.com".to_string(),
-                api_key: std::env::var("ANTHROPIC_API_KEY").ok(),
+                api_key: gamecraft_core::config::AppConfig::load().anthropic_key(),
             }),
             other => Err(format!(
                 "unknown provider '{other}' (local, openai, anthropic)"
@@ -252,6 +252,10 @@ fn openai_models(base: &str) -> Option<Vec<String>> {
 /// Returns a message naming every endpoint probed when none answered, or naming
 /// the available models when a requested model is not loaded.
 pub fn auto(model: Option<&str>) -> Result<LlmConfig, String> {
+    // A pinned model in the config file counts as an explicit request, so every
+    // caller (CLI, viewer, MCP) honours it without re-resolving flags.
+    let file_config = gamecraft_core::config::AppConfig::load();
+    let model = model.or(file_config.effective_model());
     let probes = [
         (ProviderKind::Ollama, "http://127.0.0.1:11434"),
         (ProviderKind::OpenAi, "http://127.0.0.1:1234"),

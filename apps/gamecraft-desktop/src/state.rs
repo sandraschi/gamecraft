@@ -113,6 +113,10 @@ pub(crate) struct DesktopState {
     pub(crate) selected_game: Option<usize>,
     /// Open modal, if any.
     pub(crate) dialog: Option<Dialog>,
+    /// LLM provider / key configuration, edited through App settings.
+    pub(crate) app_cfg: gamecraft_core::config::AppConfig,
+    /// Play overlay for the selected depot game, edited through Game settings.
+    pub(crate) overlay: gamecraft_core::config::GameOverlay,
 }
 
 /// Modal dialogs owned by the menu bar.
@@ -122,6 +126,10 @@ pub(crate) struct DesktopState {
 pub(crate) enum Dialog {
     /// About / controls.
     About,
+    /// Provider, model, keys, binaries.
+    AppSettings,
+    /// Per-game overlay: speed, gravity, jump, autoplay.
+    GameOverlay,
 }
 
 /// One playable project discovered under `depot/games/`.
@@ -242,6 +250,8 @@ impl DesktopState {
             selected_game: None,
             gamepad: crate::gamepad::Gamepad::new(),
             dialog: None,
+            app_cfg: gamecraft_core::config::AppConfig::load(),
+            overlay: gamecraft_core::config::GameOverlay::default(),
         };
         state.selected = state.graph.root;
         state.refresh();
@@ -377,9 +387,38 @@ impl DesktopState {
         let Some(game) = self.depot_games.get(index) else {
             return;
         };
-        let scene = game.dir.join("main.tscn");
+        let dir = game.dir.clone();
+        let scene = dir.join("main.tscn");
         self.selected_game = Some(index);
+        self.overlay = gamecraft_core::config::load_overlay(dir.as_path());
         self.load_from_path(scene.as_path());
+    }
+
+    /// Directory of the selected depot game, if any.
+    pub(crate) fn selected_game_dir(&self) -> Option<std::path::PathBuf> {
+        self.selected_game
+            .and_then(|index| self.depot_games.get(index))
+            .map(|game| game.dir.clone())
+    }
+
+    /// Persist the app config and say where it went.
+    pub(crate) fn save_app_config(&mut self) {
+        match self.app_cfg.save() {
+            Ok(()) => self.status = "settings saved".to_string(),
+            Err(err) => self.status = format!("cannot save settings: {err}"),
+        }
+    }
+
+    /// Persist the overlay for the selected depot game.
+    pub(crate) fn save_overlay(&mut self) {
+        let Some(dir) = self.selected_game_dir() else {
+            self.status = "pick a game first".to_string();
+            return;
+        };
+        match gamecraft_core::config::save_overlay(dir.as_path(), &self.overlay) {
+            Ok(()) => self.status = "overlay saved (applies on next launch)".to_string(),
+            Err(err) => self.status = format!("cannot save overlay: {err}"),
+        }
     }
 
     /// Boot the highlighted depot project in Godot.
@@ -404,7 +443,11 @@ impl DesktopState {
         let Some(game) = self.depot_games.get(index) else {
             return;
         };
-        let binary = std::env::var("GAMECRAFT_GODOT").unwrap_or_else(|_| "godot".to_string());
+        let binary = if self.app_cfg.godot_binary.trim().is_empty() {
+            std::env::var("GAMECRAFT_GODOT").unwrap_or_else(|_| "godot".to_string())
+        } else {
+            self.app_cfg.godot_binary.clone()
+        };
         let mut command = std::process::Command::new(binary.as_str());
         command.arg("--path").arg(&game.dir);
         if demo {

@@ -13,6 +13,9 @@ dist/
 # Godot import cache (regenerated on first editor open)
 .godot/
 
+# Per-game play overlays written by the viewer (local tuning, not content)
+depot/games/*/settings.json
+
 # Fleet defaults (future-proofing; nothing here yet)
 node_modules/
 **/node_modules/
