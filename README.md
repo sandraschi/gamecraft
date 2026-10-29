@@ -42,6 +42,38 @@ cargo run -p gamecraft-desktop
 cargo run -p gamecraft-mcp
 ```
 
+## Controls
+
+**In the games** (Godot): arrow keys or WASD to move, Space/Enter to jump, flap
+or confirm.
+
+**Gamepad.** Godot's built-in `ui_*` actions already carry joypad bindings for
+movement (D-pad buttons 11–14 and left-stick axes 0/1), but `ui_accept` ships
+**keys-only** — so a pad could walk and never jump. The shared runtime adds the
+missing buttons at startup, idempotently, rather than re-declaring input maps in
+15 `project.godot` files:
+
+| Input | Effect |
+|---|---|
+| D-pad / left stick | move, walk, drive, chess cursor |
+| **A** | jump, flap, confirm knight move |
+| **B** | quit the game (there is no menu to go back to) |
+
+Verified by probing `InputMap.action_get_events` — `ui_accept` reported
+`KEY, KEY, KEY` before this change.
+
+**Desktop viewer** (`gilrs`, polled once per frame):
+
+| Input | Effect |
+|---|---|
+| Left stick horizontal | orbit the viewport camera |
+| D-pad / left-stick vertical | move the depot selection (with hold-repeat) |
+| **A** | start the highlighted depot game |
+| **B** | return selection to the scene root |
+
+Keyboard and mouse remain fully functional; a missing pad degrades to "not
+connected" and never blocks the shell.
+
 ## Depot
 
 `depot/games/<slug>/` holds 15 standalone Godot 4.4 projects (13 forged +

@@ -107,6 +107,8 @@ pub(crate) struct DesktopState {
     pub(crate) show_frustum: bool,
     /// Playable projects found under `depot/games/`.
     pub(crate) depot_games: Vec<DepotGame>,
+    /// Gamepad context; polled once per frame by the app shell.
+    pub(crate) gamepad: crate::gamepad::Gamepad,
     /// Highlighted depot entry.
     pub(crate) selected_game: Option<usize>,
     /// Open modal, if any.
@@ -238,6 +240,7 @@ impl DesktopState {
             show_frustum: false,
             depot_games: discover_depot(),
             selected_game: None,
+            gamepad: crate::gamepad::Gamepad::new(),
             dialog: None,
         };
         state.selected = state.graph.root;

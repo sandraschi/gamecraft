@@ -39,6 +39,25 @@ func _process(delta: float) -> void:
             fire_clock = 0.0
             fire_bullet()
 
+func _bind_gamepad() -> void:
+    # Built-in ui_* actions already cover movement on a pad, but ui_accept is
+    # keys-only, so A would do nothing. Add the buttons rather than rewriting
+    # project.godot for every game.
+    _add_joy_button("ui_accept", JOY_BUTTON_A)
+    _add_joy_button("ui_cancel", JOY_BUTTON_B)
+
+func _add_joy_button(action: String, button: int) -> void:
+    for existing in InputMap.action_get_events(action):
+        if existing is InputEventJoypadButton and existing.button_index == button:
+            return
+    var event := InputEventJoypadButton.new()
+    event.button_index = button
+    InputMap.action_add_event(action, event)
+
+func _unhandled_input(event: InputEvent) -> void:
+    if event.is_action_pressed("ui_cancel"):
+        get_tree().quit()
+
 func add_score() -> void:
     score += 1
 
