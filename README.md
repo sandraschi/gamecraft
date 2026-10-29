@@ -59,6 +59,13 @@ Three gates per game, enforced by the forge:
 Plus a byte-identical re-export: the forge builds each game twice and refuses a
 non-identical scene. **Never hand-edit `depot/`** — regenerate it.
 
+**Win verification is a separate gate, and it is currently red.** `just verify-depot`
+replays each game in Godot and requires the `GameCraft: goal reached` line. Today
+**6 of 15** print it (driving, flight, night-forest, platformer, runner,
+snowy-mountain-pass). The other nine boot with zero errors and are proven only by the
+Rust trace replay — they have no in-engine driver yet, so they are *unproven*, not
+broken. `just depot-godot` (boot clean) passing does not mean a game is winnable.
+
 ## Making a new game
 
 The model writes a `GameSpec`, never GDScript. Rust validates and compiles it, so a

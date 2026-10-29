@@ -62,15 +62,20 @@ build-release:
 forge:
     $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo run -p gamecraft-cli -- forge --all --out .
 
-# Gate: every depot scene must lint clean
+# Gate: every depot scene must lint clean (all 15, not three samples)
 depot-lint:
-    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo run -p gamecraft-cli -- lint --scene depot/games/platformer/main.tscn
-    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo run -p gamecraft-cli -- lint --scene depot/games/breakout/main.tscn
-    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo run -p gamecraft-cli -- lint --scene depot/games/tower-place/main.tscn
+    pwsh -NoProfile -Command "$env:Path = ""$env:USERPROFILE\.cargo\bin;$env:Path""; $fail=0; Get-ChildItem depot/games/*/main.tscn | ForEach-Object { $r = cargo run -q -p gamecraft-cli -- lint --scene $_.FullName 2>&1 | Out-String; if ($r -match '"findings":\s*\[\s*\]') { Write-Host ""$($_.Directory.Name): clean"" } else { $fail++; Write-Host ""$($_.Directory.Name): FINDINGS"" } }; if ($fail -gt 0) { exit 1 }"
 
 # Gate: all 15 depot projects must boot in Godot with zero ERROR/WARNING lines
 depot-godot:
     pwsh -NoProfile -Command "$g=(Get-Command godot).Source; Get-ChildItem depot/games | ForEach-Object { $o = & $g --headless --path $_.FullName --quit-after 240 2>&1 | Out-String; $bad = ($o -split \"`n\" | Where-Object { $_ -match 'ERROR|WARNING|Parse Error' }); if ($bad) { Write-Host \"$($_.Name): $bad\" } else { Write-Host \"$($_.Name): clean\" } }"
+
+# Gate: every depot game must PRINT the win marker in Godot, not merely boot.
+# depot-godot proves a scene loads; this proves it can be won. They are different
+# claims and only this one is what "verified" means. Frame budget is 3600 (~60 s
+# of simulated play at 60 fps), which is generous for the current run lengths.
+verify-depot:
+    pwsh -NoProfile -File scripts/verify-depot.ps1
 
 # Godot asset import pass. Required once after forging any game that ships
 # generated textures or models: headless --import is broken in 4.4 (progress

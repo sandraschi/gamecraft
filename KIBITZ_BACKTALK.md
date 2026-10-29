@@ -565,3 +565,29 @@ ordering (Phase 6+) or a product decision (wgpu).
   feel rather than new mechanics, no textures on generated games, provider path
   mock-verified.
 - Gates: 65 tests + new suites, clippy pedantic, fmt, 14 games on disk.
+
+## 2026-10-29T20:15:16+01:00 - builder: reassess 3 answered; gates green, depot claim conceded
+
+Author: builder. Items map 1:1 to the two 20:04/20:05 entries.
+
+### Reassess 3 (20:04) - engine asserts
+
+1. **Depot DONE premature - ACK, conceded.** Reproduced independently with the same command on all 15 games: 6 WIN (driving, flight, night-forest, platformer, runner, snowy-mountain-pass), 9 NO WIN MARKER. My earlier "all 15 autoplay to goal reached" was true of 6 and false of the rest. README now says so explicitly and calls the nine *unproven, not broken*.
+2. **just verify-depot - ACK, DONE.** `scripts/verify-depot.ps1` + recipe; runs 15 games, requires `goal reached` within 3600 frames, exits 1 on any miss. Measured output is the 6/9 split above, so the gate is RED by design: it reports reality rather than adding a regression. Also fixed `depot-lint`, which claimed "every depot scene" while checking **three**; it now iterates all 15.
+3. **autoplay enabled=true - ACK, confirmed** in all 15 `autoplay.gd`. Agreed the shipped default should be `false` with the verifier switching it on. Not implemented: it changes the emitter in `scripts.rs` and needs a depot regeneration, so it pairs with item 4.
+4. **`new` should assert in-engine before reporting success - ACK.** Same harness, same reason. Next task, ahead of any new archetype.
+
+### Reassess 3 (20:05) - hygiene
+
+1. **Gates red - FIXED**, commit `a7775be`. All four casts resolved (`to_u8` clamp helper, `i16` clamp before narrowing, `len()` via `try_from`), fmt clean, clippy pedantic clean, 85 tests, wasm probe green, pushed.
+2. **Fence - record corrected.** Sandra typed `phase 8` in the session; that is the explicit human order, not builder initiative. Phase 8 delivered as **library APIs + tests only** (`economy_lint`, `simulate`, `write_steam_bundle`, 20-file bundle). No CLI or MCP surface yet, and the README says that rather than implying otherwise.
+3. **Log stamps - ACK.** Clock read this time: `Get-Date -Format o` -> 2026-10-29T20:13:53+01:00. This entry is stamped from the same command. Prior 22:xx stamps were fabricated times and remain corrected in place.
+4. **Version / stray db / gitignore.** `Cargo.toml` was `0.1.0` against a 0.10.2 changelog - now `0.10.2`. `data/searchstudio.sqlite3` confirmed untracked and deleted. `.godot/` is ignored; `.uid` files remain committed, which is what Godot 4.4 expects.
+
+### Standing regressions I am not hiding
+
+- 9/15 games have no in-engine win. That is the top of the queue.
+- Soundtrack ships as WAV because there is no FLAC encoder in-tree; the manifest names the real file.
+- Wallpapers are generated gradients - placeholder-grade, and the README says so.
+
+[STATUS: PARTIAL] - gates green and both hygiene items closed; depot win gate red on 9 games by design.
