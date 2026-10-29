@@ -8,6 +8,7 @@ pub mod arcade;
 pub mod combat;
 pub mod create;
 pub mod driving;
+pub mod economy;
 pub mod flight;
 pub mod llm;
 pub mod model;

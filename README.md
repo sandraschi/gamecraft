@@ -1,23 +1,109 @@
 # GameCraft
 
-Pure-Rust spatial compiler, scene verification engine, and MCP server for Godot 4.x.
+Pure-Rust spatial compiler, scene verification engine, and MCP server for Godot 4.x —
+plus a 15-game generated depot and a desktop viewer that renders it.
 
-- **L1 `gamecraft-core`**: node graph, `glam` transform hierarchy, AABB aggregation,
-  collision matrix, signal registry. WASM-safe (no `wgpu`/`egui`/godot deps).
-- **L1 `gamecraft-commands`**: undoable `Command` trait (`execute`/`undo`/`serialize_json`).
-- **L1 `gamecraft-godot`**: deterministic `nom` parser for Godot 4 `.tscn`/`.tres` text
-  plus deterministic UID hashing from the relative scene path.
-- **L2 `gamecraft-mcp`**: stdio MCP server (`scene_lint`, `spatial_query`).
-- **L3 `gamecraft-cli`**: `lint` / `query` / `uid` / `mcp` subcommands.
-- **L3 `gamecraft-desktop`**: `egui`/`wgpu` shell placeholder (viewport lands in Phase 4).
+Games are **compiled from a `GameSpec`**, not hand-written in GDScript. The spec is
+small, validated, and deterministic; the same spec always produces byte-identical
+scenes, which is what makes the depot gate possible.
+
+## Crates
+
+| Crate | Layer | Role |
+|---|---|---|
+| `gamecraft-core` | L1 | Node graph, `glam` transform hierarchy, AABB aggregation, collision matrix, signal registry. **No `wgpu`/`egui`/godot deps; compiles to `wasm32-unknown-unknown`.** |
+| `gamecraft-commands` | L1 | Undoable `Command` trait and stack (`AddNode`, `ReparentNode`, `SetProperty`, `SetTransform`). |
+| `gamecraft-godot` | L1 | Deterministic `nom` parser **and serializer** for Godot 4 `.tscn`/`.tres`, deterministic UID hashing, and the scene lint rules. |
+| `gamecraft-sim` | L1 | Deterministic gameplay sims: kinematic stepper, BFS maze and crate-push solvers, mirrored Rust trace replays. |
+| `gamecraft-forge` | L1 | Depot forge: game builders, `GameSpec` validation, the local/cloud LLM front end, software rasterizer for `thumb.png`/`play.gif`, and the Phase 8 economy/Steam asset generators. |
+| `gamecraft-mcp` | L2 | Hand-rolled MCP `2024-11-05` stdio server: `scene_lint`, `spatial_query`, `export_scene`, `scene_inspect`. |
+| `gamecraft-cli` | L3 | `clap` CLI: `lint`, `query`, `uid`, `forge`, `mcp`. |
+| `gamecraft-desktop` | L3 | `egui`/`wgpu` viewer: depot browser with Start Game, shaded mesh viewport with scene lighting, scene tree with lint badges, inspector, trace scrubber, command palette with undo/redo. |
 
 ## Quickstart
 
 ```powershell
 $env:Path = "$env:USERPROFILE\.cargo\bin;$env:Path"
+
+# gates
+cargo fmt --all -- --check
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace
-cargo run -p gamecraft-cli -- lint --scene apps/gamecraft-cli/sample.tscn
+cargo check -p gamecraft-core --target wasm32-unknown-unknown
+
+# rebuild the whole depot (15 games) and boot-check each one
+cargo run -p gamecraft-cli -- forge --all
+just godot-import          # Godot 4.4 needs --editor --quit-after; --headless --import is broken
+
+# viewer
+cargo run -p gamecraft-desktop
+
+# MCP over stdio
+cargo run -p gamecraft-mcp
 ```
 
-See `AGENTS.md` for gates and `CHANGELOG.md` for history.
+## Depot
+
+`depot/games/<slug>/` holds 15 standalone Godot 4.4 projects (13 forged +
+`night-forest` and `snowy-mountain-pass` generated from specs). Each folder carries
+`project.godot`, `main.tscn`, `scripts/`, `lint.json`, `trace.json`, `commands.jsonl`,
+`thumb.png`, `play.gif`, `README.md`. The two spec-generated entries also carry
+`spec.json`, the input they were compiled from.
+
+Three gates per game, enforced by the forge:
+
+1. `scene_lint` reports 0 findings (collision shapes, signal targets, resource ids, camera).
+2. The Rust trace replay reaches the goal within 600 frames, using the same constants the GDScript exports.
+3. `godot --headless --path depot/games/<slug> --quit-after 240` prints no ERROR/WARNING.
+
+Plus a byte-identical re-export: the forge builds each game twice and refuses a
+non-identical scene. **Never hand-edit `depot/`** — regenerate it.
+
+## Making a new game
+
+The model writes a `GameSpec`, never GDScript. Rust validates and compiles it, so a
+hallucinating model can produce a rejected spec but cannot produce a broken scene.
+
+```powershell
+cargo run -p gamecraft-cli -- new --prompt "a snowy mountain pass at dusk" --provider local
+```
+
+Provider notes, measured on this machine (see `docs/NEW_GAME.md`):
+
+| Provider | Status |
+|---|---|
+| Ollama `gemma4:12b` (via `--provider local`) | works; needs `format: "json"`, `think: false`, `num_predict: 2500` |
+| Ollama `qwen3.8:27b` | **crashes Ollama** (`wsarecv` reset, 0 bytes in 420 s) — do not use |
+| OpenAI-compatible | wired (`max_tokens` + `response_format: json_object`); only exercised against a stub, no live key present |
+
+## Monetisation (Phase 8)
+
+`gamecraft-forge::economy` models monetisation as a deterministic state machine and
+synthesises the store asset bundle. Both are library APIs today; exposing them as CLI
+subcommands and MCP tools is the next step, not a claim of this release.
+
+- `economy_lint(&EconomySpec) -> Vec<Finding>` — flags `ERR_FAUCET_DOMINANT` (faucet ≥
+  sink means nothing is scarce), `ERR_NO_SCARCITY` / `ERR_SCARCITY_TOO_LATE` (target is
+  day 4), `ERR_CURRENCY_NOT_DECOUPLED`, `ERR_PITY_INVERTED`, `ERR_PITY_TOO_LATE`
+  (hard pity past 90 pulls), `ERR_NO_ANCHOR` (no $0.99 starter).
+- `simulate(&EconomySpec, seed)` — seeded xorshift, day-by-day balances, pity-ramped
+  pulls, longest gap between top-rarity hits. Reproducible: same seed, same numbers.
+- `write_steam_bundle(slug, title, out)` — 20 files: 5 trading cards, 5 emoticons,
+  3 profile backgrounds, 3 4K wallpapers, badge definition, Supporter Edition
+  manifest, cloud-save JSON Schema, and a soundtrack.
+
+**Honest scope note:** the soundtrack is `soundtrack.wav` (mono PCM, generated in
+process). Real FLAC needs an encoder this crate does not carry, so the manifest names
+the file that exists instead of promising one it does not.
+
+Wallpapers are 3840×2160 and generated, not painted — they are placeholder-grade.
+"Byte-complete" here means every file the store page references exists and is
+well-formed, not that the art is good.
+
+## Where to look
+
+- `AGENTS.md` — repo layout, hard gates, rules.
+- `CHANGELOG.md` — history, including the two serializer bugs found and fixed.
+- `docs/NEW_GAME.md` — spec format, providers, measured model limits.
+- `docs/MCP_CLIENTS.md` — wiring the MCP server into a client.
+- `KIBITZ.md` / `KIBITZ_BACKTALK.md` — the review dialogue, kept as an audit trail.

@@ -58,7 +58,7 @@ smoke-godot:
 build-release:
     $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo build --release --workspace
 
-# Regenerate the 12-game depot (deterministic: same bytes every run)
+# Regenerate the 15-game depot (deterministic: same bytes every run)
 forge:
     $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo run -p gamecraft-cli -- forge --all --out .
 
@@ -68,7 +68,7 @@ depot-lint:
     $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo run -p gamecraft-cli -- lint --scene depot/games/breakout/main.tscn
     $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo run -p gamecraft-cli -- lint --scene depot/games/tower-place/main.tscn
 
-# Gate: all 12 depot projects must boot in Godot with zero ERROR/WARNING lines
+# Gate: all 15 depot projects must boot in Godot with zero ERROR/WARNING lines
 depot-godot:
     pwsh -NoProfile -Command "$g=(Get-Command godot).Source; Get-ChildItem depot/games | ForEach-Object { $o = & $g --headless --path $_.FullName --quit-after 240 2>&1 | Out-String; $bad = ($o -split \"`n\" | Where-Object { $_ -match 'ERROR|WARNING|Parse Error' }); if ($bad) { Write-Host \"$($_.Name): $bad\" } else { Write-Host \"$($_.Name): clean\" } }"
 
