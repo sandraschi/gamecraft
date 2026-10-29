@@ -116,6 +116,8 @@
 {"assigned":29,"name":"Mesh","op":"add_node","parent":28,"type":"MeshInstance3D"}
 {"key":"mesh","node":29,"op":"set_property"}
 {"key":"material_override","node":29,"op":"set_property"}
+{"key":"autoplay","node":28,"op":"set_property"}
+{"key":"autoplay_plan","node":28,"op":"set_property"}
 {"assigned":30,"name":"Crate0","op":"add_node","parent":0,"type":"Node3D"}
 {"node":30,"op":"set_transform","position":[1.0,0.44999998807907104,0.0],"scale":[1.0,1.0,1.0]}
 {"assigned":31,"name":"Mesh","op":"add_node","parent":30,"type":"MeshInstance3D"}

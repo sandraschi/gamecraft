@@ -4,8 +4,11 @@ extends CharacterBody3D
 @export var mode: int = 0 # 0 pong (keep x side), 1 breakout (force -z)
 var cool: int = 0
 var dir: Vector3 = Vector3(1, 0, 0.3).normalized()
+var sweep: float = 0.45
 
 func _ready() -> void:
+    if mode == 1:
+        dir = Vector3(0.3, 0.0, -1.0).normalized()
     velocity = dir * speed
 
 func serve(side: float) -> void:
@@ -27,6 +30,18 @@ func _physics_process(delta: float) -> void:
         var normal := hit.get_normal()
         velocity = velocity.bounce(normal)
         var collider := hit.get_collider()
+        if collider is Node3D and str((collider as Node3D).name).begins_with("Brick"):
+            var brick := collider as Node3D
+            brick.visible = false
+            brick.process_mode = Node.PROCESS_MODE_DISABLED
+            var brick_shape := brick.get_node_or_null("Shape")
+            if brick_shape is CollisionShape3D:
+                (brick_shape as CollisionShape3D).disabled = true
+            var host := get_tree().current_scene
+            if host != null and host.has_method("on_brick_down"):
+                host.on_brick_down()
+            sweep = -sweep
+            velocity = Vector3(velocity.x + sweep, 0.0, velocity.z).normalized() * speed
         if cool == 0 and collider is Node3D and str((collider as Node3D).name).begins_with("Paddle"):
             speed += 0.4
             cool = 6

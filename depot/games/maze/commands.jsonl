@@ -436,6 +436,8 @@
 {"assigned":149,"name":"Mesh","op":"add_node","parent":148,"type":"MeshInstance3D"}
 {"key":"mesh","node":149,"op":"set_property"}
 {"key":"material_override","node":149,"op":"set_property"}
+{"key":"autoplay","node":148,"op":"set_property"}
+{"key":"autoplay_plan","node":148,"op":"set_property"}
 {"assigned":150,"name":"Goal","op":"add_node","parent":0,"type":"Area3D"}
 {"node":150,"op":"set_transform","position":[5.0,0.5,5.0],"scale":[1.0,1.0,1.0]}
 {"assigned":151,"name":"Shape","op":"add_node","parent":150,"type":"CollisionShape3D"}

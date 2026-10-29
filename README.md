@@ -60,11 +60,21 @@ Plus a byte-identical re-export: the forge builds each game twice and refuses a
 non-identical scene. **Never hand-edit `depot/`** — regenerate it.
 
 **Win verification is a separate gate, and it is currently red.** `just verify-depot`
-replays each game in Godot and requires the `GameCraft: goal reached` line. Today
-**6 of 15** print it (driving, flight, night-forest, platformer, runner,
-snowy-mountain-pass). The other nine boot with zero errors and are proven only by the
-Rust trace replay — they have no in-engine driver yet, so they are *unproven*, not
-broken. `just depot-godot` (boot clean) passing does not mean a game is winnable.
+replays each game in Godot and requires the win line its runtime prints (`goal
+reached`, `puzzle solved`, `door opened, win`, or `all hostiles down`). Today
+**11 of 15** win: driving, flight, night-forest, platformer, runner,
+snowy-mountain-pass, maze, pong, sokoban, chessboard-move, talk-inventory.
+
+The four that do not are *unproven, not broken* — all boot with zero errors:
+
+| Game | What is missing |
+|---|---|
+| `breakout` | The paddle tracks the ball, so every return is dead straight; the ball clears its own column and then loops. Bricks are destructible now, but 20 is unreachable. |
+| `flappy` | Closed-loop altitude hold added; the bird still dies on pipes before x=55. |
+| `topdown-shooter` | Bullet pool fixed (it was empty — the runtime filtered on invisibility), enemies die, but it stalls at 5 of 9. |
+| `tower-place` | No placement policy; enemies never enter tower range. |
+
+`just depot-godot` (boot clean) passing does not mean a game is winnable.
 
 ## Making a new game
 

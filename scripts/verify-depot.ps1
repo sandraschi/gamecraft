@@ -1,19 +1,25 @@
 # Depot win gate.
 #
 # Booting is not winning. `just depot-godot` proves a scene loads with no engine
-# errors; this proves each game can actually be completed. Nine of the fifteen
-# games boot clean and have never printed the win marker, so this gate is RED
-# today by design: it is reporting the real state, not a new regression.
+# errors; this proves each game can actually be completed.
 #
-# Exits 1 if any game fails to print "goal reached" within its frame budget.
+# Win markers are per-archetype, because each runtime handler prints its own:
+#   goal areas      -> "GameCraft: goal reached"
+#   grid puzzles    -> "GameCraft: puzzle solved"
+#   doors           -> "GameCraft: door opened, win"
+#   combat          -> "GameCraft: all hostiles down, win"
+# Matching only "goal reached" reported winnable games as unproven.
+#
+# Exits 1 if any game produces no win marker within its frame budget.
 
 $godot = (Get-Command godot).Source
 $budget = 3600
 $fail = 0
+$pattern = 'goal reached|puzzle solved|door opened, win|all hostiles down'
 
 Get-ChildItem depot/games | ForEach-Object {
     $out = & $godot --headless --path $_.FullName --fixed-fps 60 --quit-after $budget 2>&1 | Out-String
-    if ($out -match 'goal reached') {
+    if ($out -match $pattern) {
         Write-Host ("{0}: WIN" -f $_.Name)
     }
     else {

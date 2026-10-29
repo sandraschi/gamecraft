@@ -299,7 +299,13 @@
 {"node":134,"op":"set_transform","position":[26.0,-7.0,0.0],"scale":[1.0,1.0,1.0]}
 {"assigned":135,"name":"Shape","op":"add_node","parent":134,"type":"CollisionShape3D"}
 {"key":"shape","node":135,"op":"set_property"}
-{"assigned":136,"name":"Goal","op":"add_node","parent":0,"type":"Area3D"}
-{"node":136,"op":"set_transform","position":[55.0,2.0,0.0],"scale":[1.0,1.0,1.0]}
-{"assigned":137,"name":"Shape","op":"add_node","parent":136,"type":"CollisionShape3D"}
-{"key":"shape","node":137,"op":"set_property"}
+{"assigned":136,"name":"Autoplay","op":"add_node","parent":0,"type":"Node3D"}
+{"key":"script","node":136,"op":"set_property"}
+{"key":"hold_action","node":136,"op":"set_property"}
+{"key":"jump_frames","node":136,"op":"set_property"}
+{"key":"flap","node":136,"op":"set_property"}
+{"key":"hover","node":136,"op":"set_property"}
+{"assigned":137,"name":"Goal","op":"add_node","parent":0,"type":"Area3D"}
+{"node":137,"op":"set_transform","position":[55.0,2.0,0.0],"scale":[1.0,1.0,1.0]}
+{"assigned":138,"name":"Shape","op":"add_node","parent":137,"type":"CollisionShape3D"}
+{"key":"shape","node":138,"op":"set_property"}

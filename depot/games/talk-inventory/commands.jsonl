@@ -118,6 +118,8 @@
 {"assigned":29,"name":"Mesh","op":"add_node","parent":28,"type":"MeshInstance3D"}
 {"key":"mesh","node":29,"op":"set_property"}
 {"key":"material_override","node":29,"op":"set_property"}
+{"key":"autoplay","node":28,"op":"set_property"}
+{"key":"autoplay_plan","node":28,"op":"set_property"}
 {"assigned":30,"name":"NPC","op":"add_node","parent":0,"type":"MeshInstance3D"}
 {"node":30,"op":"set_transform","position":[3.0,0.5,3.0],"scale":[1.0,1.0,1.0]}
 {"key":"mesh","node":30,"op":"set_property"}

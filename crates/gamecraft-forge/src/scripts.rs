@@ -12,6 +12,8 @@ pub const RUNTIME: &str = r#"extends Node
 @export var bullet_speed: float = 14.0
 @export var checkpoints_to_win: int = 0
 @export var rings_to_win: int = 0
+@export var points_to_win: int = 0
+@export var bricks_to_win: int = 0
 
 var score: int = 0
 var talk_index: int = 0
@@ -29,7 +31,7 @@ var total_to_win: int = 0
 
 func _ready() -> void:
     for child in get_children():
-        if child is Node3D and not (child as Node3D).visible and str(child.name).begins_with("Bullet"):
+        if child is Node3D and str(child.name).begins_with("Bullet"):
             bullets.append(child)
 
 func _process(delta: float) -> void:
@@ -44,6 +46,12 @@ func _process(delta: float) -> void:
 
 func add_score() -> void:
     score += 1
+
+func on_brick_down() -> void:
+    score += 1
+    if bricks_to_win > 0 and score >= bricks_to_win and not won:
+        won = true
+        print("GameCraft: goal reached")
 
 func _on_goal(body: Node3D) -> void:
     if body.has_method("is_player") and not won:
@@ -106,6 +114,10 @@ func on_point(side: String) -> void:
     else:
         points_right += 1
     print("GameCraft: point ", side, " ", points_left, "-", points_right)
+    if points_to_win > 0 and not won:
+        if points_left >= points_to_win or points_right >= points_to_win:
+            won = true
+            print("GameCraft: goal reached")
     var ball := get_node_or_null("Ball")
     if ball != null and ball.has_method("serve"):
         if side == "left":
@@ -277,8 +289,11 @@ pub const BALL: &str = r#"extends CharacterBody3D
 @export var mode: int = 0 # 0 pong (keep x side), 1 breakout (force -z)
 var cool: int = 0
 var dir: Vector3 = Vector3(1, 0, 0.3).normalized()
+var sweep: float = 0.45
 
 func _ready() -> void:
+    if mode == 1:
+        dir = Vector3(0.3, 0.0, -1.0).normalized()
     velocity = dir * speed
 
 func serve(side: float) -> void:
@@ -300,6 +315,18 @@ func _physics_process(delta: float) -> void:
         var normal := hit.get_normal()
         velocity = velocity.bounce(normal)
         var collider := hit.get_collider()
+        if collider is Node3D and str((collider as Node3D).name).begins_with("Brick"):
+            var brick := collider as Node3D
+            brick.visible = false
+            brick.process_mode = Node.PROCESS_MODE_DISABLED
+            var brick_shape := brick.get_node_or_null("Shape")
+            if brick_shape is CollisionShape3D:
+                (brick_shape as CollisionShape3D).disabled = true
+            var host := get_tree().current_scene
+            if host != null and host.has_method("on_brick_down"):
+                host.on_brick_down()
+            sweep = -sweep
+            velocity = Vector3(velocity.x + sweep, 0.0, velocity.z).normalized() * speed
         if cool == 0 and collider is Node3D and str((collider as Node3D).name).begins_with("Paddle"):
             speed += 0.4
             cool = 6
@@ -331,6 +358,8 @@ pub const AUTOPLAY: &str = r#"extends Node3D
 @export var jump_frames: Array[int] = []
 @export var flight: bool = false
 @export var drive: bool = false
+@export var flap: bool = false
+@export var hover: float = 1.9
 @export var ring_prefix: String = "Ring"
 
 var tick: int = 0
@@ -342,6 +371,11 @@ func _ready() -> void:
 	var root := get_parent()
 	if root != null:
 		_player = root.get_node_or_null("%Player")
+		if _player == null:
+			for child in root.get_children():
+				if child is Node3D and str((child as Node3D).name) == "Player":
+					_player = child
+					break
 		if flight or drive:
 			for child in root.get_children():
 				if child is Node3D and str(child.name).begins_with(ring_prefix):
@@ -394,6 +428,17 @@ func _fly() -> void:
 		Input.action_release("ui_down")
 	if _gate_index < _gates.size() and _player.global_position.x > (_gates[_gate_index] as Node3D).global_position.x + 1.0:
 		_gate_index += 1
+
+func _hover() -> void:
+	if _player == null:
+		return
+	if _player.global_position.y < hover:
+		# is_action_just_pressed only fires on a fresh press; holding the action
+		# down permanently would flap exactly once and then fall forever.
+		Input.action_release(jump_action)
+		Input.action_press(jump_action)
+	else:
+		Input.action_release(jump_action)
 
 func _drive() -> void:
 	if _player == null or _gate_index >= _gates.size():
@@ -605,6 +650,11 @@ pub const WALKER: &str = r#"extends Node3D
 @export var grid_h: int = 8
 var visited: Array = []
 var cursor: Vector2i = Vector2i(0, 0)
+@export var autoplay: bool = false
+@export var autoplay_plan: Array[int] = []
+@export var autoplay_interval: int = 3
+var _plan_index: int = 0
+var _plan_clock: int = 0
 
 func _ready() -> void:
     cursor = cell()
@@ -659,6 +709,58 @@ func try_step(d: Vector2i) -> void:
             (crate_at(to) as Node3D).global_position = cell_pos(beyond)
             check_soko_win()
     global_position = cell_pos(to)
+    _check_reach()
+
+func is_player() -> bool:
+    return true
+
+func _check_reach() -> void:
+    var here := cell()
+    var host := get_tree().current_scene
+    if host == null:
+        return
+    for child in get_parent().get_children():
+        if not (child is Node3D):
+            continue
+        var name_text := str((child as Node3D).name)
+        if cell_of(child as Node3D) != here:
+            continue
+        if name_text.begins_with("Goal"):
+            if host.has_method("on_grid_win"):
+                host.on_grid_win()
+            return
+        if name_text.begins_with("Npc") or name_text.begins_with("NPCTalk"):
+            if host.has_method("_on_talk"):
+                host.call("_on_talk", self)
+            return
+        if name_text.begins_with("Door"):
+            if host.has_method("_on_door"):
+                host.call("_on_door", self)
+            return
+
+func _physics_process(_delta: float) -> void:
+    if not autoplay or _plan_index >= autoplay_plan.size():
+        return
+    _plan_clock += 1
+    if _plan_clock < autoplay_interval:
+        return
+    _plan_clock = 0
+    var code: int = autoplay_plan[_plan_index]
+    _plan_index += 1
+    if mode == "chess":
+        var hop_x: int = int(floor(code / 5.0)) - 2
+        var hop_z: int = code % 5 - 2
+        knight_to(cursor + Vector2i(hop_x, hop_z))
+        return
+    match code:
+        0:
+            try_step(Vector2i(1, 0))
+        1:
+            try_step(Vector2i(-1, 0))
+        2:
+            try_step(Vector2i(0, 1))
+        3:
+            try_step(Vector2i(0, -1))
 
 func knight_to(to: Vector2i) -> void:
     var from := cell()

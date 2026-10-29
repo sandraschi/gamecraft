@@ -6,6 +6,11 @@ extends Node3D
 @export var grid_h: int = 8
 var visited: Array = []
 var cursor: Vector2i = Vector2i(0, 0)
+@export var autoplay: bool = false
+@export var autoplay_plan: Array[int] = []
+@export var autoplay_interval: int = 3
+var _plan_index: int = 0
+var _plan_clock: int = 0
 
 func _ready() -> void:
     cursor = cell()
@@ -60,6 +65,58 @@ func try_step(d: Vector2i) -> void:
             (crate_at(to) as Node3D).global_position = cell_pos(beyond)
             check_soko_win()
     global_position = cell_pos(to)
+    _check_reach()
+
+func is_player() -> bool:
+    return true
+
+func _check_reach() -> void:
+    var here := cell()
+    var host := get_tree().current_scene
+    if host == null:
+        return
+    for child in get_parent().get_children():
+        if not (child is Node3D):
+            continue
+        var name_text := str((child as Node3D).name)
+        if cell_of(child as Node3D) != here:
+            continue
+        if name_text.begins_with("Goal"):
+            if host.has_method("on_grid_win"):
+                host.on_grid_win()
+            return
+        if name_text.begins_with("Npc") or name_text.begins_with("NPCTalk"):
+            if host.has_method("_on_talk"):
+                host.call("_on_talk", self)
+            return
+        if name_text.begins_with("Door"):
+            if host.has_method("_on_door"):
+                host.call("_on_door", self)
+            return
+
+func _physics_process(_delta: float) -> void:
+    if not autoplay or _plan_index >= autoplay_plan.size():
+        return
+    _plan_clock += 1
+    if _plan_clock < autoplay_interval:
+        return
+    _plan_clock = 0
+    var code: int = autoplay_plan[_plan_index]
+    _plan_index += 1
+    if mode == "chess":
+        var hop_x: int = int(floor(code / 5.0)) - 2
+        var hop_z: int = code % 5 - 2
+        knight_to(cursor + Vector2i(hop_x, hop_z))
+        return
+    match code:
+        0:
+            try_step(Vector2i(1, 0))
+        1:
+            try_step(Vector2i(-1, 0))
+        2:
+            try_step(Vector2i(0, 1))
+        3:
+            try_step(Vector2i(0, -1))
 
 func knight_to(to: Vector2i) -> void:
     var from := cell()

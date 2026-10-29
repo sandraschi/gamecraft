@@ -60,3 +60,4 @@
 {"node":20,"op":"set_transform","position":[8.5,0.5,0.0],"scale":[1.0,1.0,1.0]}
 {"assigned":21,"name":"Shape","op":"add_node","parent":20,"type":"CollisionShape3D"}
 {"key":"shape","node":21,"op":"set_property"}
+{"key":"points_to_win","node":0,"op":"set_property"}

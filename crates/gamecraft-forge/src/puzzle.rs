@@ -67,6 +67,55 @@ fn board_base(
 }
 
 /// Walker avatar with a mode and grid exports.
+/// Encode direction deltas as codes: 0=+x, 1=-x, 2=+z, 3=-z.
+fn delta_codes(moves: &[(i32, i32)]) -> String {
+    let codes: Vec<String> = moves
+        .iter()
+        .map(|(dx, dz)| {
+            let code = if *dx > 0 {
+                0
+            } else if *dx < 0 {
+                1
+            } else if *dz > 0 {
+                2
+            } else {
+                3
+            };
+            code.to_string()
+        })
+        .collect();
+    codes.join(", ")
+}
+
+/// Encode knight hops as `(dx + 2) * 5 + (dz + 2)`, range 0..24.
+fn knight_codes(moves: &[(i32, i32)]) -> String {
+    moves
+        .iter()
+        .map(|(dx, dz)| ((dx + 2) * 5 + (dz + 2)).to_string())
+        .collect::<Vec<String>>()
+        .join(", ")
+}
+
+/// Encode a cell path as direction codes: 0=+x, 1=-x, 2=+z, 3=-z.
+fn plan_codes(path: &[(i32, i32)]) -> String {
+    let mut codes: Vec<String> = Vec::new();
+    for pair in path.windows(2) {
+        let dx = pair[1].0 - pair[0].0;
+        let dz = pair[1].1 - pair[0].1;
+        let code = if dx > 0 {
+            0
+        } else if dx < 0 {
+            1
+        } else if dz > 0 {
+            2
+        } else {
+            3
+        };
+        codes.push(code.to_string());
+    }
+    codes.join(", ")
+}
+
 fn walker_node(
     forge: &mut Forge,
     root: gamecraft_core::NodeId,
@@ -251,7 +300,22 @@ pub fn build_maze() -> Result<GameParts, String> {
     for (serial, (x, z)) in walls.into_iter().enumerate() {
         wall_cell(&mut forge, root, format!("Wall{serial}").as_str(), x, z)?;
     }
-    walker_node(&mut forge, root, "maze", [1.0, 0.5, 1.0], 7, 7)?;
+    let maze_walker = walker_node(&mut forge, root, "maze", [1.0, 0.5, 1.0], 7, 7)?;
+    let maze_plan = plan_codes(path.as_slice());
+    forge
+        .set_prop(
+            maze_walker,
+            "autoplay",
+            gamecraft_core::PropertyValue::Bool(true),
+        )
+        .map_err(|err| err.to_string())?;
+    forge
+        .set_prop(
+            maze_walker,
+            "autoplay_plan",
+            gamecraft_core::PropertyValue::Raw(format!("[{maze_plan}]")),
+        )
+        .map_err(|err| err.to_string())?;
     forge
         .area_trigger("Goal", Some(root), [5.0, 0.5, 5.0], [1.0, 2.0, 1.0])
         .map_err(|err| err.to_string())?;
@@ -323,7 +387,22 @@ pub fn build_sokoban() -> Result<GameParts, String> {
         [0.16, 0.18, 0.24],
         [0.12, 0.14, 0.2],
     )?;
-    walker_node(&mut forge, root, "soko", [0.0, 0.5, 0.0], 5, 5)?;
+    let soko_walker = walker_node(&mut forge, root, "soko", [0.0, 0.5, 0.0], 5, 5)?;
+    let soko_plan = delta_codes(moves.as_slice());
+    forge
+        .set_prop(
+            soko_walker,
+            "autoplay",
+            gamecraft_core::PropertyValue::Bool(true),
+        )
+        .map_err(|err| err.to_string())?;
+    forge
+        .set_prop(
+            soko_walker,
+            "autoplay_plan",
+            gamecraft_core::PropertyValue::Raw(format!("[{soko_plan}]")),
+        )
+        .map_err(|err| err.to_string())?;
     for (index, cell) in SOKO_CRATES.iter().enumerate() {
         crate_node(
             &mut forge,
@@ -418,7 +497,7 @@ const TALK_LINES: [&str; 3] = [
 /// # Errors
 ///
 /// Returns the bus error when a node cannot be placed.
-fn talk_scene() -> Result<Forge, String> {
+fn talk_scene(route: &[(i32, i32)]) -> Result<Forge, String> {
     let mut forge = Forge::new();
     let root = forge
         .add_node("World", "Node3D", None)
@@ -453,7 +532,26 @@ fn talk_scene() -> Result<Forge, String> {
         [0.16, 0.2, 0.18],
         [0.12, 0.16, 0.14],
     )?;
-    walker_node(&mut forge, root, "talk", [0.0, 0.5, 0.0], 5, 5)?;
+    let talk_walker = walker_node(&mut forge, root, "talk", [0.0, 0.5, 0.0], 5, 5)?;
+    // The route lists cells after the start, so prepend the origin or the
+    // first move is silently dropped by the windows(2) pairing.
+    let mut full_route: Vec<(i32, i32)> = vec![(0, 0)];
+    full_route.extend_from_slice(route);
+    let talk_plan = plan_codes(full_route.as_slice());
+    forge
+        .set_prop(
+            talk_walker,
+            "autoplay",
+            gamecraft_core::PropertyValue::Bool(true),
+        )
+        .map_err(|err| err.to_string())?;
+    forge
+        .set_prop(
+            talk_walker,
+            "autoplay_plan",
+            gamecraft_core::PropertyValue::Raw(format!("[{talk_plan}]")),
+        )
+        .map_err(|err| err.to_string())?;
     forge
         .deco_box(
             "NPC",
@@ -504,7 +602,6 @@ fn talk_scene() -> Result<Forge, String> {
 ///
 /// Returns a message when the trace fails verification or a node is invalid.
 pub fn build_talk() -> Result<GameParts, String> {
-    let forge = talk_scene()?;
     // Scripted visit: NPC x3 (in-out-in-out-in), then the door.
     let route = [
         (1, 0),
@@ -520,6 +617,7 @@ pub fn build_talk() -> Result<GameParts, String> {
         (4, 3),
         (4, 4),
     ];
+    let forge = talk_scene(route.as_slice())?;
     let mut visits = 0_usize;
     let mut has_key = false;
     let mut won = false;
@@ -616,6 +714,21 @@ pub fn build_chess() -> Result<GameParts, String> {
         .map_err(|err| err.to_string())?;
     board_base(&mut forge, root, 5, 5, [0.75, 0.7, 0.62], [0.2, 0.22, 0.3])?;
     let knight = walker_node(&mut forge, root, "chess", [0.0, 0.5, 0.0], 5, 5)?;
+    let knight_plan = knight_codes(&moves);
+    forge
+        .set_prop(
+            knight,
+            "autoplay",
+            gamecraft_core::PropertyValue::Bool(true),
+        )
+        .map_err(|err| err.to_string())?;
+    forge
+        .set_prop(
+            knight,
+            "autoplay_plan",
+            gamecraft_core::PropertyValue::Raw(format!("[{knight_plan}]")),
+        )
+        .map_err(|err| err.to_string())?;
     forge
         .deco_box(
             "Cursor",

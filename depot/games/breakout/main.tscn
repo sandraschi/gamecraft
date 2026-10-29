@@ -269,6 +269,7 @@ size = Vector3(1.4, 0.8, 0.8)
 [node name="World" type="Node3D"]
 script = ExtResource("1_runtime")
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+bricks_to_win = 20
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
@@ -298,7 +299,7 @@ shape = SubResource("paddle_shape2")
 [node name="Ball" type="CharacterBody3D" parent="."]
 script = ExtResource("2_ball")
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 0.0)
-mode = 0
+mode = 1
 speed = 16.0
 
 [node name="Mesh" type="MeshInstance3D" parent="Ball"]

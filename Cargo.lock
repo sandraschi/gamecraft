@@ -1580,7 +1580,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-cli"
-version = "0.1.0"
+version = "0.10.2"
 dependencies = [
  "clap",
  "gamecraft-forge",
@@ -1591,7 +1591,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-commands"
-version = "0.1.0"
+version = "0.10.2"
 dependencies = [
  "gamecraft-core",
  "glam",
@@ -1602,7 +1602,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-core"
-version = "0.1.0"
+version = "0.10.2"
 dependencies = [
  "glam",
  "serde",
@@ -1611,7 +1611,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-desktop"
-version = "0.1.0"
+version = "0.10.2"
 dependencies = [
  "eframe",
  "egui",
@@ -1627,7 +1627,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-forge"
-version = "0.1.0"
+version = "0.10.2"
 dependencies = [
  "gamecraft-commands",
  "gamecraft-core",
@@ -1642,7 +1642,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-godot"
-version = "0.1.0"
+version = "0.10.2"
 dependencies = [
  "gamecraft-core",
  "glam",
@@ -1653,7 +1653,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-mcp"
-version = "0.1.0"
+version = "0.10.2"
 dependencies = [
  "gamecraft-commands",
  "gamecraft-core",
@@ -1665,7 +1665,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-sim"
-version = "0.1.0"
+version = "0.10.2"
 
 [[package]]
 name = "gethostname"

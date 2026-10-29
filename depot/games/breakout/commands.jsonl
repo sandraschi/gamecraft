@@ -6,6 +6,7 @@
 {"node":2,"op":"set_transform","position":[0.0,18.0,0.009999999776482582],"scale":[1.0,1.0,1.0]}
 {"key":"current","node":2,"op":"set_property"}
 {"key":"fov","node":2,"op":"set_property"}
+{"key":"bricks_to_win","node":0,"op":"set_property"}
 {"assigned":3,"name":"Paddle","op":"add_node","parent":0,"type":"StaticBody3D"}
 {"node":3,"op":"set_transform","position":[0.0,0.5,4.5],"scale":[1.0,1.0,1.0]}
 {"key":"script","node":3,"op":"set_property"}
@@ -27,6 +28,7 @@
 {"key":"material_override","node":7,"op":"set_property"}
 {"assigned":8,"name":"Shape","op":"add_node","parent":6,"type":"CollisionShape3D"}
 {"key":"shape","node":8,"op":"set_property"}
+{"key":"mode","node":6,"op":"set_property"}
 {"assigned":9,"name":"WallW","op":"add_node","parent":0,"type":"StaticBody3D"}
 {"node":9,"op":"set_transform","position":[-8.25,0.5,0.0],"scale":[1.0,1.0,1.0]}
 {"assigned":10,"name":"Mesh","op":"add_node","parent":9,"type":"MeshInstance3D"}

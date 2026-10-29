@@ -460,6 +460,24 @@ fn flappy_scene(script: &[TraceInput], positions: &[(f32, f32)]) -> Result<Forge
         }
     }
     kill_plane(&mut forge, root, 26.0, 70.0)?;
+    forge.ext_resource("Script", "res://scripts/autoplay.gd", "5_autoplay");
+    let flappy_auto = forge
+        .autoplay(root, "5_autoplay", "", &[])
+        .map_err(|err| err.to_string())?;
+    forge
+        .set_prop(
+            flappy_auto,
+            "flap",
+            gamecraft_core::PropertyValue::Bool(true),
+        )
+        .map_err(|err| err.to_string())?;
+    forge
+        .set_prop(
+            flappy_auto,
+            "hover",
+            gamecraft_core::PropertyValue::Float(0.5),
+        )
+        .map_err(|err| err.to_string())?;
     forge
         .area_trigger("Goal", Some(root), [55.0, 2.0, 0.0], [1.5, 12.0, 2.0])
         .map_err(|err| err.to_string())?;
@@ -537,6 +555,7 @@ pub fn build_flappy() -> Result<GameParts, String> {
             ("gamecraft_runtime.gd", crate::scripts::RUNTIME),
             ("player_controller.gd", crate::scripts::PLAYER),
             ("camera_follow.gd", crate::scripts::CAMERA_FOLLOW),
+            ("autoplay.gd", crate::scripts::AUTOPLAY),
         ],
         trace_json: format!(
             "{{\"game\":\"flappy\",\"win\":true,\"frames\":{total},\"flaps\":{flaps},\"note\":\"bang-bang policy, hints replay it headless\"}}"
@@ -815,6 +834,9 @@ fn pong_scene() -> Result<Forge, String> {
     }
     forge.connect("body_entered", "GoalL", ".", "_on_point_right");
     forge.connect("body_entered", "GoalR", ".", "_on_point_left");
+    forge
+        .set_prop(root, "points_to_win", gamecraft_core::PropertyValue::Int(2))
+        .map_err(|err| err.to_string())?;
     Ok(forge)
 }
 
@@ -1193,6 +1215,13 @@ fn breakout_scene() -> Result<Forge, String> {
     forge.ext_resource("Script", "res://scripts/ball.gd", "2_ball");
     forge.ext_resource("Script", "res://scripts/tracker.gd", "3_track");
     top_camera(&mut forge, root, 0.0, 0.0)?;
+    forge
+        .set_prop(
+            root,
+            "bricks_to_win",
+            gamecraft_core::PropertyValue::Int(20),
+        )
+        .map_err(|err| err.to_string())?;
     let paddle = forge
         .place("Paddle", "StaticBody3D", Some(root), [0.0, 0.5, 4.5])
         .map_err(|err| err.to_string())?;
@@ -1221,7 +1250,10 @@ fn breakout_scene() -> Result<Forge, String> {
     forge
         .shape_child("Shape", paddle, pshape.as_str())
         .map_err(|err| err.to_string())?;
-    ball_node(&mut forge, root, 16.0)?;
+    let breakout_ball = ball_node(&mut forge, root, 16.0)?;
+    forge
+        .set_prop(breakout_ball, "mode", gamecraft_core::PropertyValue::Int(1))
+        .map_err(|err| err.to_string())?;
     for (name, x) in [("WallW", -8.25_f32), ("WallE", 8.25_f32)] {
         forge
             .solid_box(
