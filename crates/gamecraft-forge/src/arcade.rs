@@ -155,7 +155,7 @@ fn commands_json(forge: &Forge) -> String {
 /// # Errors
 ///
 /// Returns the bus error when a node cannot be placed.
-fn runner_scene() -> Result<Forge, String> {
+fn runner_scene(theme: &crate::create::Theme) -> Result<Forge, String> {
     let mut forge = Forge::new();
     let root = forge
         .add_node("World", "Node3D", None)
@@ -173,9 +173,9 @@ fn runner_scene() -> Result<Forge, String> {
             Some(root),
             [1.0, -0.5, 0.0],
             [14.0, 1.0, 4.0],
-            0.55,
-            0.36,
-            0.18,
+            theme.ground[0],
+            theme.ground[1],
+            theme.ground[2],
         )
         .map_err(|err| err.to_string())?;
     forge
@@ -185,9 +185,9 @@ fn runner_scene() -> Result<Forge, String> {
             Some(root),
             [17.5, -0.5, 0.0],
             [13.0, 1.0, 4.0],
-            0.55,
-            0.36,
-            0.18,
+            theme.ground[0],
+            theme.ground[1],
+            theme.ground[2],
         )
         .map_err(|err| err.to_string())?;
     forge
@@ -197,9 +197,9 @@ fn runner_scene() -> Result<Forge, String> {
             Some(root),
             [33.5, -0.5, 0.0],
             [13.0, 1.0, 4.0],
-            0.55,
-            0.36,
-            0.18,
+            theme.ground[0],
+            theme.ground[1],
+            theme.ground[2],
         )
         .map_err(|err| err.to_string())?;
     runner_player(&mut forge, root, 1, 5.5, 9.0, 22.0, [0.0, 0.6, 0.0])?;
@@ -219,6 +219,24 @@ fn runner_scene() -> Result<Forge, String> {
 ///
 /// Returns a message when the trace fails verification or a node is invalid.
 pub fn build_runner() -> Result<GameParts, String> {
+    // Keep the depot runner's original ground colour so regeneration stays stable.
+    let theme = crate::create::Theme {
+        ground: [0.55, 0.36, 0.18],
+        ..crate::create::Theme::default()
+    };
+    build_runner_with(&theme, "runner", "GameCraft Runner")
+}
+
+/// Runner with a caller-supplied theme and name.
+///
+/// # Errors
+///
+/// Returns a message when the trace fails verification or a node is invalid.
+pub fn build_runner_with(
+    theme: &crate::create::Theme,
+    slug: &str,
+    title: &str,
+) -> Result<GameParts, String> {
     let phys = Phys {
         speed: 5.5,
         jump_v: 9.0,
@@ -244,7 +262,7 @@ pub fn build_runner() -> Result<GameParts, String> {
             w: 13.0,
         },
     ];
-    let forge = runner_scene()?;
+    let forge = runner_scene(theme)?;
 
     let mut script = vec![TraceInput::None; 600];
     for frame in [76_usize, 255] {
@@ -289,12 +307,12 @@ pub fn build_runner() -> Result<GameParts, String> {
         })
         .collect::<Vec<Vec<Glyph>>>();
     Ok(GameParts {
-        slug: "runner",
-        title: "GameCraft Runner",
+        slug: Box::leak(slug.to_string().into_boxed_str()),
+        title: Box::leak(title.to_string().into_boxed_str()),
         controls: "Auto-runs. Space jumps (hint markers auto-jump headless).",
         win_text: "Reach x = 38.",
         seed: 2,
-        scene_text: export_scene(&forge, "runner")?,
+        scene_text: export_scene(&forge, slug)?,
         scripts: vec![
             ("gamecraft_runtime.gd", crate::scripts::RUNTIME),
             ("player_controller.gd", crate::scripts::PLAYER),
@@ -798,7 +816,7 @@ fn pong_serve(sim: &mut PongSim, side: f32) {
 /// # Errors
 ///
 /// Returns the bus error when a node cannot be placed.
-fn pong_scene() -> Result<Forge, String> {
+fn pong_scene(ball_speed: f32) -> Result<Forge, String> {
     let mut forge = Forge::new();
     let root = forge
         .add_node("World", "Node3D", None)
@@ -812,7 +830,7 @@ fn pong_scene() -> Result<Forge, String> {
     top_camera(&mut forge, root, 0.0, 0.0)?;
     paddle(&mut forge, root, "PaddleL", -7.5, 3.0)?;
     paddle(&mut forge, root, "PaddleR", 7.5, 6.5)?;
-    ball_node(&mut forge, root, 14.0)?;
+    ball_node(&mut forge, root, ball_speed)?;
     for (name, x) in [("WallN", -5.5_f32), ("WallS", 5.5_f32)] {
         forge
             .solid_box(
@@ -846,6 +864,15 @@ fn pong_scene() -> Result<Forge, String> {
 ///
 /// Returns a message when the trace fails verification or a node is invalid.
 pub fn build_pong() -> Result<GameParts, String> {
+    build_pong_with(14.0, "pong", "GameCraft Pong")
+}
+
+/// Pong with a caller-supplied ball speed and name.
+///
+/// # Errors
+///
+/// Returns a message when the trace fails verification or a node is invalid.
+pub fn build_pong_with(ball_speed: f32, slug: &str, title: &str) -> Result<GameParts, String> {
     let mut sim = PongSim {
         ball_x: 0.0,
         ball_z: 0.0,
@@ -855,7 +882,7 @@ pub fn build_pong() -> Result<GameParts, String> {
         right_z: 0.0,
         left_score: 0,
         right_score: 0,
-        speed: 14.0,
+        speed: ball_speed,
         cool: 0,
     };
     pong_serve(&mut sim, 1.0);
@@ -904,7 +931,7 @@ pub fn build_pong() -> Result<GameParts, String> {
         ));
     }
     let used = frames.len();
-    let forge = pong_scene()?;
+    let forge = pong_scene(ball_speed)?;
     let view = View {
         x: -10.0,
         y: -6.5,
@@ -912,12 +939,12 @@ pub fn build_pong() -> Result<GameParts, String> {
         h: 13.0,
     };
     Ok(GameParts {
-        slug: "pong",
-        title: "GameCraft Pong",
+        slug: Box::leak(slug.to_string().into_boxed_str()),
+        title: Box::leak(title.to_string().into_boxed_str()),
         controls: "Up/Down move the right paddle. First to 2.",
         win_text: "Outscore the simple AI (first to 2).",
         seed: 5,
-        scene_text: export_scene(&forge, "pong")?,
+        scene_text: export_scene(&forge, slug)?,
         scripts: vec![
             ("gamecraft_runtime.gd", crate::scripts::RUNTIME),
             ("ball.gd", crate::scripts::BALL),

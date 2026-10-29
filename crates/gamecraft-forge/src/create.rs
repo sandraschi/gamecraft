@@ -162,9 +162,9 @@ impl Default for GameSpec {
 /// Returns a human-readable reason listing every problem found.
 pub fn validate(spec: &GameSpec) -> Result<(), String> {
     let mut problems: Vec<String> = Vec::new();
-    if spec.archetype != "platformer" {
+    if spec.archetype != "platformer" && spec.archetype != "runner" && spec.archetype != "pong" {
         problems.push(format!(
-            "archetype '{}' is not supported (supported: platformer)",
+            "archetype '{}' is not supported (supported: platformer, runner, pong)",
             spec.archetype
         ));
     }
@@ -279,6 +279,16 @@ fn auto_script(level: &Level, physics: &Physics, frames: usize) -> Vec<sim::Trac
 /// would scatter a single construction sequence across helpers for no gain.
 #[allow(clippy::too_many_lines)]
 pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
+    if spec.archetype == "runner" {
+        return crate::arcade::build_runner_with(&spec.theme, &spec.slug, &spec.title);
+    }
+    if spec.archetype == "pong" {
+        let ball_speed = spec.physics.speed;
+        if !(8.0..=22.0).contains(&ball_speed) {
+            return Err(format!("pong ball speed {ball_speed} outside 8..22"));
+        }
+        return crate::arcade::build_pong_with(ball_speed, &spec.slug, &spec.title);
+    }
     validate(spec)?;
     let physics = &spec.physics;
     let level = &spec.level;

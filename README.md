@@ -48,13 +48,18 @@ A full example is committed at `depot/games/snowy-mountain-pass/spec.json`.
 
 Straight answers, because this is the part that matters:
 
-- **Only platformers.** The compiler accepts `archetype: "platformer"`. Ask for a
-  shooter and it rejects the spec and tells you what is supported. It does not
-  silently give you something else.
-- **The library has 13 genres; prompts reach one of them.** The 15 demo games span
+- **Three archetypes, not thirteen.** Prompts can produce `platformer`, `runner`
+  and `pong`. Ask for a shooter and the compiler rejects the spec and lists what is
+  supported - it does not silently hand back a platformer.
+- **What each archetype lets you change:** `platformer` gets the full level (ground
+  slabs, platforms, coins, goal) plus physics and theme; `runner` gets theme and
+  name (its jump timing is a fixed verified script); `pong` gets theme, name and
+  ball speed (8-22).
+- **The other ten genres exist but are hand-built.** The 15 demo games span
   platformer, runner, flight, driving, pong, breakout, flappy, maze, sokoban,
-  chessboard, dialogue, shooter and tower defence. Those were built by hand-written
-  Rust builders. Only the platformer builder is wired to the prompt path.
+  chessboard, dialogue, shooter and tower defence. Only the three above are wired to
+  the prompt path. Flappy stays unwired on purpose: it is one of the four that never
+  proved an in-engine win, so generating it would ship games I cannot verify.
 - **Local model quality varies.** `gemma4:12b` works. `qwen3.8:27b` crashes Ollama
   outright (socket reset, no output in 420 s) - do not use it.
 - **Cloud providers are wired but only tested against a stub.** No live API key
