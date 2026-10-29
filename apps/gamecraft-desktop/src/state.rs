@@ -388,6 +388,15 @@ impl DesktopState {
     /// case this serves is "show me this game now", and spawning works whether or
     /// not an editor is already open. `GAMECRAFT_GODOT` overrides the binary.
     pub(crate) fn start_game(&mut self) {
+        self.spawn_game(false);
+    }
+
+    /// Same, but lets the built-in autoplay play the level.
+    pub(crate) fn start_game_demo(&mut self) {
+        self.spawn_game(true);
+    }
+
+    fn spawn_game(&mut self, demo: bool) {
         let Some(index) = self.selected_game else {
             self.status = "pick a game first".to_string();
             return;
@@ -396,12 +405,16 @@ impl DesktopState {
             return;
         };
         let binary = std::env::var("GAMECRAFT_GODOT").unwrap_or_else(|_| "godot".to_string());
-        match std::process::Command::new(binary.as_str())
-            .arg("--path")
-            .arg(&game.dir)
-            .spawn()
-        {
-            Ok(child) => self.status = format!("started {} (pid {})", game.slug, child.id()),
+        let mut command = std::process::Command::new(binary.as_str());
+        command.arg("--path").arg(&game.dir);
+        if demo {
+            command.env("GAMECRAFT_AUTOPLAY", "1");
+        }
+        match command.spawn() {
+            Ok(child) => {
+                let mode = if demo { "demo" } else { "play" };
+                self.status = format!("started {} [{mode}] (pid {})", game.slug, child.id());
+            }
             Err(err) => self.status = format!("cannot start godot ({binary}): {err}"),
         }
     }

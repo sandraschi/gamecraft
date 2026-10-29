@@ -17,7 +17,7 @@ All crates on targets.
 
 ## Trace
 
-{"game":"sokoban","win":true,"frames":18,"pushes":17}
+{"game":"sokoban","win":true,"frames":16,"pushes":15}
 
 ## Verification
 

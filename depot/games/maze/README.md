@@ -9,7 +9,7 @@ Arrow keys move cell to cell. Find the gold exit.
 
 ## Win condition
 
-Reach the exit at (5, 5) inside 60 seconds.
+Reach the exit in the far corner.
 
 ## Seed
 
@@ -17,7 +17,7 @@ Reach the exit at (5, 5) inside 60 seconds.
 
 ## Trace
 
-{"game":"maze","win":true,"frames":33,"steps":9}
+{"game":"maze","win":true,"frames":129,"steps":33}
 
 ## Verification
 

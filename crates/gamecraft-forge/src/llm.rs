@@ -169,7 +169,15 @@ fn pick_model(names: &[String]) -> Option<String> {
         if lower.contains("embed") {
             continue;
         }
-        let score = if lower.contains("tools") {
+        // Pinned to the model measured working on this machine. qwen3.8:27b
+        // resets the Ollama socket and returns nothing in 420 s, so it must never
+        // be auto-selected; cloud models take over once keys are provisioned.
+        if lower.contains("qwen3.8") {
+            continue;
+        }
+        let score = if lower.contains("gemma4") {
+            5
+        } else if lower.contains("tools") {
             3
         } else if lower.contains("qwen") || lower.contains("instruct") {
             2

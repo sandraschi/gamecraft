@@ -12,6 +12,8 @@
 #
 # Exits 1 if any game produces no win marker within its frame budget.
 
+# Games no longer autoplay by default; the verifier drives them.
+$env:GAMECRAFT_AUTOPLAY = '1'
 $godot = (Get-Command godot).Source
 $budget = 3600
 $fail = 0

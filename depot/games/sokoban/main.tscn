@@ -1,4 +1,4 @@
-[gd_scene load_steps=68 format=3 uid="uid://2rzionvxure7n"]
+[gd_scene load_steps=116 format=3 uid="uid://2rzionvxure7n"]
 
 [ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
 
@@ -46,195 +46,363 @@ size = Vector3(1.0, 0.1, 1.0)
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile1_0_mesh10"]
+[sub_resource type="BoxMesh" id="Tile0_5_mesh10"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile1_0_mat11"]
+[sub_resource type="StandardMaterial3D" id="Tile0_5_mat11"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile1_1_mesh12"]
+[sub_resource type="BoxMesh" id="Tile0_6_mesh12"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile1_1_mat13"]
+[sub_resource type="StandardMaterial3D" id="Tile0_6_mat13"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile1_2_mesh14"]
+[sub_resource type="BoxMesh" id="Tile1_0_mesh14"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile1_2_mat15"]
+[sub_resource type="StandardMaterial3D" id="Tile1_0_mat15"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile1_3_mesh16"]
+[sub_resource type="BoxMesh" id="Tile1_1_mesh16"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile1_3_mat17"]
+[sub_resource type="StandardMaterial3D" id="Tile1_1_mat17"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile1_4_mesh18"]
+[sub_resource type="BoxMesh" id="Tile1_2_mesh18"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile1_4_mat19"]
+[sub_resource type="StandardMaterial3D" id="Tile1_2_mat19"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile2_0_mesh20"]
+[sub_resource type="BoxMesh" id="Tile1_3_mesh20"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile2_0_mat21"]
+[sub_resource type="StandardMaterial3D" id="Tile1_3_mat21"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile2_1_mesh22"]
+[sub_resource type="BoxMesh" id="Tile1_4_mesh22"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile2_1_mat23"]
+[sub_resource type="StandardMaterial3D" id="Tile1_4_mat23"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile2_2_mesh24"]
+[sub_resource type="BoxMesh" id="Tile1_5_mesh24"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile2_2_mat25"]
+[sub_resource type="StandardMaterial3D" id="Tile1_5_mat25"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile2_3_mesh26"]
+[sub_resource type="BoxMesh" id="Tile1_6_mesh26"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile2_3_mat27"]
+[sub_resource type="StandardMaterial3D" id="Tile1_6_mat27"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile2_4_mesh28"]
+[sub_resource type="BoxMesh" id="Tile2_0_mesh28"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile2_4_mat29"]
+[sub_resource type="StandardMaterial3D" id="Tile2_0_mat29"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile3_0_mesh30"]
+[sub_resource type="BoxMesh" id="Tile2_1_mesh30"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile3_0_mat31"]
+[sub_resource type="StandardMaterial3D" id="Tile2_1_mat31"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile3_1_mesh32"]
+[sub_resource type="BoxMesh" id="Tile2_2_mesh32"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile3_1_mat33"]
+[sub_resource type="StandardMaterial3D" id="Tile2_2_mat33"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile3_2_mesh34"]
+[sub_resource type="BoxMesh" id="Tile2_3_mesh34"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile3_2_mat35"]
+[sub_resource type="StandardMaterial3D" id="Tile2_3_mat35"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile3_3_mesh36"]
+[sub_resource type="BoxMesh" id="Tile2_4_mesh36"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile3_3_mat37"]
+[sub_resource type="StandardMaterial3D" id="Tile2_4_mat37"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile3_4_mesh38"]
+[sub_resource type="BoxMesh" id="Tile2_5_mesh38"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile3_4_mat39"]
+[sub_resource type="StandardMaterial3D" id="Tile2_5_mat39"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile4_0_mesh40"]
+[sub_resource type="BoxMesh" id="Tile2_6_mesh40"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile4_0_mat41"]
+[sub_resource type="StandardMaterial3D" id="Tile2_6_mat41"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile4_1_mesh42"]
+[sub_resource type="BoxMesh" id="Tile3_0_mesh42"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile4_1_mat43"]
+[sub_resource type="StandardMaterial3D" id="Tile3_0_mat43"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile4_2_mesh44"]
+[sub_resource type="BoxMesh" id="Tile3_1_mesh44"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile4_2_mat45"]
+[sub_resource type="StandardMaterial3D" id="Tile3_1_mat45"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="BoxMesh" id="Tile4_3_mesh46"]
+[sub_resource type="BoxMesh" id="Tile3_2_mesh46"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile4_3_mat47"]
+[sub_resource type="StandardMaterial3D" id="Tile3_2_mat47"]
 shading_mode = 0
 albedo_color = Color(0.12, 0.14, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="Tile4_4_mesh48"]
+[sub_resource type="BoxMesh" id="Tile3_3_mesh48"]
 size = Vector3(1.0, 0.1, 1.0)
 
-[sub_resource type="StandardMaterial3D" id="Tile4_4_mat49"]
+[sub_resource type="StandardMaterial3D" id="Tile3_3_mat49"]
 shading_mode = 0
 albedo_color = Color(0.16, 0.18, 0.24, 1)
 
-[sub_resource type="CapsuleMesh" id="walker_capsule50"]
+[sub_resource type="BoxMesh" id="Tile3_4_mesh50"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_4_mat51"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_5_mesh52"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_5_mat53"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile3_6_mesh54"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile3_6_mat55"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_0_mesh56"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_0_mat57"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_1_mesh58"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_1_mat59"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_2_mesh60"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_2_mat61"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_3_mesh62"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_3_mat63"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_4_mesh64"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_4_mat65"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_5_mesh66"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_5_mat67"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile4_6_mesh68"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile4_6_mat69"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_0_mesh70"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_0_mat71"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_1_mesh72"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_1_mat73"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_2_mesh74"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_2_mat75"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_3_mesh76"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_3_mat77"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_4_mesh78"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_4_mat79"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_5_mesh80"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_5_mat81"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile5_6_mesh82"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile5_6_mat83"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_0_mesh84"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_0_mat85"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_1_mesh86"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_1_mat87"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_2_mesh88"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_2_mat89"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_3_mesh90"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_3_mat91"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_4_mesh92"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_4_mat93"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_5_mesh94"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_5_mat95"]
+shading_mode = 0
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Tile6_6_mesh96"]
+size = Vector3(1.0, 0.1, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="Tile6_6_mat97"]
+shading_mode = 0
+albedo_color = Color(0.16, 0.18, 0.24, 1)
+
+[sub_resource type="CapsuleMesh" id="walker_capsule98"]
 radius = 0.3
 height = 0.8
 radial_segments = 20
 rings = 6
 
-[sub_resource type="StandardMaterial3D" id="walker_mat51"]
+[sub_resource type="StandardMaterial3D" id="walker_mat99"]
 shading_mode = 0
 albedo_color = Color(0.35, 0.59, 1.0, 1)
 
-[sub_resource type="BoxMesh" id="Crate0_mesh52"]
+[sub_resource type="BoxMesh" id="Crate0_mesh100"]
 size = Vector3(0.9, 0.9, 0.9)
 
-[sub_resource type="StandardMaterial3D" id="Crate0_mat53"]
+[sub_resource type="StandardMaterial3D" id="Crate0_mat101"]
 shading_mode = 0
 albedo_color = Color(0.55, 0.36, 0.18, 1)
 
-[sub_resource type="BoxMesh" id="Crate1_mesh54"]
+[sub_resource type="BoxMesh" id="Crate1_mesh102"]
 size = Vector3(0.9, 0.9, 0.9)
 
-[sub_resource type="StandardMaterial3D" id="Crate1_mat55"]
+[sub_resource type="StandardMaterial3D" id="Crate1_mat103"]
 shading_mode = 0
 albedo_color = Color(0.55, 0.36, 0.18, 1)
 
-[sub_resource type="BoxMesh" id="Crate2_mesh56"]
+[sub_resource type="BoxMesh" id="Crate2_mesh104"]
 size = Vector3(0.9, 0.9, 0.9)
 
-[sub_resource type="StandardMaterial3D" id="Crate2_mat57"]
+[sub_resource type="StandardMaterial3D" id="Crate2_mat105"]
 shading_mode = 0
 albedo_color = Color(0.55, 0.36, 0.18, 1)
 
-[sub_resource type="BoxMesh" id="Target0_mesh58"]
+[sub_resource type="BoxMesh" id="Target0_mesh106"]
 size = Vector3(0.9, 0.06, 0.9)
 
-[sub_resource type="StandardMaterial3D" id="Target0_mat59"]
+[sub_resource type="StandardMaterial3D" id="Target0_mat107"]
 shading_mode = 0
 albedo_color = Color(0.31, 0.78, 0.75, 1)
 
-[sub_resource type="BoxMesh" id="Target1_mesh60"]
+[sub_resource type="BoxMesh" id="Target1_mesh108"]
 size = Vector3(0.9, 0.06, 0.9)
 
-[sub_resource type="StandardMaterial3D" id="Target1_mat61"]
+[sub_resource type="StandardMaterial3D" id="Target1_mat109"]
 shading_mode = 0
 albedo_color = Color(0.31, 0.78, 0.75, 1)
 
-[sub_resource type="BoxMesh" id="Target2_mesh62"]
+[sub_resource type="BoxMesh" id="Target2_mesh110"]
 size = Vector3(0.9, 0.06, 0.9)
 
-[sub_resource type="StandardMaterial3D" id="Target2_mat63"]
+[sub_resource type="StandardMaterial3D" id="Target2_mat111"]
 shading_mode = 0
 albedo_color = Color(0.31, 0.78, 0.75, 1)
 
@@ -247,7 +415,7 @@ transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0
 environment = SubResource("environment")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1.0, -0.0, 0.0, 0.0, 5.9604645e-8, 0.99999994, -0.0, -0.99999994, 5.9604645e-8, 2.0, 10.0, 2.01)
+transform = Transform3D(1.0, -0.0, 0.0, 0.0, 5.9604645e-8, 0.99999994, -0.0, -0.99999994, 5.9604645e-8, 3.0, 14.0, 3.01)
 current = true
 fov = 55.0
 
@@ -276,157 +444,277 @@ transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05,
 material_override = SubResource("Tile0_4_mat9")
 mesh = SubResource("Tile0_4_mesh8")
 
+[node name="Tile0_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 5.0)
+material_override = SubResource("Tile0_5_mat11")
+mesh = SubResource("Tile0_5_mesh10")
+
+[node name="Tile0_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.05, 6.0)
+material_override = SubResource("Tile0_6_mat13")
+mesh = SubResource("Tile0_6_mesh12")
+
 [node name="Tile1_0" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 0.0)
-material_override = SubResource("Tile1_0_mat11")
-mesh = SubResource("Tile1_0_mesh10")
+material_override = SubResource("Tile1_0_mat15")
+mesh = SubResource("Tile1_0_mesh14")
 
 [node name="Tile1_1" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 1.0)
-material_override = SubResource("Tile1_1_mat13")
-mesh = SubResource("Tile1_1_mesh12")
+material_override = SubResource("Tile1_1_mat17")
+mesh = SubResource("Tile1_1_mesh16")
 
 [node name="Tile1_2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 2.0)
-material_override = SubResource("Tile1_2_mat15")
-mesh = SubResource("Tile1_2_mesh14")
+material_override = SubResource("Tile1_2_mat19")
+mesh = SubResource("Tile1_2_mesh18")
 
 [node name="Tile1_3" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 3.0)
-material_override = SubResource("Tile1_3_mat17")
-mesh = SubResource("Tile1_3_mesh16")
+material_override = SubResource("Tile1_3_mat21")
+mesh = SubResource("Tile1_3_mesh20")
 
 [node name="Tile1_4" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 4.0)
-material_override = SubResource("Tile1_4_mat19")
-mesh = SubResource("Tile1_4_mesh18")
+material_override = SubResource("Tile1_4_mat23")
+mesh = SubResource("Tile1_4_mesh22")
+
+[node name="Tile1_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 5.0)
+material_override = SubResource("Tile1_5_mat25")
+mesh = SubResource("Tile1_5_mesh24")
+
+[node name="Tile1_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -0.05, 6.0)
+material_override = SubResource("Tile1_6_mat27")
+mesh = SubResource("Tile1_6_mesh26")
 
 [node name="Tile2_0" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 0.0)
-material_override = SubResource("Tile2_0_mat21")
-mesh = SubResource("Tile2_0_mesh20")
+material_override = SubResource("Tile2_0_mat29")
+mesh = SubResource("Tile2_0_mesh28")
 
 [node name="Tile2_1" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 1.0)
-material_override = SubResource("Tile2_1_mat23")
-mesh = SubResource("Tile2_1_mesh22")
+material_override = SubResource("Tile2_1_mat31")
+mesh = SubResource("Tile2_1_mesh30")
 
 [node name="Tile2_2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 2.0)
-material_override = SubResource("Tile2_2_mat25")
-mesh = SubResource("Tile2_2_mesh24")
+material_override = SubResource("Tile2_2_mat33")
+mesh = SubResource("Tile2_2_mesh32")
 
 [node name="Tile2_3" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 3.0)
-material_override = SubResource("Tile2_3_mat27")
-mesh = SubResource("Tile2_3_mesh26")
+material_override = SubResource("Tile2_3_mat35")
+mesh = SubResource("Tile2_3_mesh34")
 
 [node name="Tile2_4" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 4.0)
-material_override = SubResource("Tile2_4_mat29")
-mesh = SubResource("Tile2_4_mesh28")
+material_override = SubResource("Tile2_4_mat37")
+mesh = SubResource("Tile2_4_mesh36")
+
+[node name="Tile2_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 5.0)
+material_override = SubResource("Tile2_5_mat39")
+mesh = SubResource("Tile2_5_mesh38")
+
+[node name="Tile2_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, -0.05, 6.0)
+material_override = SubResource("Tile2_6_mat41")
+mesh = SubResource("Tile2_6_mesh40")
 
 [node name="Tile3_0" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 0.0)
-material_override = SubResource("Tile3_0_mat31")
-mesh = SubResource("Tile3_0_mesh30")
+material_override = SubResource("Tile3_0_mat43")
+mesh = SubResource("Tile3_0_mesh42")
 
 [node name="Tile3_1" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 1.0)
-material_override = SubResource("Tile3_1_mat33")
-mesh = SubResource("Tile3_1_mesh32")
+material_override = SubResource("Tile3_1_mat45")
+mesh = SubResource("Tile3_1_mesh44")
 
 [node name="Tile3_2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 2.0)
-material_override = SubResource("Tile3_2_mat35")
-mesh = SubResource("Tile3_2_mesh34")
+material_override = SubResource("Tile3_2_mat47")
+mesh = SubResource("Tile3_2_mesh46")
 
 [node name="Tile3_3" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 3.0)
-material_override = SubResource("Tile3_3_mat37")
-mesh = SubResource("Tile3_3_mesh36")
+material_override = SubResource("Tile3_3_mat49")
+mesh = SubResource("Tile3_3_mesh48")
 
 [node name="Tile3_4" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 4.0)
-material_override = SubResource("Tile3_4_mat39")
-mesh = SubResource("Tile3_4_mesh38")
+material_override = SubResource("Tile3_4_mat51")
+mesh = SubResource("Tile3_4_mesh50")
+
+[node name="Tile3_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 5.0)
+material_override = SubResource("Tile3_5_mat53")
+mesh = SubResource("Tile3_5_mesh52")
+
+[node name="Tile3_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, -0.05, 6.0)
+material_override = SubResource("Tile3_6_mat55")
+mesh = SubResource("Tile3_6_mesh54")
 
 [node name="Tile4_0" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 0.0)
-material_override = SubResource("Tile4_0_mat41")
-mesh = SubResource("Tile4_0_mesh40")
+material_override = SubResource("Tile4_0_mat57")
+mesh = SubResource("Tile4_0_mesh56")
 
 [node name="Tile4_1" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 1.0)
-material_override = SubResource("Tile4_1_mat43")
-mesh = SubResource("Tile4_1_mesh42")
+material_override = SubResource("Tile4_1_mat59")
+mesh = SubResource("Tile4_1_mesh58")
 
 [node name="Tile4_2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 2.0)
-material_override = SubResource("Tile4_2_mat45")
-mesh = SubResource("Tile4_2_mesh44")
+material_override = SubResource("Tile4_2_mat61")
+mesh = SubResource("Tile4_2_mesh60")
 
 [node name="Tile4_3" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 3.0)
-material_override = SubResource("Tile4_3_mat47")
-mesh = SubResource("Tile4_3_mesh46")
+material_override = SubResource("Tile4_3_mat63")
+mesh = SubResource("Tile4_3_mesh62")
 
 [node name="Tile4_4" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 4.0)
-material_override = SubResource("Tile4_4_mat49")
-mesh = SubResource("Tile4_4_mesh48")
+material_override = SubResource("Tile4_4_mat65")
+mesh = SubResource("Tile4_4_mesh64")
+
+[node name="Tile4_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 5.0)
+material_override = SubResource("Tile4_5_mat67")
+mesh = SubResource("Tile4_5_mesh66")
+
+[node name="Tile4_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, -0.05, 6.0)
+material_override = SubResource("Tile4_6_mat69")
+mesh = SubResource("Tile4_6_mesh68")
+
+[node name="Tile5_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 0.0)
+material_override = SubResource("Tile5_0_mat71")
+mesh = SubResource("Tile5_0_mesh70")
+
+[node name="Tile5_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 1.0)
+material_override = SubResource("Tile5_1_mat73")
+mesh = SubResource("Tile5_1_mesh72")
+
+[node name="Tile5_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 2.0)
+material_override = SubResource("Tile5_2_mat75")
+mesh = SubResource("Tile5_2_mesh74")
+
+[node name="Tile5_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 3.0)
+material_override = SubResource("Tile5_3_mat77")
+mesh = SubResource("Tile5_3_mesh76")
+
+[node name="Tile5_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 4.0)
+material_override = SubResource("Tile5_4_mat79")
+mesh = SubResource("Tile5_4_mesh78")
+
+[node name="Tile5_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 5.0)
+material_override = SubResource("Tile5_5_mat81")
+mesh = SubResource("Tile5_5_mesh80")
+
+[node name="Tile5_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 5.0, -0.05, 6.0)
+material_override = SubResource("Tile5_6_mat83")
+mesh = SubResource("Tile5_6_mesh82")
+
+[node name="Tile6_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 0.0)
+material_override = SubResource("Tile6_0_mat85")
+mesh = SubResource("Tile6_0_mesh84")
+
+[node name="Tile6_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 1.0)
+material_override = SubResource("Tile6_1_mat87")
+mesh = SubResource("Tile6_1_mesh86")
+
+[node name="Tile6_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 2.0)
+material_override = SubResource("Tile6_2_mat89")
+mesh = SubResource("Tile6_2_mesh88")
+
+[node name="Tile6_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 3.0)
+material_override = SubResource("Tile6_3_mat91")
+mesh = SubResource("Tile6_3_mesh90")
+
+[node name="Tile6_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 4.0)
+material_override = SubResource("Tile6_4_mat93")
+mesh = SubResource("Tile6_4_mesh92")
+
+[node name="Tile6_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 5.0)
+material_override = SubResource("Tile6_5_mat95")
+mesh = SubResource("Tile6_5_mesh94")
+
+[node name="Tile6_6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 6.0, -0.05, 6.0)
+material_override = SubResource("Tile6_6_mat97")
+mesh = SubResource("Tile6_6_mesh96")
 
 [node name="Player" type="Node3D" parent="."]
 unique_name_in_owner = true
 script = ExtResource("2_walker")
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5, 0.0)
 autoplay = true
-autoplay_plan = [0, 0, 0, 1, 1, 1, 2, 2, 0, 0, 0, 2, 0, 2, 1, 1, 1]
-grid_h = 5
-grid_w = 5
+autoplay_plan = [0, 0, 0, 2, 0, 2, 2, 3, 3, 1, 2, 3, 1, 2, 2]
+grid_h = 7
+grid_w = 7
 mode = "soko"
 step_size = 1.0
 
 [node name="Mesh" type="MeshInstance3D" parent="Player"]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
-material_override = SubResource("walker_mat51")
-mesh = SubResource("walker_capsule50")
+material_override = SubResource("walker_mat99")
+mesh = SubResource("walker_capsule98")
 
 [node name="Crate0" type="Node3D" parent="."]
-transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.45, 0.0)
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 0.45, 2.0)
 
 [node name="Mesh" type="MeshInstance3D" parent="Crate0"]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
-material_override = SubResource("Crate0_mat53")
-mesh = SubResource("Crate0_mesh52")
+material_override = SubResource("Crate0_mat101")
+mesh = SubResource("Crate0_mesh100")
 
 [node name="Crate1" type="Node3D" parent="."]
-transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.45, 2.0)
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.45, 1.0)
 
 [node name="Mesh" type="MeshInstance3D" parent="Crate1"]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
-material_override = SubResource("Crate1_mat55")
-mesh = SubResource("Crate1_mesh54")
+material_override = SubResource("Crate1_mat103")
+mesh = SubResource("Crate1_mesh102")
 
 [node name="Crate2" type="Node3D" parent="."]
-transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.45, 3.0)
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, 0.45, 2.0)
 
 [node name="Mesh" type="MeshInstance3D" parent="Crate2"]
 transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
-material_override = SubResource("Crate2_mat57")
-mesh = SubResource("Crate2_mesh56")
+material_override = SubResource("Crate2_mat105")
+mesh = SubResource("Crate2_mesh104")
 
 [node name="Target0" type="MeshInstance3D" parent="."]
-transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, 0.03, 0.0)
-material_override = SubResource("Target0_mat59")
-mesh = SubResource("Target0_mesh58")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 0.03, 4.0)
+material_override = SubResource("Target0_mat107")
+mesh = SubResource("Target0_mesh106")
 
 [node name="Target1" type="MeshInstance3D" parent="."]
-transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, 0.03, 2.0)
-material_override = SubResource("Target1_mat61")
-mesh = SubResource("Target1_mesh60")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.03, 3.0)
+material_override = SubResource("Target1_mat109")
+mesh = SubResource("Target1_mesh108")
 
 [node name="Target2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.03, 4.0)
-material_override = SubResource("Target2_mat63")
-mesh = SubResource("Target2_mesh62")
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.0, 0.03, 4.0)
+material_override = SubResource("Target2_mat111")
+mesh = SubResource("Target2_mesh110")

@@ -5,7 +5,7 @@
 {"assigned":1,"name":"WorldEnvironment","op":"add_node","parent":0,"type":"WorldEnvironment"}
 {"key":"environment","node":1,"op":"set_property"}
 {"assigned":2,"name":"Camera3D","op":"add_node","parent":0,"type":"Camera3D"}
-{"node":2,"op":"set_transform","position":[2.0,10.0,2.009999990463257],"scale":[1.0,1.0,1.0]}
+{"node":2,"op":"set_transform","position":[3.0,14.0,3.009999990463257],"scale":[1.0,1.0,1.0]}
 {"key":"current","node":2,"op":"set_property"}
 {"key":"fov","node":2,"op":"set_property"}
 {"assigned":3,"name":"Tile0_0","op":"add_node","parent":0,"type":"MeshInstance3D"}

@@ -383,12 +383,22 @@ pub(crate) fn left_tree(state: &mut DesktopState, ui: &mut egui::Ui) {
         state.load_depot(index);
     }
     let can_start = state.selected_game.is_some();
-    if ui
-        .add_enabled(can_start, egui::Button::new("Start Game"))
-        .clicked()
-    {
-        state.start_game();
-    }
+    ui.horizontal(|ui| {
+        if ui
+            .add_enabled(can_start, egui::Button::new("Play"))
+            .on_hover_text("Launch the game with you in control")
+            .clicked()
+        {
+            state.start_game();
+        }
+        if ui
+            .add_enabled(can_start, egui::Button::new("Watch demo"))
+            .on_hover_text("Launch with the built-in autoplay driving")
+            .clicked()
+        {
+            state.start_game_demo();
+        }
+    });
     ui.separator();
     ui.heading("Scene");
     ui.separator();

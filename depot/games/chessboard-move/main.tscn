@@ -240,7 +240,7 @@ transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0
 environment = SubResource("environment")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1.0, -0.0, 0.0, 0.0, 5.9604645e-8, 0.99999994, -0.0, -0.99999994, 5.9604645e-8, 2.0, 10.0, 2.01)
+transform = Transform3D(1.0, -0.0, 0.0, 0.0, 5.9604645e-8, 0.99999994, -0.0, -0.99999994, 5.9604645e-8, 3.0, 14.0, 3.01)
 current = true
 fov = 55.0
 

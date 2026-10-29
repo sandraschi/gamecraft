@@ -251,16 +251,44 @@ fn path_frames(path: &[(i32, i32)], color: u8) -> Vec<Vec<Glyph>> {
 // ---------------------------------------------------------------------------
 
 /// Border plus a vertical wall with a gap at row 5.
-fn maze_walls() -> Vec<(i32, i32)> {
-    let mut walls: Vec<(i32, i32)> = Vec::new();
-    for i in 0..7 {
-        walls.push((i, 0));
-        walls.push((i, 6));
-        walls.push((0, i));
-        walls.push((6, i));
+fn maze_walls(width: i32, height: i32, seed: u64) -> Vec<(i32, i32)> {
+    let mut carved: Vec<(i32, i32)> = vec![(1, 1)];
+    let mut stack: Vec<(i32, i32)> = vec![(1, 1)];
+    let mut state = seed | 1;
+    while let Some(&(x, y)) = stack.last() {
+        let mut options: Vec<(i32, i32)> = Vec::new();
+        for (dx, dy) in [(2, 0), (-2, 0), (0, 2), (0, -2)] {
+            let nx = x + dx;
+            let ny = y + dy;
+            let inside = nx > 0 && ny > 0 && nx < width - 1 && ny < height - 1;
+            if inside && !carved.contains(&(nx, ny)) {
+                options.push((nx, ny));
+            }
+        }
+        if options.is_empty() {
+            stack.pop();
+            continue;
+        }
+        state = state
+            .wrapping_mul(6_364_136_223_846_793_005)
+            .wrapping_add(1_442_695_040_888_963_407);
+        let bound = u64::try_from(options.len()).unwrap_or(1);
+        let pick = usize::try_from((state >> 33) % bound).unwrap_or(0);
+        let Some(&(nx, ny)) = options.get(pick) else {
+            stack.pop();
+            continue;
+        };
+        carved.push((i32::midpoint(x, nx), i32::midpoint(y, ny)));
+        carved.push((nx, ny));
+        stack.push((nx, ny));
     }
-    for y in 1..5 {
-        walls.push((3, y));
+    let mut walls: Vec<(i32, i32)> = Vec::new();
+    for x in 0..width {
+        for y in 0..height {
+            if !carved.contains(&(x, y)) {
+                walls.push((x, y));
+            }
+        }
     }
     walls
 }
@@ -271,8 +299,10 @@ fn maze_walls() -> Vec<(i32, i32)> {
 ///
 /// Returns a message when the trace fails verification or a node is invalid.
 pub fn build_maze() -> Result<GameParts, String> {
-    let walls = maze_walls();
-    let path = sim::bfs_path((1, 1), (5, 5), walls.as_slice(), 7, 7)
+    let (width, height) = (15_i32, 15_i32);
+    let goal = (width - 2, height - 2);
+    let walls = maze_walls(width, height, 9);
+    let path = sim::bfs_path((1, 1), goal, walls.as_slice(), width, height)
         .ok_or_else(|| "maze has no path".to_string())?;
     if path.len() > 600 {
         return Err("maze path too long".to_string());
@@ -287,20 +317,20 @@ pub fn build_maze() -> Result<GameParts, String> {
     forge.ext_resource("Script", "res://scripts/gamecraft_runtime.gd", "1_runtime");
     forge.ext_resource("Script", "res://scripts/grid_walker.gd", "2_walker");
     forge
-        .top_camera("Camera3D", Some(root), [3.0, 3.0], 12.0)
+        .top_camera("Camera3D", Some(root), [7.0, 7.0], 26.0)
         .map_err(|err| err.to_string())?;
     board_base(
         &mut forge,
         root,
-        7,
-        7,
+        15,
+        15,
         [0.16, 0.18, 0.24],
         [0.12, 0.14, 0.2],
     )?;
     for (serial, (x, z)) in walls.into_iter().enumerate() {
         wall_cell(&mut forge, root, format!("Wall{serial}").as_str(), x, z)?;
     }
-    let maze_walker = walker_node(&mut forge, root, "maze", [1.0, 0.5, 1.0], 7, 7)?;
+    let maze_walker = walker_node(&mut forge, root, "maze", [1.0, 0.5, 1.0], width, height)?;
     let maze_plan = plan_codes(path.as_slice());
     forge
         .set_prop(
@@ -317,7 +347,7 @@ pub fn build_maze() -> Result<GameParts, String> {
         )
         .map_err(|err| err.to_string())?;
     forge
-        .area_trigger("Goal", Some(root), [5.0, 0.5, 5.0], [1.0, 2.0, 1.0])
+        .area_trigger("Goal", Some(root), [13.0, 0.5, 13.0], [1.0, 2.0, 1.0])
         .map_err(|err| err.to_string())?;
     forge.connect("body_entered", "Goal", ".", "_on_goal");
     let frames = path_frames(path.as_slice(), 2);
@@ -326,7 +356,7 @@ pub fn build_maze() -> Result<GameParts, String> {
         slug: "maze",
         title: "GameCraft Maze",
         controls: "Arrow keys move cell to cell. Find the gold exit.",
-        win_text: "Reach the exit at (5, 5) inside 60 seconds.",
+        win_text: "Reach the exit in the far corner.",
         seed: 9,
         scene_text: export_scene(&forge, "maze")?,
         scripts: vec![
@@ -352,8 +382,8 @@ pub fn build_maze() -> Result<GameParts, String> {
 // ---------------------------------------------------------------------------
 
 /// Open 5x5 room, three crates, three targets.
-const SOKO_CRATES: [(i32, i32); 3] = [(1, 0), (1, 2), (3, 3)];
-const SOKO_TARGETS: [(i32, i32); 3] = [(4, 0), (4, 2), (0, 4)];
+const SOKO_CRATES: [(i32, i32); 3] = [(2, 2), (3, 1), (4, 2)];
+const SOKO_TARGETS: [(i32, i32); 3] = [(2, 4), (3, 3), (4, 4)];
 
 /// Build the sokoban depot game.
 ///
@@ -361,7 +391,7 @@ const SOKO_TARGETS: [(i32, i32); 3] = [(4, 0), (4, 2), (0, 4)];
 ///
 /// Returns a message when the trace fails verification or a node is invalid.
 pub fn build_sokoban() -> Result<GameParts, String> {
-    let moves = sim::solve_sokoban((0, 0), &SOKO_CRATES, &SOKO_TARGETS, &[], 5, 5, 500_000)
+    let moves = sim::solve_sokoban((0, 0), &SOKO_CRATES, &SOKO_TARGETS, &[], 7, 7, 1_200_000)
         .ok_or_else(|| "sokoban layout unsolvable".to_string())?;
     if moves.len() > 600 {
         let step_count = moves.len();
@@ -377,17 +407,17 @@ pub fn build_sokoban() -> Result<GameParts, String> {
     forge.ext_resource("Script", "res://scripts/gamecraft_runtime.gd", "1_runtime");
     forge.ext_resource("Script", "res://scripts/grid_walker.gd", "2_walker");
     forge
-        .top_camera("Camera3D", Some(root), [2.0, 2.0], 10.0)
+        .top_camera("Camera3D", Some(root), [3.0, 3.0], 14.0)
         .map_err(|err| err.to_string())?;
     board_base(
         &mut forge,
         root,
-        5,
-        5,
+        7,
+        7,
         [0.16, 0.18, 0.24],
         [0.12, 0.14, 0.2],
     )?;
-    let soko_walker = walker_node(&mut forge, root, "soko", [0.0, 0.5, 0.0], 5, 5)?;
+    let soko_walker = walker_node(&mut forge, root, "soko", [0.0, 0.5, 0.0], 7, 7)?;
     let soko_plan = delta_codes(moves.as_slice());
     forge
         .set_prop(
@@ -522,7 +552,7 @@ fn talk_scene(route: &[(i32, i32)]) -> Result<Forge, String> {
     forge.ext_resource("Script", "res://scripts/gamecraft_runtime.gd", "1_runtime");
     forge.ext_resource("Script", "res://scripts/grid_walker.gd", "2_walker");
     forge
-        .top_camera("Camera3D", Some(root), [2.0, 2.0], 10.0)
+        .top_camera("Camera3D", Some(root), [3.0, 3.0], 14.0)
         .map_err(|err| err.to_string())?;
     board_base(
         &mut forge,
@@ -710,7 +740,7 @@ pub fn build_chess() -> Result<GameParts, String> {
     forge.ext_resource("Script", "res://scripts/gamecraft_runtime.gd", "1_runtime");
     forge.ext_resource("Script", "res://scripts/grid_walker.gd", "2_walker");
     forge
-        .top_camera("Camera3D", Some(root), [2.0, 2.0], 10.0)
+        .top_camera("Camera3D", Some(root), [3.0, 3.0], 14.0)
         .map_err(|err| err.to_string())?;
     board_base(&mut forge, root, 5, 5, [0.75, 0.7, 0.62], [0.2, 0.22, 0.3])?;
     let knight = walker_node(&mut forge, root, "chess", [0.0, 0.5, 0.0], 5, 5)?;

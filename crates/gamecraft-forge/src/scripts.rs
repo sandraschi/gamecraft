@@ -369,7 +369,7 @@ func _physics_process(delta: float) -> void:
 /// is what the mirrored sims used and is only safe when the engine matches.
 pub const AUTOPLAY: &str = r#"extends Node3D
 ## GameCraft autoplay: plays the level through synthesized input.
-@export var enabled: bool = true
+@export var enabled: bool = false
 @export var hold_action: String = "ui_right"
 @export var jump_action: String = "ui_accept"
 @export var smart_jump: bool = true
@@ -387,6 +387,10 @@ var _gates: Array = []
 var _gate_index: int = 0
 
 func _ready() -> void:
+	# Off by default so Start Game hands the player the controls; the verifier
+	# and the viewer's demo button set GAMECRAFT_AUTOPLAY=1.
+	if OS.get_environment("GAMECRAFT_AUTOPLAY") == "1":
+		enabled = true
 	var root := get_parent()
 	if root != null:
 		_player = root.get_node_or_null("%Player")
