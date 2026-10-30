@@ -29,7 +29,7 @@ pub fn config_path() -> Option<PathBuf> {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct AppConfig {
-    /// `auto` | `local` | `openai` | `anthropic`.
+    /// `auto` | `local` | `openai` | `anthropic` | `deepseek` | `meta`.
     pub provider: String,
     /// Model id; empty means auto-pick (gemma4 family preferred).
     pub model: String,
@@ -39,6 +39,10 @@ pub struct AppConfig {
     pub openai_api_key: String,
     /// Cloud key; empty means the environment variable.
     pub anthropic_api_key: String,
+    /// Cloud key; empty means `DEEPSEEK_API_KEY`.
+    pub deepseek_api_key: String,
+    /// Cloud key; empty means `META_API_KEY`.
+    pub meta_api_key: String,
     /// `godot` binary override (empty means `godot`).
     pub godot_binary: String,
 }
@@ -51,6 +55,8 @@ impl Default for AppConfig {
             ollama_endpoint: String::new(),
             openai_api_key: String::new(),
             anthropic_api_key: String::new(),
+            deepseek_api_key: String::new(),
+            meta_api_key: String::new(),
             godot_binary: String::new(),
         }
     }
@@ -104,6 +110,26 @@ impl AppConfig {
             std::env::var("ANTHROPIC_API_KEY").ok()
         } else {
             Some(self.anthropic_api_key.clone())
+        }
+    }
+
+    /// Config file, else the environment.
+    #[must_use]
+    pub fn deepseek_key(&self) -> Option<String> {
+        if self.deepseek_api_key.trim().is_empty() {
+            std::env::var("DEEPSEEK_API_KEY").ok()
+        } else {
+            Some(self.deepseek_api_key.clone())
+        }
+    }
+
+    /// Config file, else the environment.
+    #[must_use]
+    pub fn meta_key(&self) -> Option<String> {
+        if self.meta_api_key.trim().is_empty() {
+            std::env::var("META_API_KEY").ok()
+        } else {
+            Some(self.meta_api_key.clone())
         }
     }
 

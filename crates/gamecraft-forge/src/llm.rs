@@ -21,6 +21,10 @@ pub enum ProviderKind {
     OpenAi,
     /// Anthropic messages.
     Anthropic,
+    /// `DeepSeek` chat completions (OpenAI-compatible wire format).
+    DeepSeek,
+    /// Meta Llama API (OpenAI-compatible wire format).
+    Meta,
 }
 
 /// Connection settings.
@@ -62,8 +66,22 @@ impl LlmConfig {
                 endpoint: "https://api.anthropic.com".to_string(),
                 api_key: gamecraft_core::config::AppConfig::load().anthropic_key(),
             }),
+            "deepseek" => Ok(Self {
+                kind: ProviderKind::DeepSeek,
+                model: model.unwrap_or("deepseek-chat").to_string(),
+                endpoint: "https://api.deepseek.com".to_string(),
+                api_key: gamecraft_core::config::AppConfig::load().deepseek_key(),
+            }),
+            "meta" => Ok(Self {
+                kind: ProviderKind::Meta,
+                model: model
+                    .unwrap_or("Llama-4-Maverick-17B-128E-Instruct-FP8")
+                    .to_string(),
+                endpoint: "https://api.llama.com/compat/v1".to_string(),
+                api_key: gamecraft_core::config::AppConfig::load().meta_key(),
+            }),
             other => Err(format!(
-                "unknown provider '{other}' (local, openai, anthropic)"
+                "unknown provider '{other}' (local, openai, anthropic, deepseek, meta)"
             )),
         }
     }
@@ -333,11 +351,16 @@ pub fn complete(config: &LlmConfig, prompt: &str) -> Result<String, String> {
                 .map_err(|err| format!("unexpected ollama reply: {err}: {text}"))?;
             Ok(reply.message.content)
         }
-        ProviderKind::OpenAi => {
+        ProviderKind::OpenAi | ProviderKind::DeepSeek | ProviderKind::Meta => {
+            let want_key = match config.kind {
+                ProviderKind::DeepSeek => "DEEPSEEK_API_KEY",
+                ProviderKind::Meta => "META_API_KEY",
+                _ => "OPENAI_API_KEY",
+            };
             let key = config
                 .api_key
                 .as_ref()
-                .ok_or_else(|| "OPENAI_API_KEY is not set".to_string())?;
+                .ok_or_else(|| format!("{want_key} is not set"))?;
             let body = serde_json::json!({
                 "model": config.model,
                 "messages": [{"role": "user", "content": prompt}],
@@ -361,12 +384,12 @@ pub fn complete(config: &LlmConfig, prompt: &str) -> Result<String, String> {
                 body.as_str(),
             )?;
             let reply: OpenAiReply = serde_json::from_str(text.as_str())
-                .map_err(|err| format!("unexpected openai reply: {err}: {text}"))?;
+                .map_err(|err| format!("unexpected chat reply: {err}: {text}"))?;
             reply
                 .choices
                 .first()
                 .map(|choice| choice.message.content.clone())
-                .ok_or_else(|| "openai reply had no choices".to_string())
+                .ok_or_else(|| "chat reply had no choices".to_string())
         }
         ProviderKind::Anthropic => {
             let key = config
@@ -443,6 +466,22 @@ mod tests {
     #[test]
     fn unknown_provider_is_rejected() {
         assert!(LlmConfig::new("banana", None).is_err());
+    }
+
+    #[test]
+    fn cloud_defaults_point_at_their_apis() {
+        for (name, host) in [("deepseek", "api.deepseek.com"), ("meta", "api.llama.com")] {
+            let config = LlmConfig::new(name, None);
+            assert!(config.is_ok(), "{name} rejected");
+            if let Ok(config) = config {
+                assert!(
+                    config.endpoint.contains(host),
+                    "{name}: {}",
+                    config.endpoint
+                );
+                assert!(config.api_key.is_none(), "{name} leaked a key");
+            }
+        }
     }
 
     #[test]

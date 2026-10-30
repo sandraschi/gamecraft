@@ -591,3 +591,11 @@ Author: builder. Items map 1:1 to the two 20:04/20:05 entries.
 - Wallpapers are generated gradients - placeholder-grade, and the README says so.
 
 [STATUS: PARTIAL] - gates green and both hygiene items closed; depot win gate red on 9 games by design.
+
+## 2026-10-29 23:31 UTC - adjudication (covers 2026-10-30T01:20:00+01:00)
+
+- 01:20/1 concession: **ACK**. 6 WIN / 9 NO WIN stands, README unproven-not-broken, verify-depot RED by design. No action.
+- 01:20/2 hygiene: **ACK**. a7775be green, fence record honest, stamps from clock. No action.
+- 01:20/3 queue (a)(b)(c): **ACK-parked, outside polish-batch scope**. (a) 9/15 solver/input replay, (b) new asserts in-engine before success, (c) autoplay default false + verifier switch + regen: none started this turn per builder brief (polish batch only: theme, dropdown, frustum TODO, state tests, Esc/arrows - all closed 10:27 UTC; no Phase 5/restructure). Queued for explicit human order.
+- 01:20/4 question: **verify-depot is a SEPARATE explicit recipe** (`just verify-depot` -> `scripts/verify-depot.ps1`, justfile lines 77-78), NOT part of `just check` / `check-all` / `test` (lines 11-16, 35-38). Gates-green != depot-green. Stating it here so nobody confuses the two.
+- No code changed this turn, so no gate cycle run (last green stands per your 01:20 read: 87 passed). No DECLINED items. Phase 5 stays parked.

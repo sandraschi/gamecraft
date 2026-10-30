@@ -160,6 +160,30 @@ fn scenes_dir() -> Option<PathBuf> {
     None
 }
 
+/// Model-id shortcuts per provider. The text field stays editable; these are
+/// suggestions, not a closed list.
+fn model_presets(provider: &str) -> &'static [(&'static str, &'static str)] {
+    match provider {
+        "openai" => &[("gpt-4o-mini (cheap)", "gpt-4o-mini"), ("gpt-4o", "gpt-4o")],
+        "anthropic" => &[("claude-sonnet-4-5", "claude-sonnet-4-5")],
+        "deepseek" => &[
+            ("deepseek-chat (general)", "deepseek-chat"),
+            ("deepseek-reasoner (thinking)", "deepseek-reasoner"),
+        ],
+        "meta" => &[
+            (
+                "Llama-4-Maverick (general)",
+                "Llama-4-Maverick-17B-128E-Instruct-FP8",
+            ),
+            (
+                "Llama-4-Scout (long context)",
+                "Llama-4-Scout-17B-16E-Instruct-FP8",
+            ),
+        ],
+        _ => &[("auto (recommended)", ""), ("gemma4:12b", "gemma4:12b")],
+    }
+}
+
 /// Modal windows opened from the menu bar.
 pub(crate) fn dialogs(state: &mut DesktopState, ctx: &egui::Context) {
     let Some(dialog) = state.dialog else {
@@ -208,18 +232,32 @@ fn app_settings_window(state: &mut DesktopState, ctx: &egui::Context, open: &mut
             egui::ComboBox::from_id_salt("app_provider")
                 .selected_text(state.app_cfg.provider.as_str())
                 .show_ui(ui, |combo| {
-                    for name in ["auto", "local", "openai", "anthropic"] {
+                    for name in ["auto", "local", "openai", "anthropic", "deepseek", "meta"] {
                         combo.selectable_value(&mut state.app_cfg.provider, name.to_string(), name);
                     }
                 });
             ui.label("Model (empty = auto-pick, gemma4 family preferred)");
             ui.text_edit_singleline(&mut state.app_cfg.model);
+            ui.label("Model presets (fills the field above)");
+            egui::ComboBox::from_id_salt("app_model_preset")
+                .selected_text("Pick a preset…")
+                .show_ui(ui, |combo| {
+                    for (label, id) in model_presets(state.app_cfg.provider.as_str()) {
+                        if combo.button(*label).clicked() {
+                            state.app_cfg.model = (*id).to_string();
+                        }
+                    }
+                });
             ui.label("Local endpoint (empty = provider default)");
             ui.text_edit_singleline(&mut state.app_cfg.ollama_endpoint);
             ui.label("OpenAI API key (empty = OPENAI_API_KEY env)");
             ui.add(egui::TextEdit::singleline(&mut state.app_cfg.openai_api_key).password(true));
             ui.label("Anthropic API key (empty = ANTHROPIC_API_KEY env)");
             ui.add(egui::TextEdit::singleline(&mut state.app_cfg.anthropic_api_key).password(true));
+            ui.label("DeepSeek API key (empty = DEEPSEEK_API_KEY env)");
+            ui.add(egui::TextEdit::singleline(&mut state.app_cfg.deepseek_api_key).password(true));
+            ui.label("Meta API key (empty = META_API_KEY env)");
+            ui.add(egui::TextEdit::singleline(&mut state.app_cfg.meta_api_key).password(true));
             ui.label("Godot binary (empty = godot)");
             ui.text_edit_singleline(&mut state.app_cfg.godot_binary);
             ui.separator();
