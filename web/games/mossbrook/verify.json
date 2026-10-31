@@ -1,0 +1,71 @@
+{
+  "slug": "mossbrook",
+  "title": "Mossbrook",
+  "date": "2026-10-31T01:54:30.858Z",
+  "boot_ms": 817,
+  "steps": 3098,
+  "sim_seconds": 51.6,
+  "checkpoints": [
+    {
+      "name": "tavern-ground",
+      "step": 227
+    },
+    {
+      "name": "tavern-upper",
+      "step": 522
+    },
+    {
+      "name": "cellar",
+      "step": 1162
+    },
+    {
+      "name": "tunnel",
+      "step": 1406
+    },
+    {
+      "name": "smithy",
+      "step": 1854
+    },
+    {
+      "name": "village",
+      "step": 2070
+    },
+    {
+      "name": "cave",
+      "step": 2968
+    },
+    {
+      "name": "troll",
+      "step": 3098
+    }
+  ],
+  "shots": [
+    "shots/01-tavern-ground.png",
+    "shots/02-tavern-upper.png",
+    "shots/03-cellar.png",
+    "shots/04-tunnel.png",
+    "shots/05-smithy.png",
+    "shots/06-village.png",
+    "shots/07-cave.png",
+    "shots/08-troll.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 4004,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint tavern-ground",
+    "GameCraft: checkpoint tavern-upper",
+    "GameCraft: checkpoint cellar",
+    "GameCraft: checkpoint tunnel",
+    "GameCraft: checkpoint smithy",
+    "GameCraft: checkpoint village",
+    "GameCraft: checkpoint cave",
+    "GameCraft: checkpoint troll",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

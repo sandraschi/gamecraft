@@ -30,6 +30,23 @@ Three gates per game, all enforced by the forge:
 Plus byte-identical re-export: the forge builds each game twice and refuses a
 non-identical scene. Never hand-edit `depot/`; regenerate it.
 
+## Web family (`web/`)
+
+Model-written three.js browser games, a separate track from the depot. Not part
+of the Cargo workspace. Each `web/games/<slug>/` has `index.html`, ES modules,
+`game.json` (title, `win_marker`, `thumb_checkpoint`, `step_budget`) and the
+verifier's outputs (`verify.json`, `thumb.png`, `shots/`).
+
+Contract: every game exposes `window.__gamecraft` with `ready`, `state()`,
+`autoplay()`, `step(n)` (fixed steps, stops at a new checkpoint), `render()`, and
+optionally `selfTest()` returning `{pass, checks, summary}`. `?verify=1` must
+disable the page's own loop and anything needing a user gesture (audio).
+
+Gate: `just web-verify` (Node 24, not Bun: Playwright hangs under Bun). A game
+passes only with zero console errors, the win marker printed, and `selfTest`
+passing when present. Look at `shots/` before calling a game done; two harness
+bugs were found that way, not by the gate.
+
 ## Hard gates (ArtCraft 6-gate bar)
 
 ```powershell

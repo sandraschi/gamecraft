@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GameCraft Arcade</title>
+<style>
+  body { margin: 0; background: #09090b; color: #e4e4e7; font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 1000px; margin: 0 auto; padding: 32px 16px; }
+  h1 { font-weight: 600; margin: 0 0 4px; }
+  .sub { color: #a1a1aa; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .card { background: #18181b; border: 1px solid #27272a; border-radius: 10px; overflow: hidden; }
+  .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #000; }
+  .body { padding: 12px 14px 14px; }
+  .title { font-size: 18px; font-weight: 600; }
+  .meta { color: #a1a1aa; font-size: 13px; margin: 4px 0 10px; }
+  .badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; margin-right: 6px; }
+  .pass { background: #14532d; color: #bbf7d0; } .fail { background: #7f1d1d; color: #fecaca; } .none { background: #3f3f46; }
+  a.btn { display: inline-block; margin-right: 8px; padding: 6px 12px; border-radius: 6px; background: #f59e0b; color: #1c1917; text-decoration: none; font-weight: 600; }
+  a.btn.alt { background: #27272a; color: #e4e4e7; }
+</style>
+</head>
+<body>
+<main>
+  <h1>GameCraft Arcade</h1>
+  <div class="sub">three.js family. Each game is verified by headless self-play; see web/README.md for what that does and does not prove.</div>
+  <div class="grid" id="grid"></div>
+</main>
+<script type="module">
+  const games = await (await fetch('/api/games')).json();
+  const grid = document.getElementById('grid');
+  if (!games.length) grid.textContent = 'No games yet.';
+  for (const g of games) {
+    const v = g.verify;
+    const badge = !v ? '<span class="badge none">unverified</span>'
+      : v.pass ? `<span class="badge pass">verified ${v.checkpoints.length} checkpoints</span>`
+      : `<span class="badge fail">failing: ${v.failed ?? 'console errors'}</span>`;
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = `${g.has_thumb ? `<img src="/games/${g.slug}/thumb.png" alt="">` : ''}
+      <div class="body"><div class="title"></div><div class="meta"></div>${badge}<div style="margin-top:10px">
+      <a class="btn" href="/games/${g.slug}/">Play</a><a class="btn alt" href="/games/${g.slug}/?autoplay=1">Watch the tour</a></div></div>`;
+    el.querySelector('.title').textContent = g.title;
+    el.querySelector('.meta').textContent = g.experiment ?? '';
+    grid.appendChild(el);
+  }
+</script>
+</body>
+</html>

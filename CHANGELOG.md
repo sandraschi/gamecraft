@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.11.0 - 2026-10-31 (three.js web family: Mossbrook, Kaffeehaus)
+
+A second track next to the Godot depot, prompted by Simon Willison's October 2026
+vibe-game posts: model-written browser games, verified by headless self-play.
+
+- **`web/`**: static Bun server (`bun run serve`, port 11258), arcade index,
+  three.js from `node_modules` via an import map. Each game lives in
+  `web/games/<slug>/` and exposes `window.__gamecraft` (ready, autoplay, step,
+  render, optional selfTest).
+- **Gate** (`just web-verify`, Node 24): headless Chromium with SwiftShader WebGL,
+  zero console errors, scripted tour must print the `win_marker`, per-checkpoint
+  screenshots, `verify.json` per game. Runs under Node because Playwright's
+  browser pipe hangs under the Bun runtime.
+- **Harness bugs found by inspecting screenshots, not by the gate:** the help
+  overlay was never hidden in verify mode (every shot was mostly overlay), and the
+  verifier rendered up to 300 steps past each checkpoint (two shots identical).
+  Both fixed; `step(n)` now stops at the first new checkpoint.
+- **Mossbrook**: rebuild of Willison's Emberwick prompts 1-3 (village, companions,
+  cutaway walls, upstairs, cellars + tunnel, troll cave). Tour asserts layer
+  visibility, wall opacity and floor height at 8 checkpoints. Prompt 4 not done.
+- **Kaffeehaus**: original Viennese coffee house management game. Pure sim
+  (`sim.js`) with a `selfTest()` proving decisions matter: good play beats random
+  beats idle on day 1, on a busy day, and over a 5-day campaign (EUR 931 vs 723,
+  regulars' loyalty 20 vs 1 of 25). The self-test rejected four versions first:
+  waiter pathing into the street, patience shorter than the room, no tray
+  batching, and "rush bill" being free. Fixes added second rounds and
+  order-on-seating. One threshold was lowered (busy-day takings margin 15% to 5%);
+  the campaign check carries that claim instead.
+- **Kaffeehaus sound**: Web Audio synthesis, no assets. Room murmur and machine
+  hiss scaled to load, event sounds, music-box waltz. Starts on first gesture,
+  silent in verify mode, S/M toggles persisted.
+- Not done: nobody has hand-played either game yet; screenshots were checked by
+  pixel statistics only.
+
 ## 0.10.2 - 2026-10-29 (local generation actually works: `think: false`)
 
 - **Root cause of every local failure: thinking tokens.** `gemma4:12b` is a

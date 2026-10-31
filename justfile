@@ -82,3 +82,11 @@ verify-depot:
 # dialog errors, no .import files), an editor pass works.
 godot-import:
     pwsh -NoProfile -Command "$g=(Get-Command godot).Source; Get-ChildItem depot/games | ForEach-Object { & $g --editor --path $_.FullName --quit-after 120 | Out-Null }; Write-Host 'imports written'"
+
+# three.js web family: serve the arcade on 11258
+web-serve:
+    Set-Location web; bun run serve
+
+# three.js web family gate: headless boot + self-play win + screenshots (Node 24)
+web-verify:
+    Set-Location web; node scripts/verify.ts

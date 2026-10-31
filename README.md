@@ -260,6 +260,27 @@ subcommands and MCP tools is the next step, not a claim of this release.
 process). Real FLAC needs an encoder this crate does not carry, so the manifest names
 the file that exists. Wallpapers are generated gradients - placeholder-grade.
 
+## Browser games (three.js family)
+
+`web/` is a second, deliberately different track. The depot's rule is "the model
+writes a spec, never code". The web family breaks it: the model writes the whole
+game as a static three.js page, the way recent frontier models do well. What can
+still be asserted is asserted:
+
+```powershell
+cd web; bun install
+just web-serve     # http://127.0.0.1:11258/
+just web-verify    # headless boot, zero console errors, self-play must win
+```
+
+| Game | What it is | Gate |
+|---|---|---|
+| `mossbrook` | Angled top-down village RPG engine: companions, cutaway walls, upstairs, cellars, troll cave | 8 checkpoints, win |
+| `kaffeehaus` | Viennese coffee house management, multi-day, with sound | full day, win, plus a self-test that good play beats random play |
+
+The gate proves a game loads, its systems behave along a scripted tour, and it can
+be finished. It does not prove it is fun. See `web/README.md`.
+
 ## Where to look
 
 - `AGENTS.md` - repo layout, hard gates, rules.

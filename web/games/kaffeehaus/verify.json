@@ -1,0 +1,134 @@
+{
+  "slug": "kaffeehaus",
+  "title": "Kaffeehaus",
+  "date": "2026-10-31T01:54:26.987Z",
+  "boot_ms": 527,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "day1_greedy_takings_beat_random": true,
+      "day1_random_beats_idle": true,
+      "day1_idle_earns_nothing": true,
+      "day1_greedy_stars_at_least_3": true,
+      "day1_greedy_stars_beat_random": true,
+      "busy_day_greedy_takings_beat_random": true,
+      "busy_day_greedy_stars_beat_random": true,
+      "campaign_greedy_cash_beats_random": true,
+      "campaign_random_loses_regulars": true,
+      "every_day_ends": true
+    },
+    "summary": {
+      "day1": {
+        "greedy": {
+          "takings": 234.47,
+          "stars": 3.06,
+          "angry": 2.6,
+          "walkouts": 0.2,
+          "guests": 25.6
+        },
+        "random": {
+          "takings": 202.14,
+          "stars": 1.32,
+          "angry": 1.4,
+          "walkouts": 0,
+          "guests": 25.6
+        },
+        "idle": {
+          "takings": 0,
+          "stars": 0,
+          "angry": 25.6,
+          "walkouts": 0,
+          "guests": 25.6
+        }
+      },
+      "day4": {
+        "greedy": {
+          "takings": 271.48,
+          "stars": 2.56,
+          "angry": 6.8,
+          "walkouts": 0.6,
+          "guests": 34.4
+        },
+        "random": {
+          "takings": 244.6,
+          "stars": 1.14,
+          "angry": 5,
+          "walkouts": 0,
+          "guests": 34.4
+        }
+      },
+      "campaign5": {
+        "greedy": {
+          "cash": 931.33,
+          "reputation": 2.49,
+          "loyalty": 20
+        },
+        "random": {
+          "cash": 723.05,
+          "reputation": 1.45,
+          "loyalty": 1
+        }
+      }
+    }
+  },
+  "steps": 45001,
+  "sim_seconds": 750,
+  "checkpoints": [
+    {
+      "name": "first-seated",
+      "step": 998,
+      "t": "07:16"
+    },
+    {
+      "name": "morning-rush",
+      "step": 7201,
+      "t": "09:00"
+    },
+    {
+      "name": "midday",
+      "step": 19801,
+      "t": "12:30"
+    },
+    {
+      "name": "jause",
+      "step": 32401,
+      "t": "16:00"
+    },
+    {
+      "name": "closing",
+      "step": 41401,
+      "t": "18:30"
+    },
+    {
+      "name": "day-end",
+      "step": 45001,
+      "t": "19:30"
+    }
+  ],
+  "shots": [
+    "shots/01-first-seated.png",
+    "shots/02-morning-rush.png",
+    "shots/03-midday.png",
+    "shots/04-jause.png",
+    "shots/05-closing.png",
+    "shots/06-day-end.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 3563,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint first-seated",
+    "GameCraft: checkpoint morning-rush",
+    "GameCraft: checkpoint midday",
+    "GameCraft: checkpoint jause",
+    "GameCraft: checkpoint closing",
+    "GameCraft: checkpoint day-end",
+    "GameCraft: day complete, 2.8 stars, € 140.22 profit",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

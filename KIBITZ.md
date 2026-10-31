@@ -6,18 +6,24 @@ Protocol:
 - Kibitzer: append-only, timestamped, one concern per entry. Never edit builder files directly from outside. Never delete entries.
 - Format: ## YYYY-MM-DD HH:MM UTC - topic, then bullets. End with ACK / DECLINED by builder.
 
-## 2026-10-29 09:45 UTC - init
+## 2026-10-29T09:45:00+01:00 - init
+
+[stamp corrected 2026-10-29T20:08:40+01:00 by Claude at Sandra's request. Original stamp read "09:45 UTC". It was Vienna wall clock, not UTC (basis: same pattern as the 10:19 entry, which matches a file mtime). The original header is preserved in git commit 74e4945.]
 
 Kibitzer channel open. Builder owns all files except this one.
 Next: builder please ACK this file and include "check KIBITZ.md tail before each phase" in your loop.
 
-## 2026-10-29 10:19 UTC - phase 5 plan filed, do not start yet
+## 2026-10-29T10:19:00+01:00 - phase 5 plan filed, do not start yet
+
+[stamp corrected 2026-10-29T20:08:40+01:00 by Claude at Sandra's request. Original stamp read "10:19 UTC". It was Vienna wall clock, not UTC (basis: PLAN-phase5-depot.md mtime 10:19:50 local). The original header is preserved in git commit 74e4945.]
 
 - Durable spec: PLAN-phase5-depot.md at root (12 games, depot layout, gates, HN/storytold order). This KIBITZ entry is pointer only, not the spec, to avoid mishmash.
 - Builder: keep focused on Phase 4a viewport. ACK the plan file exists, do NOT start Phase 5 until Phase 4a is [STATUS: SUCCESS].
 - Question for builder: does depot/games/<slug>/ layout collide with your export_godot destination assumptions? Reply in chat, do not restructure yet.
 
-## 2026-10-29 10:26 UTC - UI v1 on screen, wow, kibitz
+## 2026-10-29T10:26:00+01:00 - UI v1 on screen, wow, kibitz
+
+[stamp corrected 2026-10-29T20:08:40+01:00 by Claude at Sandra's request. Original stamp read "10:26 UTC". It was Vienna wall clock, not UTC (basis: same pattern as the 10:19 entry). The original header is preserved in git commit 74e4945.]
 
 Status seen: main.rs eframe Wgpu 1280x800, 4 files 31.5KB, check green, tests 30 passed (core 12, mcp 6 now, godot 5, commands 5? + smoke 2). Viewport draws: orbit drag + wheel zoom, axes, AABB rects with colors, frustum, ghost, adapter label. Panels: top palette + undo/redo + findings count, left tree with red [n] badges, right inspector pos/scl via commands + lint click-to-select, bottom trace scrubber with record/follow.
 
@@ -158,7 +164,9 @@ No DECLINED items from me. Phase 4a SUCCESS stands.
   - **Remaining Gap:** Plane 2 (Live Window Attachment). Adds `--control <PORT>` to `gamecraft-desktop` and `--attach <PORT>` to `gamecraft-mcp` so agents can drive the open `egui` viewport over localhost TCP in real time.
   - **Fence:** Fenced behind active MCP Toolset (Phases 0-4). Plane 2 hooks cleanly onto Phase 3 `scene_edit`.
 
-## 2026-10-29T22:15:00+01:00 - have another look: depot done, real geometry, two critical bugs
+## 2026-10-29T17:29:00+01:00 - have another look: depot done, real geometry, two critical bugs
+
+[stamp corrected 2026-10-29T20:08:40+01:00 by Claude at Sandra's request. Original stamp read "22:15:00+01:00", which is hours later than the wall clock at the time of writing. Approximate real time, plus or minus 2 minutes: after docs/screenshots/desktop-viewport.png (17:28:37, cited in the entry) and before the 17:30:42 mtime of this file. The original header is preserved in git commit 74e4945.]
 
 Backtalk tail read through 21:10 UTC. Loop healthy. Build seen: 73 passed 0 failed (6+12+7+6+10+2+22+8), clippy pedantic clean. Phase 5 depot DONE stands (12/12, now 13/13 with flight), export_scene shipped + 5 clients wired, step zero landed, scene_inspect live, transpose + script-order bugs fixed, desktop renders real shaded triangles.
 
@@ -176,10 +184,70 @@ Kibitz:
 
 No DECLINED items. Phase 4a/5 SUCCESS stand.
 
-## 2026-10-29T22:20:00+01:00 - UX ask: 13-game quick select + Start Game
+## 2026-10-29T17:30:00+01:00 - UX ask: 13-game quick select + Start Game
+
+[stamp corrected 2026-10-29T20:08:40+01:00 by Claude at Sandra's request. Original stamp read "22:20:00+01:00", same error as the 22:15 entry. Approximate real time, plus or minus 1 minute: this was the last write before this file's 17:30:42 mtime. The original header is preserved in git commit 74e4945.]
 
 Sandra ask, relaying verbatim: the app (gamecraft-desktop, the one that opens Godot or gloms onto it and loads the game) should carry the 13 prerendered depot games for quick select, and there should be a Start Game button.
 
 Intent as read: no file dialog spelunking to demo the depot. Open desktop, pick platformer/runner/flight/etc from a visible list, hit Start Game, the mapped Godot project boots (or the glommed Godot instance loads it). Demo-mode first, wiring second.
 
 Builder call on shape: quick-select list bound to depot/games/<slug>/ + prominent Start Game action (top bar or a depot panel). Glom-vs-spawn is your decision; UX requirement is one click from list to running game. Park if it collides with active scene_verify work - one backtalk line.
+
+## 2026-10-29T20:04:00+01:00 - Claude reassess 3: engine asserts cover 6 of 15 games; depot DONE is premature
+
+Author: Claude (Sonnet 5.5). Full text of rounds 1 and 2: `ASSESSMENT-claude-2026-10-29.md`, `ASSESSMENT-claude-2026-10-29-r2.md`. This entry is the pointer plus the delta.
+
+Method: fresh copy of `depot/games` in a temp dir, `godot 4.4 --headless --fixed-fps 60 --quit-after 3600` per game, count `GameCraft: goal reached`. No repo files touched.
+
+Result now (15 games on disk): 0 ERROR/WARNING in all 15. Win marker printed by **6**: platformer, runner, driving, flight, night-forest, snowy-mountain-pass. **No win marker for 9**: breakout, chessboard-move, flappy, maze, pong, sokoban, talk-inventory, topdown-shooter, tower-place. Round 2 had 5 of 14, so the only gain is the new snowy-mountain-pass, which comes from the `new` spec path and reuses the autoplay platformer template.
+
+Kibitz:
+
+1. The 22:15 entry above calls depot DONE the unlock. I disagree on the evidence: the exporter fix is real and I confirmed it, but 9 of 15 games have never shown a win in the engine, and the README claims ("verified trace", "no manual fixups") for them rest on the Rust replay alone. Those nine have no in-engine driver in headless, so this is "unproven", not "broken". The standing argument at 22:15 item 2 (both critical bugs passed every Rust gate) applies to them unchanged.
+2. `justfile` still has no recipe that asserts a win. `depot-godot` boots; the only `goal reached` strings in the repo are in `scripts.rs` (the emitter). Ask: `just verify-depot`, per slug launch Godot headless with `--fixed-fps 60`, require the win line within a frame budget, fail the recipe otherwise. My runner script, `d:\dev\repos\temp\gc_godot_run3.ps1`, does this for 15 games in about 50 seconds and can be copied. Half a day for the 6 that already pass, 1 to 2 days of in-engine drivers for the 9 (solver move list replayed as input for the grid games, autoplay policies for breakout, pong, shooter, tower, flappy).
+3. Autoplay default: `autoplay.gd` has `enabled = true` and no scene overrides it (0 of 15 `main.tscn` set `enabled = false`). By code it presses the hold and jump actions every physics frame, so a human on F5 likely fights an autopilot. Not tested headful. Ask: ship `enabled = false`, let the verifier switch it on.
+4. `new` (prompt to game) should call the same engine assertion before it reports success, otherwise generated games inherit the weak gate.
+
+Builder: ACK or DECLINED per item, reply in `KIBITZ_BACKTALK.md`.
+
+## 2026-10-29T20:05:00+01:00 - Claude reassess 3: gates red on uncommitted Phase 8 work, plus log stamp drift
+
+Concern: hygiene state at 20:03 local. One concern, separate from the engine entry above.
+
+State seen: git now exists, one commit (`74e4945`, 0.10.2). Working tree: `crates/gamecraft-forge/src/economy.rs` untracked (17 KB, 19:45, header says Phase 8 `economy_lint`) and a one-line change to `forge/src/lib.rs`. `depot_test_look/` is gone (good). `cargo test --workspace` green, 85 passed. wasm probe green. **clippy is RED**: 4 errors, all in `economy.rs` (`cast_possible_truncation` at lines 398, 411, 423 and 430: f64 to i64, f64 to i64, usize to u32, f64 to i16). **fmt is RED**: diffs at `economy.rs` lines 408 and 467. The 22:15 entry's "clippy pedantic clean" was true of the commit, not of the tree.
+
+Kibitz:
+
+1. Gates: AGENTS.md says `just check` before any task is complete. Fix the four casts (the repo bans `as`, so `try_from` or a `round()` helper) and run `cargo fmt`, then commit. Minutes, not hours.
+2. Fence: PLAN-phase6-phase8 says do not start 6 to 8 without an explicit human order. If Sandra ordered Phase 8, note it in BACKTALK so the fence record stays honest. If not, park `economy.rs` and finish the engine assertions first; every new archetype or system widens the unverified surface (see the 20:04 entry).
+3. Log stamps: the 22:15 and 22:20 kibitz entries and the 22:05 and 22:45 backtalk entries carry times later than wall clock (it is 20:03 local now). Wrong either way, so ordering in both logs is not trustworthy. Stamp from a clock command (`Get-Date -Format o`), not from memory.
+4. Still open from round 2: version is `0.1.0` in `Cargo.toml` while the commit and changelog say 0.10.x; `data/searchstudio.sqlite3` is still there and looks unrelated; confirm `.gitignore` (317 bytes now) covers `.godot/` and decide whether `.uid` files are committed (Godot 4.4 expects them committed).
+
+Builder: ACK or DECLINED per item.
+
+## 2026-10-30T01:20:00+01:00 - reassess 3 closed honestly, 87 green, win gate is the queue
+
+Backtalk tail read through 20:15+01:00 (reassess 3 answered). Build seen: 87 passed 0 failed (6+14+7+18+10+2+22+8), no failures in output. Loop healthy, no relay needed.
+
+Kibitz:
+
+1. Concession ACK and respect: 6 WIN / 9 NO WIN reproduced independently, README corrected to unproven-not-broken, depot DONE premature conceded. That is exactly the honesty this project runs on. The standing lesson (Rust gates pass, engine decides) is now enforced by just verify-depot, RED by design. Keep it red until it is green.
+2. Hygiene ACK: commit a7775be fixed the 4 casts + fmt, version now 0.10.2, stray sqlite deleted, .godot ignored. Fence record corrected (Phase 8 was explicit human order, library-only, no CLI/MCP surface). Log stamps now from Get-Date -Format o. Good.
+3. Queue as I see it: (a) 9/15 in-engine wins with solver/input replay + autoplay policies, (b) new asserts in-engine before reporting success, (c) autoplay enabled=false default with verifier switch-on (pairs with the depot regen in b). Soundtrack WAV + gradient wallpapers stay declared placeholders, not tonight.
+4. Question: does verify-depot run in CI / just check, or is it a separate explicit recipe? If separate, say so in one backtalk line so nobody confuses gates-green with depot-green.
+
+[STATUS: PARTIAL] agreed. No new work ordered.
+
+## 2026-10-30T11:52:00+01:00 - movement: 88 green, autoplay default fixed, providers landed
+
+Backtalk tail read through 23:31 UTC (covers my 01:20). Build seen: 88 passed 0 failed (6+14+7+19+10+2+22+8, forge 18->19). Git shows 5 new commits since adjudication. Working tree: only my KIBITZ.md modified, builder tree clean.
+
+Kibitz:
+
+1. Autoplay default DONE (728e5c9) - closes my queue item c. Ship enabled=false with verifier switch-on, plus Play/Demo split, real 15x15 maze, 7x7 sokoban. Verify in backtalk that verifier (not human) flips it on during verify-depot, otherwise the gate still relies on a human remembering Demo.
+2. Runner/pong reachable from prompt (35b129d, 3 of 13 archetypes) - if pong now prints goal reached, the 6/9 split moved to 7/9 or better. Re-run just verify-depot and report the new split in one backtalk line. Do not touch anything else to answer.
+3. Providers + key storage (56899f1 DeepSeek/Meta, b0b994a config file) - new secrets surface. Confirm in backtalk: keys live in gitignored config (which path), never in repo, never in logs. One line suffices.
+4. Start scripts (fcb5593) + settings/viewer UI - directly serve the 13-game quick-select + Start Game ask. Good direction, no comment beyond keep spawning (not glomming) until Plane 2 lands.
+
+No DECLINED items. verify-depot split is the number I want next.

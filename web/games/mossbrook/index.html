@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Mossbrook</title>
+<style>
+  :root {
+    --ink: #f3e7c9; --ink-dim: #c9b88f; --panel: rgba(28, 22, 16, 0.82); --edge: rgba(232, 200, 140, 0.35);
+    --accent: #e8b04a; --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0a08; color: var(--ink); font-family: var(--serif); }
+  #view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
+  .panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; backdrop-filter: blur(6px); box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+  #loc { position: fixed; top: 14px; left: 14px; padding: 10px 14px 12px; min-width: 220px; }
+  #loc-sub { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-dim); }
+  #loc-place { font-size: 21px; margin-top: 2px; }
+  #clock-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  #clock { font-variant-numeric: tabular-nums; font-size: 14px; color: var(--accent); min-width: 44px; }
+  .chip { font: 12px var(--serif); color: var(--ink); background: rgba(255,255,255,.06); border: 1px solid var(--edge); border-radius: 999px; padding: 3px 9px; cursor: pointer; }
+  .chip.on { background: var(--accent); color: #241a0e; border-color: var(--accent); }
+  #minimap { position: fixed; top: 14px; right: 14px; width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 6px 24px rgba(0,0,0,.45); }
+  #help-btn { position: fixed; top: 172px; right: 70px; width: 34px; height: 34px; border-radius: 50%; font-size: 17px; }
+  #party { position: fixed; left: 14px; bottom: 14px; display: flex; gap: 10px; padding: 10px 12px; }
+  .member { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-dim); }
+  .face { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--edge); }
+  #prompt { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 8px 14px; font-size: 15px; white-space: nowrap; }
+  kbd { display: inline-block; min-width: 22px; padding: 1px 6px; margin-right: 6px; border-radius: 5px; background: var(--ink); color: #241a0e; font: bold 13px var(--serif); text-align: center; }
+  #dialog { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); width: min(620px, calc(100vw - 28px)); padding: 14px 18px 12px; }
+  #dialog-who { color: var(--accent); font-size: 14px; letter-spacing: .04em; }
+  #dialog-text { font-size: 17px; line-height: 1.45; margin: 6px 0 8px; }
+  #dialog-hint { font-size: 12px; color: var(--ink-dim); text-align: right; }
+  #bubbles { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  .bubble { position: absolute; left: 0; top: 0; max-width: 220px; padding: 5px 10px; border-radius: 10px; background: rgba(250, 244, 228, .94); color: #2a2018; font-size: 13px; line-height: 1.3; box-shadow: 0 2px 8px rgba(0,0,0,.3); white-space: normal; text-align: center; }
+  .bubble.zzz { background: transparent; box-shadow: none; color: #cfe8ff; font-size: 22px; font-style: italic; text-shadow: 0 0 6px #000; }
+  #help { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8, 6, 4, .55); z-index: 5; }
+  #help[hidden] { display: none; }
+  #help .card { width: min(520px, calc(100vw - 28px)); padding: 22px 24px 18px; }
+  #help h1 { margin: 0 0 4px; font-size: 30px; font-weight: normal; letter-spacing: .02em; }
+  #help .tag { color: var(--ink-dim); font-size: 14px; margin-bottom: 14px; }
+  #help table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  #help td { padding: 5px 0; border-bottom: 1px solid rgba(232,200,140,.12); }
+  #help td:first-child { width: 42%; color: var(--ink-dim); }
+  #help button.go { margin-top: 16px; width: 100%; padding: 10px; font: 16px var(--serif); background: var(--accent); color: #241a0e; border: 0; border-radius: 8px; cursor: pointer; }
+  #stick-zone { position: fixed; left: 0; bottom: 0; width: 50vw; height: 55vh; display: none; touch-action: none; }
+  #stick-knob { position: fixed; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; background: rgba(243,231,201,.25); border: 2px solid rgba(243,231,201,.6); pointer-events: none; }
+  #talk-btn { position: fixed; right: 18px; bottom: 90px; width: 64px; height: 64px; border-radius: 50%; display: none; font-size: 14px; }
+  @media (pointer: coarse) {
+    #stick-zone { display: block; }
+    #talk-btn:not([hidden]) { display: block; }
+    #prompt kbd { display: none; }
+  }
+  @media (max-width: 640px) {
+    #loc { min-width: 0; padding: 8px 10px; }
+    #loc-place { font-size: 17px; }
+    #minimap { width: 104px; height: 104px; }
+    #help-btn { top: 124px; right: 48px; }
+    #party { bottom: auto; top: 128px; left: 14px; padding: 6px 8px; gap: 6px; }
+    .face { width: 28px; height: 28px; }
+  }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="bubbles"></div>
+
+<div id="loc" class="panel">
+  <div id="loc-sub">Village green</div>
+  <div id="loc-place">Mossbrook</div>
+  <div id="clock-row">
+    <span id="clock">18:40</span>
+    <button class="chip" data-time="dawn">Dawn</button>
+    <button class="chip" data-time="noon">Noon</button>
+    <button class="chip" data-time="dusk">Dusk</button>
+    <button class="chip" data-time="night">Night</button>
+  </div>
+</div>
+
+<canvas id="minimap" width="150" height="150"></canvas>
+<button id="help-btn" class="chip" title="Help (H)">?</button>
+
+<div id="party" class="panel">
+  <div class="member"><div class="face" style="background: radial-gradient(circle at 50% 38%, #e8b894 34%, #3a5a8a 36%)"></div>You</div>
+  <div class="member"><div class="face" style="background: radial-gradient(circle at 50% 38%, #f0c8a8 34%, #3f6a3a 36%)"></div>Tamsin</div>
+  <div class="member"><div class="face" style="background: radial-gradient(circle at 50% 38%, #d8a07a 34%, #8a2d2d 36%)"></div>Odo</div>
+</div>
+
+<div id="prompt" class="panel" hidden><kbd>E</kbd><span id="prompt-text"></span></div>
+<div id="dialog" class="panel" hidden>
+  <div id="dialog-who"></div>
+  <div id="dialog-text"></div>
+  <div id="dialog-hint">E / Enter to continue, Esc to close</div>
+</div>
+
+<div id="stick-zone"></div>
+<div id="stick-knob" hidden></div>
+<button id="talk-btn" class="chip" hidden>Talk</button>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Mossbrook</h1>
+    <div class="tag">A village, two friends, a cellar that is too big, and something asleep up the crag.</div>
+    <table>
+      <tr><td>Move</td><td>WASD or arrow keys (drag on the left half on touch)</td></tr>
+      <tr><td>Run</td><td>Shift</td></tr>
+      <tr><td>Talk, read</td><td>E or Enter</td></tr>
+      <tr><td>Time of day</td><td>1 dawn, 2 noon, 3 dusk, 4 night</td></tr>
+      <tr><td>Zoom</td><td>Mouse wheel</td></tr>
+      <tr><td>Help</td><td>H</td></tr>
+    </table>
+    <button id="help-close" class="go">Walk into the village</button>
+  </div>
+</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "slug": "kaffeehaus",
+  "title": "Kaffeehaus",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Viennese coffee house management: seat, serve, bill, keep the regulars. Original design; the sim is pure logic and self-tests that good play beats random play.",
+  "author": "Claude Opus 5.5, gamecraft session 2026-10-31",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "midday",
+  "step_budget": 60000
+}
