@@ -20,13 +20,23 @@ const CLIMB: f32 = 6.0;
 const TOLERANCE: f32 = 1.6;
 
 /// Gate positions: `(x, altitude)`.
-const GATES: [(f32, f32); 5] = [
-    (20.0, 4.0),
-    (40.0, 6.5),
-    (60.0, 4.5),
-    (80.0, 8.0),
-    (100.0, 5.5),
-];
+const GATE_OFFSETS: [f32; 5] = [0.0, 2.5, 0.5, 4.0, 1.5];
+
+/// Deterministic gate course: `count` gates spaced along +x, alternating
+/// altitude around `base`. The default arguments reproduce the original
+/// hand-written table exactly.
+fn gate_list(count: usize, spacing: f32, base: f32) -> Vec<(f32, f32)> {
+    (0..count)
+        .map(|index| {
+            let step = f32::from(u16::try_from(index).unwrap_or(0));
+            let offset = GATE_OFFSETS
+                .get(index % GATE_OFFSETS.len())
+                .copied()
+                .unwrap_or(0.0);
+            (spacing * (step + 1.0), base + offset)
+        })
+        .collect()
+}
 
 /// Build the flight archetype.
 ///
@@ -34,6 +44,24 @@ const GATES: [(f32, f32); 5] = [
 ///
 /// Returns a message when the trace cannot clear the gates or a node is invalid.
 pub fn build_flight() -> Result<GameParts, String> {
+    build_flight_with(5, 20.0, 4.0, "flight", "GameCraft Flight", true)
+}
+
+/// Flight with a caller-supplied gate course and name.
+///
+/// # Errors
+///
+/// Returns a message when the trace cannot clear the gates or a node is invalid.
+#[allow(clippy::too_many_lines)]
+pub fn build_flight_with(
+    gate_count: usize,
+    spacing: f32,
+    base: f32,
+    slug: &str,
+    title: &str,
+    textured: bool,
+) -> Result<GameParts, String> {
+    let gates_data = gate_list(gate_count, spacing, base);
     let mut forge = Forge::new();
     let root = forge
         .add_node("World", "Node3D", None)
@@ -42,7 +70,11 @@ pub fn build_flight() -> Result<GameParts, String> {
         .set_prop(root, "script", Forge::ext_ref("1_runtime"))
         .map_err(|err| err.to_string())?;
     forge
-        .set_prop(root, "rings_to_win", PropertyValue::Int(5))
+        .set_prop(
+            root,
+            "rings_to_win",
+            PropertyValue::Int(i64::try_from(gates_data.len()).unwrap_or(5)),
+        )
         .map_err(|err| err.to_string())?;
     forge
         .sky(root, [0.24, 0.42, 0.75], [0.78, 0.87, 0.96])
@@ -54,12 +86,14 @@ pub fn build_flight() -> Result<GameParts, String> {
     forge.ext_resource("Script", "res://scripts/player_controller.gd", "2_player");
     forge.ext_resource("Script", "res://scripts/camera_follow.gd", "3_camera");
     forge.ext_resource("Script", "res://scripts/autoplay.gd", "4_autoplay");
-    forge.ext_resource("Texture2D", "res://textures/plaster.png", "tex_plaster");
-    forge.ext_resource("Texture2D", "res://textures/brick.png", "tex_brick");
+    if textured {
+        forge.ext_resource("Texture2D", "res://textures/plaster.png", "tex_plaster");
+        forge.ext_resource("Texture2D", "res://textures/brick.png", "tex_brick");
+    }
 
     terrain(&mut forge, root)?;
-    village(&mut forge, root)?;
-    gates(&mut forge, root)?;
+    village(&mut forge, root, textured)?;
+    gates(&mut forge, root, gates_data.as_slice())?;
     aircraft(&mut forge, root)?;
     forge
         .follow_camera("Camera3D", Some(root), [0.0, 3.6, 16.0], 42.0, "3_camera")
@@ -68,12 +102,16 @@ pub fn build_flight() -> Result<GameParts, String> {
         .autoplay_flight(root, "4_autoplay")
         .map_err(|err| err.to_string())?;
 
-    let run = sim::run_flight(SPEED, CLIMB, &GATES, TOLERANCE, 600);
+    // The sim budget must scale with course length: 600 frames only reaches
+    // ~5 gates at the default spacing, so a longer course reported "missed a
+    // gate" when it was really out of time.
+    let budget = gates_data.len().saturating_mul(150).max(600);
+    let run = sim::run_flight(SPEED, CLIMB, gates_data.as_slice(), TOLERANCE, budget);
     if !run.won {
         return Err(format!(
             "flight trace missed a gate: {} of {} cleared in {} frames",
             run.rings,
-            GATES.len(),
+            gates_data.len(),
             run.frames
         ));
     }
@@ -97,10 +135,10 @@ pub fn build_flight() -> Result<GameParts, String> {
         .map(std::string::ToString::to_string)
         .collect::<Vec<String>>()
         .join("\n");
-    let statics = statics();
+    let statics = statics(gates_data.as_slice());
     Ok(GameParts {
-        slug: "flight",
-        title: "GameCraft Flight",
+        slug: Box::leak(slug.to_string().into_boxed_str()),
+        title: Box::leak(title.to_string().into_boxed_str()),
         controls: "Up/Down pitch to climb or dive. Speed is fixed; fly through all 5 gates.",
         win_text: "Pass all 5 gates.",
         seed: 13,
@@ -161,7 +199,7 @@ fn terrain(forge: &mut Forge, root: NodeId) -> Result<(), String> {
 }
 
 /// Settlement: four building kinds at three LODs, plus creatures.
-fn village(forge: &mut Forge, root: NodeId) -> Result<(), String> {
+fn village(forge: &mut Forge, root: NodeId, textured: bool) -> Result<(), String> {
     let plan = [
         (BuildingKind::Farmhouse, 16.0_f32, -7.0_f32, 2_u8),
         (BuildingKind::Barn, 34.0, -9.0, 1),
@@ -173,13 +211,19 @@ fn village(forge: &mut Forge, root: NodeId) -> Result<(), String> {
     ];
     for (serial, (kind, x, z, lod)) in plan.iter().enumerate() {
         let mut spec = BuildingSpec::new(*kind, *x, *z, *lod);
-        spec.tex = Some(match kind {
-            BuildingKind::Barn | BuildingKind::Church | BuildingKind::Castle => "tex_brick",
-            BuildingKind::Farmhouse
-            | BuildingKind::Igloo
-            | BuildingKind::Windmill
-            | BuildingKind::Lighthouse => "tex_plaster",
-        });
+        // Textures need Godot's editor import pass (.import + .ctex), which a
+        // generated game never runs. Flat materials keep it error-free.
+        spec.tex = if textured {
+            Some(match kind {
+                BuildingKind::Barn | BuildingKind::Church | BuildingKind::Castle => "tex_brick",
+                BuildingKind::Farmhouse
+                | BuildingKind::Igloo
+                | BuildingKind::Windmill
+                | BuildingKind::Lighthouse => "tex_plaster",
+            })
+        } else {
+            None
+        };
         spawn_building(forge, root, serial, &spec)?;
     }
     let folk = [
@@ -195,8 +239,8 @@ fn village(forge: &mut Forge, root: NodeId) -> Result<(), String> {
 }
 
 /// Five torus gates, each an `Area3D` trigger wired to the runtime.
-fn gates(forge: &mut Forge, root: NodeId) -> Result<(), String> {
-    for (index, (x, y)) in GATES.iter().enumerate() {
+fn gates(forge: &mut Forge, root: NodeId, course: &[(f32, f32)]) -> Result<(), String> {
+    for (index, (x, y)) in course.iter().enumerate() {
         let name = format!("Ring{index}");
         let ring = forge
             .place(name.as_str(), "Area3D", Some(root), [*x, *y, 0.0])
@@ -285,7 +329,7 @@ fn export_scene(forge: &Forge) -> Result<String, String> {
 }
 
 /// Static geometry for the trace render.
-fn statics() -> Vec<Glyph> {
+fn statics(course: &[(f32, f32)]) -> Vec<Glyph> {
     let mut out = vec![Glyph {
         x: 60.0,
         y: -0.6,
@@ -294,7 +338,7 @@ fn statics() -> Vec<Glyph> {
         color: 1,
         circle: false,
     }];
-    for (x, y) in GATES {
+    for (x, y) in course.iter().copied() {
         out.push(Glyph {
             x,
             y,

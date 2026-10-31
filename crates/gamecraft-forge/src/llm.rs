@@ -448,6 +448,8 @@ Other archetypes (reply with one of these shapes instead of the platformer one):
 - runner: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"runner\"}} (fixed auto-runner; theme applies)\n\
 - pong: rolling ball game; send \"physics\":{{\"speed\":14.0}} as ball speed, 8..22\n\
 - maze: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"maze\",\"maze\":{{\"size\":15,\"seed\":9}}}}; size odd 7..25\n\
+- flight: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"flight\",\"flight\":{{\"gates\":5,\"spacing\":20,\"altitude\":4}}}}; gates 2..12\n\
+- driving: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"driving\",\"drive\":{{\"radius\":12,\"checkpoints\":8}}}}; checkpoints 4..16\n\
 Rules that decide whether the level is accepted:\n\
 - The player starts on the first ground slab and runs right.\n\
 - Gaps between grounds must be jumpable: width <= 3.2 units with the default jump.\n\

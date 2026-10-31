@@ -140,6 +140,47 @@ impl Default for MazeParams {
     }
 }
 
+/// Flight course parameters (only read when `archetype` is `"flight"`).
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(default)]
+pub struct FlightParams {
+    /// Number of gates to fly through (2-12).
+    pub gates: usize,
+    /// Distance between gates along +x.
+    pub spacing: f32,
+    /// Base altitude the gates alternate around.
+    pub altitude: f32,
+}
+
+impl Default for FlightParams {
+    fn default() -> Self {
+        Self {
+            gates: 5,
+            spacing: 20.0,
+            altitude: 4.0,
+        }
+    }
+}
+
+/// Driving course parameters (only read when `archetype` is `"driving"`).
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(default)]
+pub struct DriveParams {
+    /// Loop radius in world units.
+    pub radius: f32,
+    /// Checkpoints around the loop (4-16).
+    pub checkpoints: usize,
+}
+
+impl Default for DriveParams {
+    fn default() -> Self {
+        Self {
+            radius: 12.0,
+            checkpoints: 8,
+        }
+    }
+}
+
 /// A complete game design.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
@@ -158,6 +199,10 @@ pub struct GameSpec {
     pub level: Level,
     /// Maze generation parameters (only used when `archetype` is `"maze"`).
     pub maze: MazeParams,
+    /// Flight course parameters (only used when `archetype` is `"flight"`).
+    pub flight: FlightParams,
+    /// Driving course parameters (only used when `archetype` is `"driving"`).
+    pub drive: DriveParams,
 }
 
 impl Default for GameSpec {
@@ -170,6 +215,8 @@ impl Default for GameSpec {
             physics: Physics::default(),
             level: Level::default(),
             maze: MazeParams::default(),
+            flight: FlightParams::default(),
+            drive: DriveParams::default(),
         }
     }
 }
@@ -185,9 +232,11 @@ pub fn validate(spec: &GameSpec) -> Result<(), String> {
         && spec.archetype != "runner"
         && spec.archetype != "pong"
         && spec.archetype != "maze"
+        && spec.archetype != "flight"
+        && spec.archetype != "driving"
     {
         problems.push(format!(
-            "archetype '{}' is not supported (supported: platformer, runner, pong, maze)",
+            "archetype '{}' is not supported (supported: platformer, runner, pong, maze, flight, driving)",
             spec.archetype
         ));
     }
@@ -318,6 +367,39 @@ pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
             return Err(format!("maze size {size} must be an odd number 7..=25"));
         }
         return crate::puzzle::build_maze_with(size, size, spec.maze.seed, &spec.slug, &spec.title);
+    }
+    if spec.archetype == "flight" {
+        let gates = spec.flight.gates;
+        let spacing = spec.flight.spacing;
+        let altitude = spec.flight.altitude;
+        if !(2..=12).contains(&gates) {
+            return Err(format!("flight gates {gates} must be 2..=12"));
+        }
+        if !(8.0..=60.0).contains(&spacing) {
+            return Err(format!("flight spacing {spacing} must be 8..=60"));
+        }
+        if !(1.0..=12.0).contains(&altitude) {
+            return Err(format!("flight altitude {altitude} must be 1..=12"));
+        }
+        return crate::flight::build_flight_with(
+            gates,
+            spacing,
+            altitude,
+            &spec.slug,
+            &spec.title,
+            false,
+        );
+    }
+    if spec.archetype == "driving" {
+        let radius = spec.drive.radius;
+        let checkpoints = spec.drive.checkpoints;
+        if !(5.0..=40.0).contains(&radius) {
+            return Err(format!("driving radius {radius} must be 5..=40"));
+        }
+        if !(4..=16).contains(&checkpoints) {
+            return Err(format!("driving checkpoints {checkpoints} must be 4..=16"));
+        }
+        return crate::driving::build_driving_with(radius, checkpoints, &spec.slug, &spec.title);
     }
     validate(spec)?;
     let physics = &spec.physics;

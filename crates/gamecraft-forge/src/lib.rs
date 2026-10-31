@@ -177,9 +177,11 @@ fn forge_game(game: &GameDef, out: &Path) -> Result<String, String> {
 /// Returns a message when any file cannot be written.
 pub fn write_game(dir: &Path, parts: &GameParts) -> Result<(), String> {
     fs::create_dir_all(dir.join("scripts")).map_err(|err| err.to_string())?;
-    // Generated textures (currently the flight village). Written before the
-    // resource check below, which requires every res:// target to exist.
-    if parts.slug == "flight" {
+    // Generated textures (the flight village). Written before the resource
+    // check below, which requires every res:// target to exist. Keyed on what
+    // the scene actually references, not on the slug: a generated flight game
+    // has a user-chosen slug and used to ship with missing textures.
+    if parts.scene_text.contains("res://textures/") {
         let tex_dir = dir.join("textures");
         fs::create_dir_all(&tex_dir).map_err(|err| err.to_string())?;
         for (name, bytes) in textures::depot() {
