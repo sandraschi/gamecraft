@@ -13,7 +13,7 @@ export const BELOW_Y = -3.0;
 export const WALL_T = 0.3;
 export const DOOR_W = 1.8;
 export const DOOR_H = 2.3;
-export const WORLD_HALF = 96;
+export const WORLD_HALF = 196;
 
 // ---------------------------------------------------------------- math
 export const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -119,10 +119,14 @@ export const BELOW_ROOMS = [
   { id: 'tunnel-a', name: "Smugglers' tunnel", r: [1, 3.5, -16.2, 4.5] },
   { id: 'tunnel-b', name: "Smugglers' tunnel", r: [1, 17.2, 2, 4.5] },
   { id: 'cellar-forge', name: 'Forge cellar', r: [17, 27, -0.6, 8] },
+  { id: 'keepers-cellar', name: "The Keeper's Cellar", r: [4.4, 9.5, -5, 0.8] },
+  { id: 'keepers-door', name: "Smugglers' tunnel", r: [5, 6.6, 0.8, 2.05] },
 ];
 export const CAVE_ROOMS = [
   { id: 'cave-mouth', name: 'Knucklehollow, the mouth', r: [-57, -46, -7.5, -4.5] },
   { id: 'cave-hall', name: 'Knucklehollow Cave', r: [-72, -56.5, -17, 4] },
+  { id: 'cave-passage', name: 'Root passage', r: [-66, -63, 4, 10] },
+  { id: 'cave-hollow', name: "The Keeper's Hollow", r: [-71, -58, 10, 18] },
 ];
 export const MOUNTAIN = { x: -80, z: -6, r: 32, h: 24, block: 30 };
 // Hysteresis: enter below enterX, leave above exitX, so the boundary never flickers.
@@ -137,7 +141,12 @@ export const ROADS = [
   [[0, 28.5], [10, 31]], [[10, 31], [10, 30.4]],
   [[4, 0], [24, -14.6]], [[24, -14.6], [70, -10]],
   [[4.5, 3.5], [-48.8, -6]], [[14, 12], [4.5, 3.5]],
+  [[70, -10], [120, -4]], [[-6, 28.5], [-17, 38]], [[-17, 38], [-8, 62]], [[-8, 62], [-8, 68]],
+  [[64, -10.6], [70, -16]], [[70, -16], [72, -21]],
 ];
+export const riverX = (z) => 62 + 5 * Math.sin(z * 0.035);
+export const MOONRING = { x: -8, z: 72, r: 7 };
+export const HUT = { x: 76, z: -25, w: 6, d: 5 };
 export function roadDist(x, z) {
   let d = 1e9;
   for (const [a, b] of ROADS) d = Math.min(d, distToSeg(x, z, a, b));
@@ -166,7 +175,12 @@ export function terrainHeight(x, z) {
   const rim = smoothstep(40, 80, dv) * (5 + 6 * vnoise(x * 0.04 + 7, z * 0.04 - 3));
   const roll = 0.7 * Math.sin(x * 0.19 + 1.3) * Math.cos(z * 0.16 - 0.4) + 0.9 * (vnoise(x * 0.11, z * 0.11) - 0.5);
   const village = (roll + 0.55) * (1 - plotMask(x, z));
-  return village + rim + mountainHeight(x, z);
+  const far = 7 * (vnoise(x * 0.015 + 3, z * 0.015 - 9) - 0.5) * smoothstep(80, 140, dv);
+  const ring = 1 - smoothstep(9, 15, Math.hypot(x - MOONRING.x, z - MOONRING.z));
+  const hut = 1 - smoothstep(5, 9, Math.hypot(x - HUT.x, z - HUT.z));
+  let h = village + (rim + far) * (1 - Math.max(ring, hut) * 0.85) + mountainHeight(x, z);
+  h -= 4.5 * (1 - smoothstep(3.5, 7.5, Math.abs(x - riverX(z))));
+  return h;
 }
 
 // ---------------------------------------------------------------- collision
@@ -182,7 +196,13 @@ export class Collision {
     return s;
   }
   walk(id, r) { (this.space(id).walk ??= []).push(r); }
-  box(id, x0, x1, z0, z1) { this.space(id).boxes.push([Math.min(x0, x1), Math.max(x0, x1), Math.min(z0, z1), Math.max(z0, z1)]); }
+  box(id, x0, x1, z0, z1) {
+    const b = [Math.min(x0, x1), Math.max(x0, x1), Math.min(z0, z1), Math.max(z0, z1)];
+    this.space(id).boxes.push(b);
+    return b;
+  }
+  remove(id, b) { const s = this.space(id); s.boxes = s.boxes.filter((o) => o !== b); }
+  block(id, fn) { (this.space(id).funcs ??= []).push(fn); }
   circle(id, x, z, r) { this.space(id).circles.push([x, z, r]); }
   canStand(id, x, z, r) {
     if (Math.abs(x) > WORLD_HALF || Math.abs(z) > WORLD_HALF) return false;
@@ -198,6 +218,7 @@ export class Collision {
       if ((x - qx) ** 2 + (z - qz) ** 2 < r * r) return false;
     }
     for (const c of s.circles) if (Math.hypot(x - c[0], z - c[1]) < c[2] + r) return false;
+    if (s.funcs) for (const f of s.funcs) if (f(x, z, r)) return false;
     return true;
   }
 }
@@ -206,6 +227,7 @@ export function buildingAt(x, z) {
   return BUILDINGS.find((b) => inRect(b.inner, x, z)) ?? null;
 }
 export function floorY(world, space, x, z) {
+  if (space === 'outdoor' && world.bridge && inRect(world.bridge.rect, x, z)) return world.bridge.y;
   if (space === 'outdoor') return buildingAt(x, z) ? FLOOR_Y : terrainHeight(x, z);
   if (space.startsWith('upper:')) return UPPER_Y;
   if (space === 'below') return BELOW_Y;
@@ -952,8 +974,10 @@ function buildOutdoorProps(ctx, rng) {
 
 function buildTrees(ctx, rng) {
   const spots = [];
-  for (let i = 0; i < 1400 && spots.length < 190; i++) {
-    const x = (rng() * 2 - 1) * 93, z = (rng() * 2 - 1) * 93;
+  for (let i = 0; i < 9000 && spots.length < 760; i++) {
+    const x = (rng() * 2 - 1) * 192, z = (rng() * 2 - 1) * 192;
+    if (Math.abs(x - riverX(z)) < 9) continue;
+    if (Math.hypot(x - MOONRING.x, z - MOONRING.z) < 14 || Math.hypot(x - HUT.x, z - HUT.z) < 10) continue;
     if (Math.hypot(x - 2, z - 2) < 24) continue;
     if (plotMask(x, z) > 0.02 || roadDist(x, z) < 3.6) continue;
     if (Math.hypot(x - MOUNTAIN.x, z - MOUNTAIN.z) < MOUNTAIN.r + 1.5) continue;
@@ -1000,7 +1024,7 @@ function buildTrees(ctx, rng) {
 }
 
 function buildTerrain(ctx) {
-  const S = 200, N = 200;
+  const S = 400, N = 200;
   const geo = new THREE.PlaneGeometry(S, S, N, N);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
@@ -1029,6 +1053,136 @@ function buildTerrain(ctx) {
   return m;
 }
 
+
+// ---------------------------------------------------------------- prompt 4: the wider valley and the secrets
+function buildRiver(ctx) {
+  const a = ctx.groups.above;
+  // water ribbon following the channel
+  const pos = [], idx = [];
+  let i = 0;
+  for (let z = -WORLD_HALF; z <= WORLD_HALF; z += 4, i++) {
+    const cx = riverX(z), y = terrainHeight(cx + 9, z) - 2.6;
+    pos.push(cx - 6.5, y, z, cx + 6.5, y, z);
+    if (i > 0) { const k = (i - 1) * 2; idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  const water = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0x3a6a8a, roughness: 0.2, metalness: 0.1, transparent: true, opacity: 0.85, side: THREE.DoubleSide }));
+  water.receiveShadow = true;
+  a.add(water);
+  // the bridge
+  const b = ctx.bridge;
+  const [x0, x1, z0, z1] = b.rect;
+  box(a, x1 - x0, 0.3, z1 - z0, (x0 + x1) / 2, b.y - 0.15, (z0 + z1) / 2, 0x7a5a3a);
+  for (const zz of [z0 + 0.1, z1 - 0.1]) {
+    box(a, x1 - x0, 0.1, 0.1, (x0 + x1) / 2, b.y + 0.95, zz, 0x5a3d24);
+    for (let x = x0 + 0.3; x < x1; x += 2.1) box(a, 0.14, 1.0, 0.14, x, b.y + 0.5, zz, 0x5a3d24);
+  }
+  for (const x of [x0 + 5.5, x1 - 5.5]) box(a, 0.5, 4, 0.5, x, b.y - 2.2, (z0 + z1) / 2, 0x6d665e);
+  // the river blocks walking except across the deck
+  ctx.col.block('outdoor', (x, z, r) => {
+    if (Math.abs(x - riverX(z)) >= 5.5 + r) return false;
+    return !(x >= x0 && x <= x1 && z - r >= z0 + 0.25 && z + r <= z1 - 0.25);
+  });
+}
+
+function buildMoonring(ctx, rng) {
+  const a = ctx.groups.above;
+  const { x: cx, z: cz, r } = MOONRING;
+  for (let k = 0; k < 8; k++) {
+    const ang = ((k + 0.5) * Math.PI) / 4;
+    const x = cx + Math.cos(ang) * r, z = cz + Math.sin(ang) * r;
+    const st = box(a, 1.1, 3.2 + rng() * 1.2, 0.7, x, terrainHeight(x, z) + 1.7, z, 0x8a8680);
+    st.rotation.y = -ang + Math.PI / 2;
+    ctx.col.circle('outdoor', x, z, 0.75);
+  }
+  const ay = terrainHeight(cx, cz);
+  box(a, 2, 0.6, 1.4, cx, ay + 0.3, cz, 0x6d6862);
+  const rune = box(a, 1.2, 0.04, 0.6, cx, ay + 0.62, cz, 0, { material: glow(0xb08aff, 1.4), cast: false });
+  ctx.col.circle('outdoor', cx, cz, 1.0);
+  const l = new THREE.PointLight(0xb08aff, 3, 10, 1.6);
+  l.position.set(cx, ay + 1.5, cz); a.add(l);
+  ctx.story.altar = { rune, light: l };
+}
+
+function buildWillowbank(ctx) {
+  const a = ctx.groups.above;
+  const { x, z, w, d } = HUT;
+  const y = terrainHeight(x, z);
+  box(a, w, 2.6, d, x, y + 1.3, z, 0x8a6a44);
+  const roof = box(a, w + 0.8, 0.25, d + 1.2, x, y + 3.0, z, 0x5e6b3f);
+  roof.rotation.z = 0.12;
+  box(a, 1, 1.9, 0.1, x - 1, y + 0.95, z + d / 2 + 0.05, 0x3a2414);
+  ctx.col.box('outdoor', x - w / 2, x + w / 2, z - d / 2, z + d / 2);
+  // jetty and a rowing boat
+  const jx = riverX(-17) + 4.2;
+  box(a, 3, 0.15, 1.2, jx, terrainHeight(jx + 3, -17) - 0.4, -17, 0x6b4a2b);
+  const boat = box(a, 2.6, 0.4, 1, riverX(-21) + 2, terrainHeight(riverX(-21) + 9, -21) - 2.4, -21, 0x7a4a2a);
+  boat.rotation.y = 0.3;
+  for (let i = 0; i < 6; i++) crate(a, x + 4 + (i % 2) * 0.8, terrainHeight(x + 4, z), z - 1 + i * 0.4, 0.5, i);
+}
+
+function buildSecrets(ctx, rng) {
+  const g = ctx.groups.below, y = BELOW_Y, st = ctx.story;
+  // the false wall between the tunnel and the Keeper's Cellar, with a glyph only Glimmer shows
+  const wall = box(g, 1.6, 3.1, 0.9, 5.8, y + 1.55, 1.45, 0x5a4c3e);
+  const glyph = box(g, 0.9, 0.9, 0.02, 5.8, y + 1.5, 1.91, 0, { material: glow(0x5ac8ff, 2.2), cast: false });
+  glyph.visible = false;
+  st.falseWall = { mesh: wall, col: ctx.col.box('below', 5, 6.6, 1.0, 1.9) };
+  ctx.glimmer.push(glyph);
+  // the Keeper's Cradle: the mechanism that lifts light into the well
+  const cr = group(g, 7.5, y, -3.2);
+  cyl(cr, 0.6, 0.8, 0.9, 0, 0.45, 0, 0x6d665e, 10);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.06, 6, 18), mat(0xc9a646));
+  ring.rotation.x = Math.PI / 2; ring.position.y = 1.0; cr.add(ring);
+  for (let i = 0; i < 3; i++) cyl(cr, 0.06, 0.06, 2.4, Math.cos(i * 2.1) * 0.5, 2.1, Math.sin(i * 2.1) * 0.5, 0xb8902e, 6);
+  const heartSlot = new THREE.Mesh(new THREE.OctahedronGeometry(0.35, 0), glow(0xffe08a, 2.5));
+  heartSlot.position.y = 1.4; heartSlot.scale.y = 1.6; heartSlot.visible = false; cr.add(heartSlot);
+  const splinter = new THREE.Mesh(new THREE.OctahedronGeometry(0.1, 0), glow(0x5a7a8a, 0.5));
+  splinter.position.y = 1.1; cr.add(splinter);
+  ctx.col.box('below', 7, 8, -3.7, -2.7);
+  for (let i = 0; i < 5; i++) crate(g, 8.6, y, -4.4 + i * 0.75, 0.55, i * 0.4);
+  ctx.col.box('below', 8.25, 9.5, -4.8, -0.9);
+  box(g, 0.06, 0.25, 0.4, 5.2, y + 0.9, -4.6, 0xeee6d0, { cast: false });
+  torch(g, 4.8, y + 1.8, -1.0, ctx, 3, 8);
+  st.cradle = { heart: heartSlot, splinter };
+  // crystal smuggled into the forge cellar, packed in coal
+  const cmat = glow(0x5ac8ff, 1.4);
+  for (let i = 0; i < 9; i++) {
+    const c = new THREE.Mesh(new THREE.OctahedronGeometry(0.12 + rng() * 0.08, 0), cmat);
+    c.position.set(23.4 + rng() * 2.2, y + 0.75 + rng() * 0.25, 5.7 + rng() * 1.7); c.scale.y = 1.8; g.add(c);
+  }
+  // cave: the root curtain, the passage, the hollow, the tablet, the heart crystal
+  const cg = ctx.groups.cave, cy = ctx.caveY;
+  const roots = new THREE.Group(); cg.add(roots);
+  for (let i = 0; i < 16; i++) {
+    const r = cyl(roots, 0.07, 0.12, 3.2, -65.8 + i * 0.18 + rng() * 0.1, cy + 1.6, 5.85 + (rng() - 0.5) * 0.3, 0x5a3d24, 5);
+    r.rotation.z = (rng() - 0.5) * 0.4;
+  }
+  st.roots = { group: roots, col: ctx.col.box('cave', -66, -63, 5.5, 6.2) };
+  const tab = group(cg, -64.5, cy, 16.9);
+  box(tab, 2.2, 2.4, 0.4, 0, 1.2, 0, 0x6d6862);
+  box(tab, 1.8, 1.8, 0.05, 0, 1.3, 0.21, 0x8a8478, { cast: false });
+  for (let i = 0; i < 6; i++) box(tab, 1.3 - (i % 2) * 0.3, 0.06, 0.06, 0, 0.75 + i * 0.25, 0.25, 0x3a3630, { cast: false });
+  ctx.col.box('cave', -65.7, -63.3, 16.6, 17.2);
+  const ped = group(cg, -68.5, cy, 13.5);
+  cyl(ped, 0.45, 0.6, 1.0, 0, 0.5, 0, 0x5e5953, 8);
+  const heart = new THREE.Mesh(new THREE.OctahedronGeometry(0.4, 0), glow(0xffe08a, 2.2));
+  heart.position.y = 1.45; heart.scale.y = 1.6; ped.add(heart);
+  const hl = new THREE.PointLight(0xffd070, 4, 9, 1.5); hl.position.set(0, 1.8, 0); ped.add(hl);
+  ctx.col.box('cave', -69.1, -67.9, 12.9, 14.1);
+  st.heart = { mesh: heart, light: hl };
+  // the beam that rises from the well when the light comes back
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.1, 60, 16, 1, true),
+    new THREE.MeshBasicMaterial({ color: 0xffe2a0, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  beam.position.set(PLAZA.x, terrainHeight(PLAZA.x, PLAZA.z) + 30, PLAZA.z);
+  beam.visible = false;
+  ctx.groups.above.add(beam);
+  st.beam = beam;
+}
+
 // ---------------------------------------------------------------- entry point
 export function buildWorld(scene, seed = 20261031) {
   const rng = mulberry32(seed);
@@ -1038,7 +1192,11 @@ export function buildWorld(scene, seed = 20261031) {
     col: new Collision(), groups, fires: [], lamps: [], items: [],
     lampMat: glow(0xffc070, 0.2),
     caveY: terrainHeight(CAVE.enterX, -6),
+    story: {}, glimmer: [],
   };
+  const bx = riverX(-10.8);
+  const bRect = [bx - 8.5, bx + 8.5, -12.6, -9.0];
+  ctx.bridge = { rect: bRect, y: Math.max(terrainHeight(bRect[0], -10.8), terrainHeight(bRect[1], -10.8)) + 0.2 };
   ctx.col.space('outdoor');
   buildTerrain(ctx);
   for (const b of BUILDINGS) buildBuilding(b, ctx);
@@ -1051,6 +1209,10 @@ export function buildWorld(scene, seed = 20261031) {
   buildBelow(ctx, rng);
   buildCave(ctx, rng);
   buildOutdoorProps(ctx, rng);
+  buildRiver(ctx);
+  buildMoonring(ctx, rng);
+  buildWillowbank(ctx);
+  buildSecrets(ctx, rng);
   buildTrees(ctx, rng);
   return { ...ctx, buildings: BUILDINGS, rng };
 }
