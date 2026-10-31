@@ -9,7 +9,7 @@ Arrows walk. Bump the NPC 3 times, then take the door.
 
 ## Win condition
 
-Open the door with the spare key.
+Talk to the keeper 3 times, then open the door.
 
 ## Seed
 
@@ -17,7 +17,7 @@ Open the door with the spare key.
 
 ## Trace
 
-{"game":"talk-inventory","win":true,"frames":45,"talks":3,"route":"npc x3 then door"}
+{"game":"talk-inventory","win":true,"frames":45,"talks":3,"route":"npc xN then door"}
 
 ## Verification
 

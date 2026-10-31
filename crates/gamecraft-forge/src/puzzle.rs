@@ -653,34 +653,46 @@ fn talk_scene(route: &[(i32, i32)]) -> Result<Forge, String> {
 /// # Errors
 ///
 /// Returns a message when the trace fails verification or a node is invalid.
+/// Scripted visit: walk to the NPC, bump it `visits` times in-out, then the door.
+/// `visits = 3` reproduces the original hand-written 12-cell route exactly.
+fn talk_route(visits: usize) -> Vec<(i32, i32)> {
+    let mut route: Vec<(i32, i32)> = vec![(1, 0), (2, 0), (3, 0), (3, 1), (3, 2), (3, 3)];
+    for _ in 1..visits {
+        route.push((3, 2));
+        route.push((3, 3));
+    }
+    route.push((4, 3));
+    route.push((4, 4));
+    route
+}
+/// Build the talk depot game.
+///
+/// # Errors
+///
+/// Returns a message when the trace never unlocks the door.
 pub fn build_talk() -> Result<GameParts, String> {
-    // Scripted visit: NPC x3 (in-out-in-out-in), then the door.
-    let route = [
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (3, 1),
-        (3, 2),
-        (3, 3),
-        (3, 2),
-        (3, 3),
-        (3, 2),
-        (3, 3),
-        (4, 3),
-        (4, 4),
-    ];
+    build_talk_with(3, "talk-inventory", "GameCraft Talk & Key")
+}
+
+/// Talk & key with a caller-supplied required number of NPC talks.
+///
+/// # Errors
+///
+/// Returns a message when the trace never unlocks the door.
+pub fn build_talk_with(visits: usize, slug: &str, title: &str) -> Result<GameParts, String> {
+    let route = talk_route(visits);
     let forge = talk_scene(route.as_slice())?;
-    let mut visits = 0_usize;
+    let mut talks = 0_usize;
     let mut has_key = false;
     let mut won = false;
-    for cell in route {
-        if cell == (3, 3) {
-            visits += 1;
-            if visits >= 3 {
+    for cell in &route {
+        if *cell == (3, 3) {
+            talks += 1;
+            if talks >= visits {
                 has_key = true;
             }
         }
-        if cell == (4, 4) && has_key {
+        if *cell == (4, 4) && has_key {
             won = true;
         }
     }
@@ -690,25 +702,25 @@ pub fn build_talk() -> Result<GameParts, String> {
     let frames = path_frames(&route, 2);
     let used = frames.len();
     Ok(GameParts {
-        slug: "talk-inventory",
-        title: "GameCraft Talk & Key",
+        slug: Box::leak(slug.to_string().into_boxed_str()),
+        title: Box::leak(title.to_string().into_boxed_str()),
         controls: "Arrows walk. Bump the NPC 3 times, then take the door.",
-        win_text: "Open the door with the spare key.",
+        win_text: Box::leak(format!("Talk to the keeper {visits} times, then open the door.").into_boxed_str()),
         seed: 11,
-        scene_text: export_scene(&forge, "talk-inventory")?,
+        scene_text: export_scene(&forge, slug)?,
         scripts: vec![
             ("gamecraft_runtime.gd", crate::scripts::RUNTIME),
             ("grid_walker.gd", crate::scripts::WALKER),
         ],
         trace_json: format!(
-            "{{\"game\":\"talk-inventory\",\"win\":true,\"frames\":{used},\"talks\":3,\"route\":\"npc x3 then door\"}}"
+            "{{\"game\":\"{slug}\",\"win\":true,\"frames\":{used},\"talks\":{visits},\"route\":\"npc xN then door\"}}"
         ),
         commands_json: commands_json(&forge),
         statics: vec![],
         frames,
         view: View { x: -1.0, y: -1.0, w: 6.0, h: 6.0 },
         readme_body: "Talk -> key -> door state machine on the root script.\nDialogue and the key requirement are scene data, not code.\n".to_string(),
-        summary: format!("talk-inventory: door opened in {used} frames, lint clean"),
+        summary: format!("{slug}: door opened in {used} frames, lint clean"),
     })
 }
 

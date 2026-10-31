@@ -49,8 +49,8 @@ A full example is committed at `depot/games/snowy-mountain-pass/spec.json`.
 
 Straight answers, because this is the part that matters:
 
-- **Seven archetypes, not thirteen.** Prompts can produce `platformer`, `runner`,
-  `pong`, `maze`, `flight`, `driving` and `chess`. Ask for a shooter and the
+- **Eight archetypes, not thirteen.** Prompts can produce `platformer`, `runner`,
+  `pong`, `maze`, `flight`, `driving`, `chess` and `talk`. Ask for a shooter and the
   compiler rejects the spec and lists what is supported - it does not silently hand
   back a platformer.
 - **What each archetype lets you change:** `platformer` gets the full level (ground
@@ -58,10 +58,11 @@ Straight answers, because this is the part that matters:
   name (its jump timing is a fixed verified script); `pong` gets theme, name and
   ball speed (8-22); `maze` gets size (odd 7-25), seed and name; `flight` gets gate
   count, spacing and altitude; `driving` gets loop radius and checkpoint count;
-  `chess` gets board size, hop count and seed.
-- **The other six genres exist but are hand-built.** The 15 demo games span
+  `chess` gets board size, hop count and seed; `talk` gets how many conversations the
+  door requires.
+- **The other five genres exist but are hand-built.** The 15 demo games span
   platformer, runner, flight, driving, pong, breakout, flappy, maze, sokoban,
-  chessboard, dialogue, shooter and tower defence. Only the seven above are wired to
+  chessboard, dialogue, shooter and tower defence. Only the eight above are wired to
   the prompt path. Flappy stays unwired on purpose: it is one of the four that never
   proved an in-engine win, so generating it would ship games I cannot verify.
 - **Local model quality varies.** `gemma4:12b` works. `qwen3.8:27b` crashes Ollama
@@ -275,8 +276,12 @@ just web-verify    # headless boot, zero console errors, self-play must win
 
 | Game | What it is | Gate |
 |---|---|---|
-| `mossbrook` | Angled top-down village RPG engine: companions, cutaway walls, upstairs, cellars, troll cave | 8 checkpoints, win |
+| `mossbrook` | "The Quiet Well": village RPG with a 14-stage story, a three-flame lantern, stealth, a 400 m world, sound | whole story played to the end, plus a self-test that the stealth bites |
 | `kaffeehaus` | Viennese coffee house management, multi-day, with sound | full day, win, plus a self-test that good play beats random play |
+
+Player cheat sheets: `web/games/mossbrook/CHEATSHEET.md` (with walkthrough),
+`web/games/kaffeehaus/CHEATSHEET.md` (every number in the sim). Developer cheat
+sheet: `web/CHEATSHEET.md`.
 
 The gate proves a game loads, its systems behave along a scripted tour, and it can
 be finished. It does not prove it is fun. See `web/README.md`.
@@ -287,4 +292,5 @@ be finished. It does not prove it is fun. See `web/README.md`.
 - `CHANGELOG.md` - history, including the two serializer bugs found and fixed.
 - `docs/NEW_GAME.md` - spec format, providers, measured model limits.
 - `docs/MCP_CLIENTS.md` - wiring the MCP server into a client.
+- `web/README.md`, `web/CHEATSHEET.md` - the three.js family and how to add a game.
 - `KIBITZ.md` / `KIBITZ_BACKTALK.md` - the review dialogue, kept as an audit trail.

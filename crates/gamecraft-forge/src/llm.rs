@@ -451,6 +451,7 @@ Other archetypes (reply with one of these shapes instead of the platformer one):
 - flight: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"flight\",\"flight\":{{\"gates\":5,\"spacing\":20,\"altitude\":4}}}}; gates 2..12\n\
 - driving: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"driving\",\"drive\":{{\"radius\":12,\"checkpoints\":8}}}}; checkpoints 4..16\n\
         - chess: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"chess\",\"chess\":{{\"board\":5,\"hops\":4,\"seed\":12}}}}; board 5..9, hops 2..8\n\
+        - talk: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"talk\",\"talk\":{{\"visits\":3}}}}; visits 2..6
 Rules that decide whether the level is accepted:\n\
 - The player starts on the first ground slab and runs right.\n\
 - Gaps between grounds must be jumpable: width <= 3.2 units with the default jump.\n\

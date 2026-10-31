@@ -203,6 +203,20 @@ impl Default for ChessParams {
     }
 }
 
+/// Talk & key parameters (only read when `archetype` is `"talk"`).
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(default)]
+pub struct TalkParams {
+    /// NPC conversations required before the door opens (2-6).
+    pub visits: usize,
+}
+
+impl Default for TalkParams {
+    fn default() -> Self {
+        Self { visits: 3 }
+    }
+}
+
 /// A complete game design.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
@@ -227,6 +241,8 @@ pub struct GameSpec {
     pub drive: DriveParams,
     /// Chess parameters (only used when `archetype` is `"chess"`).
     pub chess: ChessParams,
+    /// Talk & key parameters (only used when `archetype` is `"talk"`).
+    pub talk: TalkParams,
 }
 
 impl Default for GameSpec {
@@ -242,6 +258,7 @@ impl Default for GameSpec {
             flight: FlightParams::default(),
             drive: DriveParams::default(),
             chess: ChessParams::default(),
+            talk: TalkParams::default(),
         }
     }
 }
@@ -260,9 +277,10 @@ pub fn validate(spec: &GameSpec) -> Result<(), String> {
         && spec.archetype != "flight"
         && spec.archetype != "driving"
         && spec.archetype != "chess"
+        && spec.archetype != "talk"
     {
         problems.push(format!(
-            "archetype '{}' is not supported (supported: platformer, runner, pong, maze, flight, driving, chess)",
+            "archetype '{}' is not supported (supported: platformer, runner, pong, maze, flight, driving, chess, talk)",
             spec.archetype
         ));
     }
@@ -443,6 +461,13 @@ pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
             &spec.slug,
             &spec.title,
         );
+    }
+    if spec.archetype == "talk" {
+        let visits = spec.talk.visits;
+        if !(2..=6).contains(&visits) {
+            return Err(format!("talk visits {visits} must be 2..=6"));
+        }
+        return crate::puzzle::build_talk_with(visits, &spec.slug, &spec.title);
     }
     validate(spec)?;
     let physics = &spec.physics;
