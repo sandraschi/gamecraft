@@ -134,9 +134,20 @@ pub(crate) enum Dialog {
     GameOverlay,
 }
 
-/// One playable project discovered under `depot/games/`.
+/// Which runtime a depot entry belongs to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum GameKind {
+    /// Godot 4 project under `depot/games/`.
+    Godot,
+    /// three.js page under `web/games/`.
+    Web,
+}
+
+/// One playable project discovered under `depot/games/` or `web/games/`.
 #[derive(Debug, Clone)]
 pub(crate) struct DepotGame {
+    /// Which runtime launches it.
+    pub(crate) kind: GameKind,
     /// Folder name (`platformer`, `flight`, ...).
     pub(crate) slug: String,
     /// Display label.
@@ -439,10 +450,15 @@ impl DesktopState {
             return;
         };
         let dir = game.dir.clone();
-        let scene = dir.join("main.tscn");
+        let kind = game.kind;
         self.selected_game = Some(index);
         self.overlay = gamecraft_core::config::load_overlay(dir.as_path());
-        self.load_from_path(scene.as_path());
+        if kind == GameKind::Web {
+            // No Godot scene to parse; keep the current viewport and say so.
+            self.status = format!("selected {} (three.js, opens in the browser)", game.slug);
+            return;
+        }
+        self.load_from_path(dir.join("main.tscn").as_path());
     }
 
     /// Directory of the selected depot game, if any.
@@ -450,6 +466,43 @@ impl DesktopState {
         self.selected_game
             .and_then(|index| self.depot_games.get(index))
             .map(|game| game.dir.clone())
+    }
+
+    /// Open a three.js game in the browser, starting the static server when the
+    /// port is closed. `demo` maps to `?autoplay=1`, the visible tour.
+    fn open_web(&mut self, game: &DepotGame, demo: bool) {
+        let mut url = format!("http://127.0.0.1:11258/games/{}/", game.slug);
+        if demo {
+            url.push_str("?autoplay=1");
+        }
+        let port_closed = std::net::TcpStream::connect(("127.0.0.1", 11_258)).is_err();
+        if port_closed {
+            let web_root = game
+                .dir
+                .parent()
+                .and_then(|p| p.parent())
+                .map_or_else(|| game.dir.clone(), std::path::Path::to_path_buf);
+            let bun = std::env::var("GAMECRAFT_BUN").unwrap_or_else(|_| "bun".to_string());
+            match std::process::Command::new(bun.as_str())
+                .arg("run")
+                .arg("serve.ts")
+                .current_dir(web_root)
+                .spawn()
+            {
+                Ok(_) => std::thread::sleep(std::time::Duration::from_millis(900)),
+                Err(err) => {
+                    self.status = format!("cannot start web server ({bun}): {err}");
+                    return;
+                }
+            }
+        }
+        match std::process::Command::new("cmd")
+            .args(["/C", "start", "", url.as_str()])
+            .spawn()
+        {
+            Ok(_) => self.status = format!("opened {} in the browser", game.slug),
+            Err(err) => self.status = format!("cannot open browser: {err}"),
+        }
     }
 
     /// Persist the app config and say where it went.
@@ -491,9 +544,13 @@ impl DesktopState {
             self.status = "pick a game first".to_string();
             return;
         };
-        let Some(game) = self.depot_games.get(index) else {
+        let Some(game) = self.depot_games.get(index).cloned() else {
             return;
         };
+        if game.kind == GameKind::Web {
+            self.open_web(&game, demo);
+            return;
+        }
         let binary = if self.app_cfg.godot_binary.trim().is_empty() {
             std::env::var("GAMECRAFT_GODOT").unwrap_or_else(|_| "godot".to_string())
         } else {
@@ -697,18 +754,28 @@ impl DesktopState {
     }
 }
 
-/// Find every project under `depot/games/` that has a `main.tscn`.
+/// Find every playable project: Godot scenes under `depot/games/`, three.js
+/// pages under `web/games/`. Two runtimes, one list.
 fn discover_depot() -> Vec<DepotGame> {
-    let Some(root) = find_up_dir("depot/games") else {
-        return Vec::new();
-    };
-    let Ok(entries) = std::fs::read_dir(&root) else {
-        return Vec::new();
-    };
     let mut games: Vec<DepotGame> = Vec::new();
+    if let Some(root) = find_up_dir("depot/games") {
+        collect_games(root.as_path(), "main.tscn", GameKind::Godot, &mut games);
+    }
+    if let Some(root) = find_up_dir("web/games") {
+        collect_games(root.as_path(), "game.json", GameKind::Web, &mut games);
+    }
+    games.sort_by(|left, right| left.slug.cmp(&right.slug));
+    games
+}
+
+/// Append every child directory of `root` that contains `marker`.
+fn collect_games(root: &Path, marker: &str, kind: GameKind, out: &mut Vec<DepotGame>) {
+    let Ok(entries) = std::fs::read_dir(root) else {
+        return;
+    };
     for entry in entries.flatten() {
         let dir = entry.path();
-        if !dir.join("main.tscn").is_file() {
+        if !dir.join(marker).is_file() {
             continue;
         }
         let slug = dir
@@ -719,11 +786,13 @@ fn discover_depot() -> Vec<DepotGame> {
         if slug.is_empty() {
             continue;
         }
-        let title = slug.replace('-', " ");
-        games.push(DepotGame { slug, title, dir });
+        out.push(DepotGame {
+            kind,
+            title: slug.replace('-', " "),
+            slug,
+            dir,
+        });
     }
-    games.sort_by(|left, right| left.slug.cmp(&right.slug));
-    games
 }
 
 /// Resolve a repo-relative **directory** by walking up from the cwd.

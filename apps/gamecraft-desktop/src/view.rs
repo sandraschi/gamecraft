@@ -521,6 +521,9 @@ pub(crate) fn left_tree(state: &mut DesktopState, ui: &mut egui::Ui) {
                     {
                         row_pick = true;
                     }
+                    if game.kind == crate::state::GameKind::Web {
+                        row.weak("web");
+                    }
                 });
                 if row_pick {
                     pick = Some(index);
