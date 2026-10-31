@@ -716,29 +716,67 @@ pub fn build_talk() -> Result<GameParts, String> {
 // Chessboard knight
 // ---------------------------------------------------------------------------
 
-/// Knight-reachable target chain from (0, 0).
-const CHESS_TARGETS: [(i32, i32); 4] = [(1, 2), (2, 4), (4, 3), (3, 1)];
+/// All knight deltas, fixed order so generation is reproducible.
+const KNIGHT_DELTAS: [(i32, i32); 8] = [
+    (1, 2),
+    (2, 1),
+    (2, -1),
+    (1, -2),
+    (-1, -2),
+    (-2, -1),
+    (-2, 1),
+    (-1, 2),
+];
 
-/// Verify the scripted knight tour: every hop legal, all targets landed on.
-fn chess_verify(moves: &[(i32, i32)]) -> bool {
+/// Seeded knight walk from (0,0) that never revisits a cell.
+fn knight_walk(board: i32, hops: usize, seed: u64) -> Option<Vec<(i32, i32)>> {
     let mut at = (0_i32, 0_i32);
-    let mut landed = [false; 4];
-    for step in moves {
-        let knight = (at.0 + step.0, at.1 + step.1);
-        let dx = (knight.0 - at.0).abs();
-        let dy = (knight.1 - at.1).abs();
-        let legal = (dx == 1 && dy == 2) || (dx == 2 && dy == 1);
-        if !legal || knight.0 < 0 || knight.1 < 0 || knight.0 > 4 || knight.1 > 4 {
-            return false;
+    let mut visited: Vec<(i32, i32)> = vec![(0, 0)];
+    let mut moves: Vec<(i32, i32)> = Vec::new();
+    let mut state = seed | 1;
+    for _ in 0..hops {
+        let options: Vec<(i32, i32)> = KNIGHT_DELTAS
+            .iter()
+            .map(|(dx, dy)| (at.0 + dx, at.1 + dy))
+            .filter(|cell| {
+                cell.0 >= 0
+                    && cell.1 >= 0
+                    && cell.0 < board
+                    && cell.1 < board
+                    && !visited.contains(cell)
+            })
+            .collect();
+        if options.is_empty() {
+            return None;
         }
-        at = knight;
-        for (index, target) in CHESS_TARGETS.iter().enumerate() {
-            if at == *target {
-                landed[index] = true;
-            }
-        }
+        state = state
+            .wrapping_mul(6_364_136_223_846_793_005)
+            .wrapping_add(1_442_695_040_888_963_407);
+        let bound = u64::try_from(options.len()).unwrap_or(1);
+        let pick = usize::try_from((state >> 33) % bound).unwrap_or(0);
+        let next = *options.get(pick)?;
+        moves.push((next.0 - at.0, next.1 - at.1));
+        visited.push(next);
+        at = next;
     }
-    landed.iter().all(|landed| *landed)
+    Some(moves)
+}
+
+/// Target cells are the walk's landings, so a generated tour cannot miss one.
+fn landings(moves: &[(i32, i32)], board: i32) -> Result<Vec<(i32, i32)>, String> {
+    let mut at = (0_i32, 0_i32);
+    let mut out: Vec<(i32, i32)> = Vec::with_capacity(moves.len());
+    for step in moves {
+        let dx = step.0.abs();
+        let dy = step.1.abs();
+        let legal = (dx == 1 && dy == 2) || (dx == 2 && dy == 1);
+        at = (at.0 + step.0, at.1 + step.1);
+        if !legal || at.0 < 0 || at.1 < 0 || at.0 >= board || at.1 >= board {
+            return Err(format!("illegal knight hop at {at:?}"));
+        }
+        out.push(at);
+    }
+    Ok(out)
 }
 
 /// Build the chess-knight depot game.
@@ -747,11 +785,50 @@ fn chess_verify(moves: &[(i32, i32)]) -> bool {
 ///
 /// Returns a message when the trace fails verification or a node is invalid.
 pub fn build_chess() -> Result<GameParts, String> {
-    // Cursor hops: deltas chosen so each hop is a legal knight move.
-    let moves = [(1, 2), (1, 2), (2, -1), (-1, -2)];
-    if !chess_verify(&moves) {
-        return Err("chess script leaves a target unvisited".to_string());
-    }
+    build_chess_impl(
+        5,
+        &[(1, 2), (1, 2), (2, -1), (-1, -2)],
+        "chessboard-move",
+        "GameCraft Chess Knight",
+        12,
+    )
+}
+
+/// Chess with a caller-supplied board size, hop count, seed and name.
+///
+/// # Errors
+///
+/// Returns a message when no legal knight walk exists for the parameters.
+pub fn build_chess_with(
+    board: i32,
+    hops: usize,
+    seed: u64,
+    slug: &str,
+    title: &str,
+) -> Result<GameParts, String> {
+    let moves = knight_walk(board, hops, seed)
+        .ok_or_else(|| format!("no legal knight walk of {hops} hops on a {board}x{board} board"))?;
+    build_chess_impl(
+        board,
+        moves.as_slice(),
+        slug,
+        title,
+        u32::try_from(seed).unwrap_or(12),
+    )
+}
+
+/// Shared chess builder.
+#[allow(clippy::cast_precision_loss, clippy::too_many_lines)]
+fn build_chess_impl(
+    board: i32,
+    moves: &[(i32, i32)],
+    slug: &str,
+    title: &str,
+    seed: u32,
+) -> Result<GameParts, String> {
+    let targets = landings(moves, board)?;
+    let span_half = board as f32 / 2.0 + 0.5;
+    let span_distance = board as f32 * 14.0 / 5.0;
     let mut forge = Forge::new();
     let root = forge
         .add_node("World", "Node3D", None)
@@ -762,11 +839,23 @@ pub fn build_chess() -> Result<GameParts, String> {
     forge.ext_resource("Script", "res://scripts/gamecraft_runtime.gd", "1_runtime");
     forge.ext_resource("Script", "res://scripts/grid_walker.gd", "2_walker");
     forge
-        .top_camera("Camera3D", Some(root), [3.0, 3.0], 14.0)
+        .top_camera(
+            "Camera3D",
+            Some(root),
+            [span_half, span_half],
+            span_distance,
+        )
         .map_err(|err| err.to_string())?;
-    board_base(&mut forge, root, 5, 5, [0.75, 0.7, 0.62], [0.2, 0.22, 0.3])?;
-    let knight = walker_node(&mut forge, root, "chess", [0.0, 0.5, 0.0], 5, 5)?;
-    let knight_plan = knight_codes(&moves);
+    board_base(
+        &mut forge,
+        root,
+        board,
+        board,
+        [0.75, 0.7, 0.62],
+        [0.2, 0.22, 0.3],
+    )?;
+    let knight = walker_node(&mut forge, root, "chess", [0.0, 0.5, 0.0], board, board)?;
+    let knight_plan = knight_codes(moves);
     forge
         .set_prop(
             knight,
@@ -792,7 +881,7 @@ pub fn build_chess() -> Result<GameParts, String> {
             0.38,
         )
         .map_err(|err| err.to_string())?;
-    for (index, target) in CHESS_TARGETS.iter().enumerate() {
+    for (index, target) in targets.iter().enumerate() {
         target_pad(
             &mut forge,
             root,
@@ -811,7 +900,7 @@ pub fn build_chess() -> Result<GameParts, String> {
         color: 2,
         circle: false,
     }]];
-    for step in &moves {
+    for step in moves {
         at = (at.0 + step.0, at.1 + step.1);
         for _ in 0..8 {
             frames.push(vec![Glyph {
@@ -826,12 +915,12 @@ pub fn build_chess() -> Result<GameParts, String> {
     }
     let used = frames.len();
     Ok(GameParts {
-        slug: "chessboard-move",
-        title: "GameCraft Chess Knight",
+        slug: Box::leak(slug.to_string().into_boxed_str()),
+        title: Box::leak(title.to_string().into_boxed_str()),
         controls: "Arrows move the cursor, Space jumps the knight there.",
-        win_text: "Land the knight on all 4 targets, legally.",
-        seed: 12,
-        scene_text: export_scene(&forge, "chessboard-move")?,
+        win_text: Box::leak(format!("Land the knight on all {} targets, legally.", targets.len()).into_boxed_str()),
+        seed,
+        scene_text: export_scene(&forge, slug)?,
         scripts: vec![
             ("gamecraft_runtime.gd", crate::scripts::RUNTIME),
             ("grid_walker.gd", crate::scripts::WALKER),
@@ -844,6 +933,6 @@ pub fn build_chess() -> Result<GameParts, String> {
         frames,
         view: View { x: -1.0, y: -1.0, w: 6.0, h: 6.0 },
         readme_body: "Cursor/accept split: arrows aim, Space commits - and only\nknight moves land. The trace is verified hop by hop.\n".to_string(),
-        summary: format!("chessboard-move: 4 legal hops in {used} frames, lint clean"),
+        summary: format!("{slug}: {} legal hops in {used} frames, lint clean", moves.len()),
     })
 }

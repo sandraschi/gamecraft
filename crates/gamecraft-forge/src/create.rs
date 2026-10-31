@@ -181,6 +181,28 @@ impl Default for DriveParams {
     }
 }
 
+/// Chess course parameters (only read when `archetype` is `"chess"`).
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(default)]
+pub struct ChessParams {
+    /// Board size in cells (5-9).
+    pub board: i32,
+    /// Knight hops to make (2-8). Targets are wherever the walk lands.
+    pub hops: usize,
+    /// Deterministic walk seed.
+    pub seed: u64,
+}
+
+impl Default for ChessParams {
+    fn default() -> Self {
+        Self {
+            board: 5,
+            hops: 4,
+            seed: 12,
+        }
+    }
+}
+
 /// A complete game design.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
@@ -203,6 +225,8 @@ pub struct GameSpec {
     pub flight: FlightParams,
     /// Driving course parameters (only used when `archetype` is `"driving"`).
     pub drive: DriveParams,
+    /// Chess parameters (only used when `archetype` is `"chess"`).
+    pub chess: ChessParams,
 }
 
 impl Default for GameSpec {
@@ -217,6 +241,7 @@ impl Default for GameSpec {
             maze: MazeParams::default(),
             flight: FlightParams::default(),
             drive: DriveParams::default(),
+            chess: ChessParams::default(),
         }
     }
 }
@@ -234,9 +259,10 @@ pub fn validate(spec: &GameSpec) -> Result<(), String> {
         && spec.archetype != "maze"
         && spec.archetype != "flight"
         && spec.archetype != "driving"
+        && spec.archetype != "chess"
     {
         problems.push(format!(
-            "archetype '{}' is not supported (supported: platformer, runner, pong, maze, flight, driving)",
+            "archetype '{}' is not supported (supported: platformer, runner, pong, maze, flight, driving, chess)",
             spec.archetype
         ));
     }
@@ -400,6 +426,23 @@ pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
             return Err(format!("driving checkpoints {checkpoints} must be 4..=16"));
         }
         return crate::driving::build_driving_with(radius, checkpoints, &spec.slug, &spec.title);
+    }
+    if spec.archetype == "chess" {
+        let board = spec.chess.board;
+        let hops = spec.chess.hops;
+        if !(5..=9).contains(&board) {
+            return Err(format!("chess board {board} must be 5..=9"));
+        }
+        if !(2..=8).contains(&hops) {
+            return Err(format!("chess hops {hops} must be 2..=8"));
+        }
+        return crate::puzzle::build_chess_with(
+            board,
+            hops,
+            spec.chess.seed,
+            &spec.slug,
+            &spec.title,
+        );
     }
     validate(spec)?;
     let physics = &spec.physics;
