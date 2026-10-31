@@ -22,6 +22,7 @@
   .chip.on { background: var(--accent); color: #241a0e; border-color: var(--accent); }
   #minimap { position: fixed; top: 14px; right: 14px; width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 6px 24px rgba(0,0,0,.45); }
   #help-btn { position: fixed; top: 172px; right: 70px; width: 34px; height: 34px; border-radius: 50%; font-size: 17px; }
+  #sound-btns { position: fixed; top: 212px; right: 14px; display: flex; gap: 6px; }
   #party { position: fixed; left: 14px; bottom: 14px; display: flex; gap: 10px; padding: 10px 12px; }
   .member { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-dim); }
   .face { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--edge); }
@@ -36,16 +37,36 @@
   .bubble.zzz { background: transparent; box-shadow: none; color: #cfe8ff; font-size: 22px; font-style: italic; text-shadow: 0 0 6px #000; }
   #help { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8, 6, 4, .55); z-index: 5; }
   #help[hidden] { display: none; }
-  #help .card { width: min(520px, calc(100vw - 28px)); padding: 22px 24px 18px; }
-  #help h1 { margin: 0 0 4px; font-size: 30px; font-weight: normal; letter-spacing: .02em; }
-  #help .tag { color: var(--ink-dim); font-size: 14px; margin-bottom: 14px; }
+  #help .card, #journal .card, #ending .card { width: min(520px, calc(100vw - 28px)); padding: 22px 24px 18px; }
+  #help h1, #journal h1, #ending h1 { margin: 0 0 4px; font-size: 30px; font-weight: normal; letter-spacing: .02em; }
+  #help .tag, #journal .tag, #ending .tag { color: var(--ink-dim); font-size: 14px; margin-bottom: 14px; }
   #help table { width: 100%; border-collapse: collapse; font-size: 14px; }
   #help td { padding: 5px 0; border-bottom: 1px solid rgba(232,200,140,.12); }
   #help td:first-child { width: 42%; color: var(--ink-dim); }
-  #help button.go { margin-top: 16px; width: 100%; padding: 10px; font: 16px var(--serif); background: var(--accent); color: #241a0e; border: 0; border-radius: 8px; cursor: pointer; }
+  #help button.go, #journal button.go, #ending button.go { margin-top: 16px; width: 100%; padding: 10px; font: 16px var(--serif); background: var(--accent); color: #241a0e; border: 0; border-radius: 8px; cursor: pointer; }
   #stick-zone { position: fixed; left: 0; bottom: 0; width: 50vw; height: 55vh; display: none; touch-action: none; }
   #stick-knob { position: fixed; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; background: rgba(243,231,201,.25); border: 2px solid rgba(243,231,201,.6); pointer-events: none; }
   #talk-btn { position: fixed; right: 18px; bottom: 90px; width: 64px; height: 64px; border-radius: 50%; display: none; font-size: 14px; }
+  #quest { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); max-width: min(520px, calc(100vw - 420px)); padding: 8px 14px; text-align: center; }
+  #quest .label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); }
+  #objective { font-size: 15px; margin-top: 2px; }
+  #flames { display: flex; gap: 6px; justify-content: center; margin-top: 7px; }
+  .flame { font-size: 12px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--c); color: var(--c); opacity: .75; }
+  .flame.on { background: var(--c); color: #1a1208; opacity: 1; box-shadow: 0 0 10px var(--c); }
+  .flame.unknown { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.35); }
+  #stir { width: 160px; height: 7px; margin: 7px auto 0; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; }
+  #stir[hidden] { display: none; }
+  #stir-fill { height: 100%; width: 0; background: linear-gradient(90deg, #b08aff, #e05040); }
+  #compass { position: fixed; left: 0; top: 0; pointer-events: none; transform-origin: 0 50%; display: flex; align-items: center; gap: 6px; }
+  #compass[hidden] { display: none; }
+  #compass .tip { width: 0; height: 0; border-left: 16px solid var(--accent); border-top: 9px solid transparent; border-bottom: 9px solid transparent; filter: drop-shadow(0 0 4px rgba(0,0,0,.6)); }
+  #compass-label { font-size: 12px; color: var(--accent); text-shadow: 0 0 4px #000; }
+  #toast { position: fixed; left: 50%; top: 118px; transform: translateX(-50%); padding: 8px 14px; max-width: min(560px, calc(100vw - 28px)); text-align: center; font-size: 14px; }
+  #toast[hidden] { display: none; }
+  #journal, #ending { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8, 6, 4, .55); z-index: 6; }
+  #journal[hidden], #ending[hidden] { display: none; }
+  #journal ol { padding-left: 20px; line-height: 1.5; font-size: 14px; }
+  #ending h1 { font-size: 30px; }
   @media (pointer: coarse) {
     #stick-zone { display: block; }
     #talk-btn:not([hidden]) { display: block; }
@@ -56,6 +77,7 @@
     #loc-place { font-size: 17px; }
     #minimap { width: 104px; height: 104px; }
     #help-btn { top: 124px; right: 48px; }
+    #sound-btns { top: 164px; }
     #party { bottom: auto; top: 128px; left: 14px; padding: 6px 8px; gap: 6px; }
     .face { width: 28px; height: 28px; }
   }
@@ -81,7 +103,23 @@
 </div>
 
 <canvas id="minimap" width="150" height="150"></canvas>
+<div id="quest" class="panel">
+  <div class="label">The Quiet Well</div>
+  <div id="objective"></div>
+  <div id="flames"></div>
+  <div id="stir" hidden title="If this fills, the Keeper stirs"><div id="stir-fill"></div></div>
+</div>
+<div id="compass" hidden><span class="tip"></span><span id="compass-label"></span></div>
+<div id="toast" class="panel" hidden></div>
+<div id="journal" hidden><div class="card panel"><h1>Journal</h1><ol id="journal-list"></ol><button id="journal-close" class="go">Close</button></div></div>
+<div id="ending" hidden><div class="card panel">
+  <h1>The Quiet Well</h1>
+  <div class="tag">The light rises out of the well and every lantern in Mossbrook catches at once.</div>
+  <p>Next Lantern Eve the whole village climbs the crag with lanterns lit from every hearth. Bertil carries nothing heavier than a cake. Old Knuckles listens to the song with his eyes closed, and afterwards Odo is asked, firmly and by everyone, not to sing next year.</p>
+  <button id="ending-close" class="go">Keep wandering</button>
+</div></div>
 <button id="help-btn" class="chip" title="Help (H)">?</button>
+<div id="sound-btns"><button id="sfx-btn" class="chip" title="Sound (N)">Sound</button><button id="music-btn" class="chip" title="Music (M)">Music</button></div>
 
 <div id="party" class="panel">
   <div class="member"><div class="face" style="background: radial-gradient(circle at 50% 38%, #e8b894 34%, #3a5a8a 36%)"></div>You</div>
@@ -103,12 +141,15 @@
 <div id="help" hidden>
   <div class="card panel">
     <h1>Mossbrook</h1>
-    <div class="tag">A village, two friends, a cellar that is too big, and something asleep up the crag.</div>
+    <div class="tag">Every lantern in Mossbrook is lit from the glow that rises from the old well at dusk. Tonight it did not rise. Captain Osk blames the troll.</div>
     <table>
       <tr><td>Move</td><td>WASD or arrow keys (drag on the left half on touch)</td></tr>
       <tr><td>Run</td><td>Shift</td></tr>
-      <tr><td>Talk, read</td><td>E or Enter</td></tr>
-      <tr><td>Time of day</td><td>1 dawn, 2 noon, 3 dusk, 4 night</td></tr>
+      <tr><td>Talk, use, read</td><td>E or Enter</td></tr>
+      <tr><td>Lantern flame</td><td>Q cycles Ember, Glimmer, Hush</td></tr>
+      <tr><td>Journal</td><td>J</td></tr>
+      <tr><td>Sound, music</td><td>N, M</td></tr>
+      <tr><td>Time of day</td><td>T cycles, or 1 dawn, 2 noon, 3 dusk, 4 night</td></tr>
       <tr><td>Zoom</td><td>Mouse wheel</td></tr>
       <tr><td>Help</td><td>H</td></tr>
     </table>

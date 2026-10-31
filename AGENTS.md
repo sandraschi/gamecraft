@@ -47,6 +47,11 @@ passes only with zero console errors, the win marker printed, and `selfTest`
 passing when present. Look at `shots/` before calling a game done; two harness
 bugs were found that way, not by the gate.
 
+Every game ships a player `CHEATSHEET.md`; numbers in it come from the code, so
+update it when balance changes. When a tour passes on its first run, add a
+negative self-test that proves the mechanic it skirts actually bites (see
+Mossbrook's stealth). Developer reference: `web/CHEATSHEET.md`.
+
 ## Hard gates (ArtCraft 6-gate bar)
 
 ```powershell

@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.12.0 - 2026-10-31 (Mossbrook prompt 4: The Quiet Well)
+
+- **Story** (`web/games/mossbrook/story.js`): 14-stage quest grown from seeds
+  already in the prompt-3 small talk. Two twists, an objective line with a
+  compass arrow, a journal, stage-dependent dialogue, companion comments on
+  new places, an ending.
+- **Magic system:** a lantern carrying three flames (Ember burns, Glimmer
+  reveals, Hush keeps sleepers asleep), learned along the story; Q cycles.
+- **Stealth:** a stir meter near the sleeping Keeper; fill it and he throws you
+  out of the cave.
+- **World x4:** terrain 400 m square (was 200), river with a bridge and
+  walk-blocking channel, fisher's hut, the Moonring stones, a hidden cellar
+  behind a glyph wall, a root-blocked passage and a hollow behind the troll.
+  About 700 trees. Collision gained functional blockers and removable boxes.
+- **Gate:** the tour now plays the entire story (131 steps, 14 checkpoints,
+  must never be tossed). Self-test added because the tour passed on the first
+  full run: Ember walking is tossed in 2.7 s, running in 1.7 s, Hush walking
+  never, Hush running in 8.3 s.
+- **Verifier:** clears a game's `shots/` before each run (stale prompt-3 shots
+  were sitting next to new ones).
+- **Sound** (`audio.js`): place-based ambience (wind, birds or crickets, river,
+  Moonring hum, fire crackle, underground drips and drone, tavern murmur),
+  footsteps by surface, the Keeper's snore and a stir heartbeat, story effects,
+  an off-key song for Odo, and an outdoor lute tune. N/M toggles, persisted;
+  off in verify mode.
+- **Cheat sheets:** `web/games/kaffeehaus/CHEATSHEET.md` (every number in the
+  sim plus the tactics the bots proved), `web/games/mossbrook/CHEATSHEET.md`
+  (controls, map, stealth numbers, spoiler walkthrough), `web/CHEATSHEET.md`
+  (developer: commands, hook, gate rules, patterns, traps). Linked from all
+  READMEs; AGENTS.md now asks for a cheat sheet per game.
+- Not done: hand-play; sound is untested by ear.
+
 ## 0.11.0 - 2026-10-31 (three.js web family: Mossbrook, Kaffeehaus)
 
 A second track next to the Godot depot, prompted by Simon Willison's October 2026

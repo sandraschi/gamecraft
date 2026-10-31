@@ -5,6 +5,8 @@ bring newspapers, collect bills. No reflexes needed; pause any time.
 
 Play: `just web-serve`, then http://127.0.0.1:11258/games/kaffeehaus/
 Watch the bot: add `?autoplay=1`.
+Every number in the game (patience, prices, tips, regulars, upgrades) and the
+tactics the bots proved: [CHEATSHEET.md](CHEATSHEET.md).
 
 ## How it plays
 

@@ -16,7 +16,7 @@
 
 import { chromium } from "playwright";
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -54,6 +54,8 @@ for (const slug of slugs) {
   const meta = JSON.parse(readFileSync(join(GAMES, slug, "game.json"), "utf8")) as GameMeta;
   const shotsDir = join(GAMES, slug, "shots");
   mkdirSync(shotsDir, { recursive: true });
+  // stale shots from an older tour would sit next to the new ones and mislead
+  for (const f of readdirSync(shotsDir)) if (f.endsWith(".png")) unlinkSync(join(shotsDir, f));
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors: string[] = [];
   const warnings: string[] = [];

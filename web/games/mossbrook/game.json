@@ -3,15 +3,15 @@
   "title": "Mossbrook",
   "family": "threejs",
   "entry": "index.html",
-  "experiment": "Simon Willison's Emberwick prompt sequence (simonwillison.net/2026/Oct/28/vibe-game-development/), prompts 1-3 of 4, rebuilt from scratch",
+  "experiment": "Simon Willison's Emberwick prompt sequence (simonwillison.net/2026/Oct/28/vibe-game-development/), all 4 prompts, rebuilt from scratch",
   "author": "Claude Opus 5.5, gamecraft session 2026-10-31",
   "prompts": [
     "1. A three.js engine demo for an angled top-down RPG: player walks a fantasy village with one or two companions; entering a building turns the camera-side wall transparent.",
     "2. Add NPCs, plenty of furniture, several building types, some with an upstairs.",
-    "3. Make the landscape not flat; give two buildings basements joined by a tunnel; add a rocky mountain with a cave holding a sleeping troll."
+    "3. Make the landscape not flat; give two buildings basements joined by a tunnel; add a rocky mountain with a cave holding a sleeping troll.",
+    "4. Turn it into an actual game: four times the playable area, fun mechanics, a plot that is not too cliche with twists, a magic system, make it really good."
   ],
-  "not_done": "Prompt 4 (quadruple the map, mechanics, plot, magic system) is the next step.",
   "win_marker": "GameCraft: tour complete, win",
-  "thumb_checkpoint": "tavern-ground",
-  "step_budget": 60000
+  "thumb_checkpoint": "keepers-cellar",
+  "step_budget": 120000
 }

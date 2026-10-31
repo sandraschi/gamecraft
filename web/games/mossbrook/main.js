@@ -4,6 +4,8 @@
 
 import * as THREE from 'three';
 import * as W from './world.js';
+import { createStory, tour, FLAMES } from './story.js';
+import { createAudio } from './audio.js';
 
 const { BUILDINGS, STAIRS, CAVE, clamp, lerp, inRect, stairT } = W;
 const params = new URLSearchParams(location.search);
@@ -32,6 +34,53 @@ scene.background = new THREE.Color(0x9cc6ea);
 scene.fog = new THREE.Fog(0x9cc6ea, 80, 170);
 
 const world = W.buildWorld(scene);
+
+// ---------------------------------------------------------------- sound
+const audio = createAudio();
+const SOUND_KEY = 'gamecraft.mossbrook.sound';
+try { const sv = JSON.parse(localStorage.getItem(SOUND_KEY) ?? 'null'); if (sv) { audio.setSfx(sv.sfx); audio.setMusic(sv.music); } } catch { /* defaults */ }
+function saveSound() { try { localStorage.setItem(SOUND_KEY, JSON.stringify({ sfx: audio.sfx, music: audio.music })); } catch { /* ignore */ } }
+if (!VERIFY) {
+  addEventListener('pointerdown', () => audio.init(), true);
+  addEventListener('keydown', () => audio.init(), true);
+}
+const STORY_SOUND = { 'story cradle': 'reveal', 'story tablet': 'burn', 'story set': 'song' };
+const firePos = new THREE.Vector3();
+let lastStepPhase = 0, lastFlame = 'ember';
+function soundTick() {
+  if (!audio.ready) return;
+  const view = viewOf(player.space);
+  const b = player.space === 'outdoor' ? W.buildingAt(player.x, player.z) : null;
+  const indoors = player.space.startsWith('upper:') || !!b;
+  let fire = 0;
+  for (const f of world.fires) {
+    if (!shown(f.light)) continue;
+    f.light.getWorldPosition(firePos);
+    fire = Math.max(fire, 1 - W.smoothstep(1.5, 9, Math.hypot(firePos.x - player.x, firePos.z - player.z)));
+  }
+  const crowd = b ? npcs.filter((n) => n.space === 'outdoor' && W.buildingAt(n.x, n.z) === b).length / 3 : 0;
+  audio.update({
+    layer: view, indoors, night: timeKey === 'night', dusk: timeKey === 'dusk' || timeKey === 'dawn',
+    river: 1 - W.smoothstep(6, 30, Math.abs(player.x - W.riverX(player.z))),
+    ring: 1 - W.smoothstep(4, 20, Math.hypot(player.x - W.MOONRING.x, player.z - W.MOONRING.z)),
+    fire, crowd: Math.min(1, crowd),
+    troll: Math.max(0, 1 - Math.hypot(player.x - CAVE.troll[0], player.z - CAVE.troll[1]) / 25),
+    trollAwake: story.st.trollAwake, stir: story.st.stir,
+    playing: $('help').hidden && $('journal').hidden,
+  });
+  // footsteps on whatever is underfoot
+  const stepIdx = Math.floor(player.ch.phase / Math.PI);
+  if (stepIdx !== lastStepPhase && player.speed > 0.2) {
+    const surface = view !== 'above' ? 'stone' : indoors ? 'wood' : W.roadDist(player.x, player.z) < 2 || (world.bridge && W.inRect(world.bridge.rect, player.x, player.z)) ? 'gravel' : 'grass';
+    audio.step(surface);
+  }
+  lastStepPhase = stepIdx;
+  if (story.st.flame !== lastFlame) { lastFlame = story.st.flame; audio.play(lastFlame); }
+}
+function setSoundButtons() {
+  $('sfx-btn').classList.toggle('on', audio.sfx);
+  $('music-btn').classList.toggle('on', audio.music);
+}
 for (const b of BUILDINGS) for (const key of ['S0', 'S1', 'roof']) for (const m of b.fades[key]) m.material.transparent = true;
 
 const TIMES = {
@@ -164,8 +213,8 @@ const companions = [
   entity({ name: 'Tamsin', x: 2, z: 6.5, look: { skin: 0xf0c8a8, body: 0x3f6a3a, legs: 0x4a3a2a, hair: 0xd8b050, longHair: true, cloak: 0x2f4a2a, bow: true } }),
   entity({ name: 'Odo', x: 2, z: 8, look: { skin: 0xd8a07a, body: 0x6a2626, legs: 0x4a4a52, hair: 0x3a2a1a, beard: 0x3a2a1a, armour: 0x8a2d2d, hammer: true, wide: 1.15 } }),
 ];
-companions[0].bark = { tavern: 'Smells like stew and spilled cider.', 'tavern-upper': 'Creaky boards. Good for hearing who comes up.', cellar: 'Cold down here. Cold and organised.', tunnel: 'Nobody digs a tunnel this straight for turnips.', cave: 'Quiet now. Something big is breathing.', troll: 'He is asleep. Let us keep it that way.' };
-companions[1].bark = { tavern: 'First round is mine. Second round is also mine.', 'tavern-upper': 'Mind the low beam. Ow. That one.', cellar: 'Barrels. Good sign.', tunnel: 'I can hear the forge through the stone.', smithy: 'Bertil still owes me a buckle.', cave: 'Is that roast mutton? Is that our roast mutton?', troll: 'I could take him. I will not, but I could.' };
+companions[0].bark = { secret: 'Somebody has been oiling these pipes. Recently.', moonring: 'Listen. The stones are humming.', hollow: 'There is writing on that stone. Old writing.', river: 'Blue lights on a bridge at night. I want to know whose.',  tavern: 'Smells like stew and spilled cider.', 'tavern-upper': 'Creaky boards. Good for hearing who comes up.', cellar: 'Cold down here. Cold and organised.', tunnel: 'Nobody digs a tunnel this straight for turnips.', cave: 'Quiet now. Something big is breathing.', troll: 'He is asleep. Let us keep it that way.' };
+companions[1].bark = { secret: 'A secret cellar under a well. I love this village.', moonring: 'Nobody makes me stand in the middle. I am not being sacrificed.', hollow: 'If this says sing, I am ready. I have always been ready.', river: 'Fish. I could go for fish.',  tavern: 'First round is mine. Second round is also mine.', 'tavern-upper': 'Mind the low beam. Ow. That one.', cellar: 'Barrels. Good sign.', tunnel: 'I can hear the forge through the stone.', smithy: 'Bertil still owes me a buckle.', cave: 'Is that roast mutton? Is that our roast mutton?', troll: 'I could take him. I will not, but I could.' };
 for (const e of [player, ...companions]) scene.add(e.ch.group);
 const trail = [];
 for (let i = 14; i >= 0; i--) trail.push({ x: 2, z: 5 + i * 0.3, y: player.y, space: 'outdoor' });
@@ -199,6 +248,8 @@ const NPC_DEFS = [
   { name: 'Captain Osk', role: 'watch', x: -36, z: -1.5, fixed: true, rot: Math.PI / 2, look: { skin: 0xd0a080, body: 0x4a5a6a, legs: 0x3a3a3a, hair: 0x3a3a3a, helmet: 0x8a9098, armour: 0x6a7480, beard: 0x5a5a5a },
     lines: ['The cave mouth is just up the road. Old Knuckles sleeps in there.', 'Nobody goes in. That is the rule. You look like you are going in.', 'If you wake him, run downhill. Trolls are bad at downhill.'],
     barks: ['Halt. Or do not. I am not your mother.', 'Quiet road today.'] },
+  { name: 'Old Wenzel', role: 'fisher', x: 66.5, z: -16, fixed: true, rot: -Math.PI / 2, look: { skin: 0xd0a080, body: 0x4a5a3a, legs: 0x3a3a2a, hair: 0xb0b0b0, beard: 0xb0b0b0, hood: 0x5a4a2a },
+    lines: ['Lights on the bridge at night. Blue ones.'], barks: ['Nothing biting.', 'River is low.'] },
   { name: 'Hob', role: 'miller', x: 10, z: 32.5, wander: [6, 14, 31.6, 33.4], look: { skin: 0xd8b090, body: 0x8a7a5a, legs: 0x5a4a3a, hair: 0xe8e0d0, beard: 0xe8e0d0, apron: 0xd8d0b8 },
     lines: ['Flour in my hair, flour in my beard, flour in my tea.', 'The wheel is down by the stream. I just keep the sacks.'],
     barks: ['Sacks, sacks, sacks.'] },
@@ -224,11 +275,11 @@ troll.ch.legR.rotation.x = 0.5;
 world.groups.cave.add(troll.ch.group);
 troll.bubbleAnchor = { x: -68, z: -11, y: world.caveY + 3 };
 
-const interactables = [
-  ...npcs.map((n) => ({ kind: 'npc', ent: n, name: n.name, role: n.def.role, lines: n.def.lines, range: 2.4 })),
-  ...world.items.map((it) => ({ kind: 'item', name: it.name, lines: it.lines, x: it.x, z: it.z, space: it.space, range: 1.8 })),
-  { kind: 'troll', name: 'Old Knuckles', role: 'troll, asleep', x: -66, z: -11, space: 'cave', range: 6, lines: ['He snores like a rockslide in slow motion.', 'A smell of old cheese and wet stone. One eye twitches. Best not.', 'Next to him: a chest, a heap of coins, and a lot of very clean bones.'] },
-];
+const npcTargets = npcs.map((n) => ({ kind: 'npc', ent: n, name: n.name, role: n.def.role, lines: n.def.lines, range: n.name === 'Mags' ? 3.4 : n.name === 'Bertil' ? 3.2 : 2.6 }));
+function interactables() {
+  const objs = story.objects.filter((o) => !o.enabled || o.enabled()).map((o) => ({ kind: 'object', obj: o, name: o.name, x: o.x, z: o.z, space: o.space, range: o.range }));
+  return [...npcTargets, ...objs];
+}
 
 // ---------------------------------------------------------------- input
 const keys = new Set();
@@ -239,6 +290,11 @@ addEventListener('keydown', (ev) => {
   keys.add(ev.code);
   if (ev.code === 'KeyE' || ev.code === 'Enter') interact();
   if (ev.code === 'KeyH' || ev.code === 'Slash') toggleHelp();
+  if (ev.code === 'KeyQ') { story.cycleFlame(); refreshFlames(); }
+  if (ev.code === 'KeyJ') toggleJournal();
+  if (ev.code === 'KeyN') { audio.setSfx(!audio.sfx); saveSound(); setSoundButtons(); }
+  if (ev.code === 'KeyM') { audio.setMusic(!audio.music); saveSound(); setSoundButtons(); }
+  if (ev.code === 'KeyT') setTime(Object.keys(TIMES)[(Object.keys(TIMES).indexOf(timeKey) + 1) % 4]);
   if (ev.code === 'Escape') { closeDialog(); setHelp(false); }
   const t = { Digit1: 'dawn', Digit2: 'noon', Digit3: 'dusk', Digit4: 'night' }[ev.code];
   if (t) setTime(t);
@@ -262,7 +318,13 @@ function context() {
     const room = W.roomName('below', player.x, player.z) ?? '';
     return room.startsWith('Smugglers') ? 'tunnel' : 'cellar';
   }
-  if (player.space === 'cave') return Math.hypot(player.x - CAVE.troll[0], player.z - CAVE.troll[1]) < 6 ? 'troll' : 'cave';
+  if (player.space === 'cave') {
+    if (W.roomName('cave', player.x, player.z) === "The Keeper's Hollow") return 'hollow';
+    return Math.hypot(player.x - CAVE.troll[0], player.z - CAVE.troll[1]) < 6 ? 'troll' : 'cave';
+  }
+  if (player.space === 'below' && W.roomName('below', player.x, player.z) === "The Keeper's Cellar") return 'secret';
+  if (player.space === 'outdoor' && Math.hypot(player.x - W.MOONRING.x, player.z - W.MOONRING.z) < 12) return 'moonring';
+  if (player.space === 'outdoor' && Math.abs(player.x - W.riverX(player.z)) < 14) return 'river';
   if (player.space === 'upper:tavern') return 'tavern-upper';
   const b = W.buildingAt(player.x, player.z);
   if (b?.id === 'tavern') return 'tavern';
@@ -278,55 +340,73 @@ function onContext(ctx) {
   if (c) say(c, c.bark[ctx], 4.5);
 }
 
-// ---------------------------------------------------------------- autoplay (the verifier's driver)
+// ---------------------------------------------------------------- the story
+let story = null; // created after the HUD helpers exist, see below
 const inside = (id) => (player.space === 'outdoor' || player.space === `upper:${id}`) && W.buildingAt(player.x, player.z)?.id === id;
-const opacity = (id, key) => Math.max(...byId(id).fades[key].map((m) => m.material.opacity));
-const trollDist = () => Math.hypot(player.x - CAVE.troll[0], player.z - CAVE.troll[1]);
-const TOUR = [
-  { to: [0, -8.5] },
-  { to: [0, -11.5], checkpoint: 'tavern-ground', check: () => inside('tavern') && !byId('tavern').roofGroup.visible && !byId('tavern').upper.visible && opacity('tavern', 'S0') < 0.4 },
-  { to: [-1, -18.5] }, { to: [-5.2, -19.9] }, { to: [-6.95, -20.9] },
-  { to: [-6.95, -12.6], checkpoint: 'tavern-upper', check: () => player.space === 'upper:tavern' && byId('tavern').upper.visible && opacity('tavern', 'S1') < 0.4 && Math.abs(player.y - W.UPPER_Y) < 0.01 },
-  { to: [3.5, -13.0] }, { to: [-6.95, -12.6] },
-  { to: [-6.95, -20.9], check: () => player.space === 'outdoor' && Math.abs(player.y - W.FLOOR_Y) < 0.01 },
-  { to: [-5.2, -19.9] }, { to: [5.4, -16.8] }, { to: [6.85, -16.8] },
-  { to: [6.85, -23.0], checkpoint: 'cellar', check: () => player.space === 'below' && !world.groups.above.visible && world.groups.below.visible && Math.abs(player.y - W.BELOW_Y) < 0.01 },
-  { to: [2.25, -22.5] },
-  { to: [2.25, -8.6], checkpoint: 'tunnel', check: () => player.space === 'below' && (W.roomName('below', player.x, player.z) ?? '').startsWith('Smugglers') },
-  { to: [2.25, 3.2] }, { to: [17.8, 3.2] }, { to: [19.5, 0.2] },
-  { to: [25.8, 0.2], checkpoint: 'smithy', check: () => player.space === 'outdoor' && inside('smithy') && world.groups.above.visible },
-  { to: [25.8, 4.0] }, { to: [22, 6.5] }, { to: [22, 9.6] },
-  { to: [22, 12], checkpoint: 'village', check: () => !W.buildingAt(player.x, player.z) && byId('smithy').roofGroup.visible },
-  { to: [14, 12] }, { to: [4.5, 3.5] }, { to: [-48.8, -6] },
-  { to: [-56, -6], checkpoint: 'cave', check: () => player.space === 'cave' && world.groups.cave.visible && !world.groups.above.visible },
-  { to: [-62.3, -10.5], checkpoint: 'troll', check: () => trollDist() < 5.0, win: true },
-];
-const auto = { active: false, i: 0, stepsHere: 0, budget: 0, settle: 0 };
+
+// ---------------------------------------------------------------- autoplay (the verifier's driver)
+// Plays the whole story through the same movement and interaction code a player uses.
+let TOUR = [];
+const auto = { active: false, i: 0, stepsHere: 0, budget: 0, settle: 0, walk: false };
 function startAutoplay() {
-  Object.assign(auto, { active: true, i: 0, stepsHere: 0, settle: 0 });
+  TOUR = tour(story);
+  Object.assign(auto, { active: true, i: 0, stepsHere: 0, settle: 0, walk: false });
   auto.budget = budgetFor(0);
   mark('autoplay start');
 }
-function budgetFor(i) {
-  const [tx, tz] = TOUR[i].to;
-  return Math.ceil((Math.hypot(tx - player.x, tz - player.z) / 6) * 60 * 2.5) + 300;
+function stepTarget(step) {
+  if (step.to) return { x: step.to[0], z: step.to[1], range: 0.2 };
+  if (step.talk) { const n = npcs.find((o) => o.name === step.talk); return n ? { x: n.x, z: n.z, range: npcTargets.find((t) => t.ent === n).range - 0.4 } : null; }
+  if (step.use) { const o = story.objects.find((b) => b.id === step.use); return o ? { x: o.x, z: o.z, range: o.range - 0.3 } : null; }
+  return null;
 }
+function budgetFor(i) {
+  const t = TOUR[i] && stepTarget(TOUR[i]);
+  if (!t) return 400;
+  return Math.ceil((Math.hypot(t.x - player.x, t.z - player.z) / 4) * 60 * 3) + 400;
+}
+function gameView() {
+  return {
+    stage: story.STAGES[story.st.stage].id, flames: story.st.flames, hearths: story.st.hearths.size,
+    tossed: story.st.tossed, trollAwake: story.st.trollAwake, ended: story.st.ended,
+    space: player.space, layer: viewOf(player.space),
+    roomName: W.roomName(player.space, player.x, player.z),
+    inside, roofVisible: (id) => byId(id).roofGroup.visible,
+    canStand: (sp, x, z) => world.col.canStand(sp, x, z, 0.35),
+  };
+}
+function nextStep() { auto.i++; auto.stepsHere = 0; auto.budget = budgetFor(auto.i); }
 function autoSteer() {
-  const wp = TOUR[auto.i];
+  const step = TOUR[auto.i];
+  if (!step) { auto.active = false; return [0, 0]; }
+  if (step.flame) { story.setFlame(step.flame); refreshFlames(); nextStep(); return [0, 0]; }
+  if ('walk' in step && !step.to && !step.use && !step.talk) { auto.walk = step.walk; nextStep(); return [0, 0]; }
   if (auto.settle > 0) {
     auto.settle--;
     if (auto.settle === 0) {
-      if (wp.check && !wp.check()) { fail(`check failed at ${wp.checkpoint ?? `waypoint ${auto.i}`}`); return [0, 0]; }
-      if (wp.checkpoint) { state.checkpoint = wp.checkpoint; state.checkpoints.push({ name: wp.checkpoint, step: state.steps }); mark(`checkpoint ${wp.checkpoint}`); }
-      if (wp.win) { state.won = true; auto.active = false; mark('tour complete, win'); return [0, 0]; }
-      auto.i++; auto.stepsHere = 0; auto.budget = budgetFor(auto.i);
+      if (step.check && !step.check(gameView())) { fail(`check failed at ${step.checkpoint ?? `step ${auto.i}`}`); return [0, 0]; }
+      if (step.checkpoint) { state.checkpoint = step.checkpoint; state.checkpoints.push({ name: step.checkpoint, step: state.steps }); mark(`checkpoint ${step.checkpoint}`); }
+      if (step.win) { state.won = true; auto.active = false; mark('story complete, the well is lit'); mark('tour complete, win'); return [0, 0]; }
+      nextStep();
     }
     return [0, 0];
   }
-  const dx = wp.to[0] - player.x, dz = wp.to[1] - player.z;
+  if (!step.to && !step.talk && !step.use) { auto.settle = 30; return [0, 0]; } // pure checkpoint
+  const t = stepTarget(step);
+  if (!t) { fail(`autoplay: no target for step ${auto.i}`); return [0, 0]; }
+  const dx = t.x - player.x, dz = t.z - player.z;
   const d = Math.hypot(dx, dz);
-  if (d < 0.2) { auto.settle = wp.check || wp.checkpoint ? 45 : 1; return [0, 0]; }
-  if (++auto.stepsHere > auto.budget) { fail(`autoplay stuck at waypoint ${auto.i} (${player.x.toFixed(2)}, ${player.z.toFixed(2)}) in ${player.space}`); return [0, 0]; }
+  if (d <= t.range) {
+    if (step.talk || step.use) {
+      const target = interactables().find((o) => (step.talk ? o.ent?.name === step.talk : o.obj?.id === step.use));
+      if (!target) { fail(`autoplay: ${step.talk ?? step.use} not available at step ${auto.i}`); return [0, 0]; }
+      openDialog(target);
+      closeDialog();
+    }
+    auto.settle = step.check || step.checkpoint ? 45 : 1;
+    return [0, 0];
+  }
+  if (++auto.stepsHere > auto.budget) { fail(`autoplay stuck at step ${auto.i} (${player.x.toFixed(2)}, ${player.z.toFixed(2)}) in ${player.space}`); return [0, 0]; }
   const k = Math.min(1, d / 0.6);
   return [(dx / d) * k, (dz / d) * k];
 }
@@ -344,7 +424,7 @@ function update(dt) {
   clockMinutes += dt * 0.5;
   // input
   let mx = 0, mz = 0, speed = PLAYER_SPEED;
-  if (auto.active) { [mx, mz] = autoSteer(); speed = AUTO_SPEED; }
+  if (auto.active) { [mx, mz] = autoSteer(); speed = auto.walk ? PLAYER_SPEED * 0.95 : AUTO_SPEED; }
   else if (!dialog.open) {
     if (keys.has('KeyW') || keys.has('ArrowUp')) mz -= 1;
     if (keys.has('KeyS') || keys.has('ArrowDown')) mz += 1;
@@ -382,8 +462,10 @@ function update(dt) {
   });
   // villagers
   for (const n of npcs) updateNpc(n, dt);
-  // troll breathing
-  troll.ch.body.scale.set(1, 1, 1 + Math.sin(state.time * 1.1) * 0.04);
+  // troll breathing, the stir meter, the ending
+  if (!story.st.trollAwake) troll.ch.body.scale.set(1, 1, 1 + Math.sin(state.time * 1.1) * 0.04);
+  if (story.update(dt, player) === 'toss') tossOut();
+  if (story.st.ended && !state.endingShown) showEnding();
   // world reactions
   onContext(context());
   updateView(dt);
@@ -509,6 +591,7 @@ function applyLighting(view) {
   W.WINDOW_MAT.emissiveIntensity = t.windows;
   world.lampMat.emissiveIntensity = t.lamps > 0 ? 2.4 : 0.2;
   for (const l of world.lamps) l.intensity = t.lamps;
+  lantern.intensity = under ? 5 : timeKey === 'night' ? 3 : timeKey === 'dusk' ? 1.8 : 0.6;
 }
 
 // ---------------------------------------------------------------- HUD
@@ -524,7 +607,7 @@ function sameSpace(t) {
 }
 function nearest() {
   let best = null, bd = Infinity;
-  for (const t of interactables) {
+  for (const t of interactables()) {
     if (!sameSpace(t)) continue;
     const d = dist2(t);
     if (d < t.range * t.range && d < bd) { best = t; bd = d; }
@@ -539,12 +622,17 @@ function interact() {
     return;
   }
   const t = nearest();
-  if (!t) return;
-  Object.assign(dialog, { open: true, target: t, i: 0 });
+  if (t) openDialog(t);
+}
+function openDialog(t) {
+  const lines = t.kind === 'object' ? t.obj.use() : story.talk(t.name) ?? t.lines;
+  Object.assign(dialog, { open: true, target: { ...t, lines }, i: 0 });
   $('dialog-who').textContent = t.role ? `${t.name}, ${t.role}` : t.name;
-  $('dialog-text').textContent = t.lines[0];
+  $('dialog-text').textContent = lines[0];
   $('dialog').hidden = false;
   if (t.ent) { const dx = player.x - t.ent.x, dz = player.z - t.ent.z; t.ent.rot = Math.atan2(dx, dz); t.ent.wait = 4; }
+  refreshFlames();
+  audio.play('talk');
 }
 function closeDialog() { dialog.open = false; dialog.target = null; $('dialog').hidden = true; }
 function setHelp(v) { $('help').hidden = !v; }
@@ -585,7 +673,7 @@ function drawBubbles() {
   for (const [ent, el] of bubbles) placeBubble(el, ent.x, ent.y + (ent === troll ? 0 : 2.35), ent.z, ent.sayFor > 0 && shown(ent.ch.group));
   if (!zzz) { zzz = document.createElement('div'); zzz.className = 'bubble zzz'; $('bubbles').appendChild(zzz); }
   zzz.textContent = ['z', 'zZ', 'zZz'][Math.floor(state.time * 1.5) % 3];
-  placeBubble(zzz, troll.bubbleAnchor.x, troll.bubbleAnchor.y, troll.bubbleAnchor.z, world.groups.cave.visible);
+  placeBubble(zzz, troll.bubbleAnchor.x, troll.bubbleAnchor.y, troll.bubbleAnchor.z, world.groups.cave.visible && !story.st.trollAwake);
 }
 
 function locationText() {
@@ -615,6 +703,9 @@ function drawMinimap() {
     mm.beginPath(); mm.arc(tx(W.MOUNTAIN.x), tz(W.MOUNTAIN.z), W.MOUNTAIN.block * sc, 0, Math.PI * 2); mm.fill();
     mm.strokeStyle = '#9b7a50'; mm.lineWidth = 2.2;
     for (const [a, b] of W.ROADS) { mm.beginPath(); mm.moveTo(tx(a[0]), tz(a[1])); mm.lineTo(tx(b[0]), tz(b[1])); mm.stroke(); }
+    mm.strokeStyle = '#3a6a8a'; mm.lineWidth = 9 * sc;
+    mm.beginPath(); for (let z = cz - R; z <= cz + R; z += 4) { const x = W.riverX(z); if (z === cz - R) mm.moveTo(tx(x), tz(z)); else mm.lineTo(tx(x), tz(z)); } mm.stroke();
+    mm.fillStyle = '#8a8680'; mm.beginPath(); mm.arc(tx(W.MOONRING.x), tz(W.MOONRING.z), W.MOONRING.r * sc, 0, Math.PI * 2); mm.fill();
     rects(BUILDINGS.map((b) => [b.x0, b.x1, b.z0, b.z1]), '#c8b48a');
     mm.fillStyle = '#111'; mm.beginPath(); mm.arc(tx(-50), tz(-6), 3, 0, Math.PI * 2); mm.fill();
   } else rects((view === 'below' ? W.BELOW_ROOMS : W.CAVE_ROOMS).map((r) => r.r), '#5e5952');
@@ -629,6 +720,10 @@ function drawMinimap() {
   mm.fillStyle = '#e8d6aa'; mm.font = 'bold 11px Georgia, serif'; mm.textAlign = 'center'; mm.fillText('N', S / 2, 13);
 }
 let hudTick = 0;
+function screenOf(x, y, z) {
+  proj.set(x, y, z).project(camera);
+  return [(proj.x * 0.5 + 0.5) * innerWidth, (-proj.y * 0.5 + 0.5) * innerHeight];
+}
 function drawHud() {
   const [sub, place] = locationText();
   $('loc-place').textContent = place;
@@ -637,8 +732,23 @@ function drawHud() {
   $('clock').textContent = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
   const t = dialog.open ? null : nearest();
   $('prompt').hidden = !t;
-  if (t) $('prompt-text').textContent = t.kind === 'item' ? `Read: ${t.name}` : `Talk to ${t.name}`;
+  if (t) $('prompt-text').textContent = t.kind === 'object' ? `${t.obj.verb}: ${t.name}` : `Talk to ${t.name}`;
   $('talk-btn').hidden = !t && !dialog.open;
+  $('objective').textContent = story.objectiveText();
+  const tgt = story.objectiveTarget(npcs);
+  const arrow = $('compass');
+  if (tgt) {
+    const [px, py] = screenOf(player.x, player.y + 1.0, player.z);
+    const dx = tgt.x - player.x, dz = tgt.z - player.z;
+    const dist = Math.hypot(dx, dz);
+    const where = tgt.space === player.space ? '' : tgt.space === 'below' ? ' (below)' : tgt.space === 'cave' ? ' (in the cave)' : tgt.space === 'outdoor' ? ' (outside)' : '';
+    arrow.hidden = dist < 2.5 && !where;
+    arrow.style.transform = `translate(${px}px, ${py}px) rotate(${Math.atan2(dz, dx)}rad) translate(64px, -50%)`;
+    $('compass-label').textContent = `${Math.round(dist)} m${where}`;
+  } else arrow.hidden = true;
+  const showStir = player.space === 'cave' && !story.st.trollAwake;
+  $('stir').hidden = !showStir;
+  if (showStir) $('stir-fill').style.width = `${Math.round(story.st.stir * 100)}%`;
   if (hudTick++ % 6 === 0) drawMinimap();
 }
 
@@ -652,6 +762,7 @@ function resize() {
 addEventListener('resize', resize);
 resize();
 function render() {
+  soundTick();
   renderer.render(scene, camera);
   drawBubbles();
   drawHud();
@@ -678,6 +789,80 @@ $('help-close').addEventListener('click', () => setHelp(false));
 document.querySelectorAll('[data-time]').forEach((el) => el.addEventListener('click', () => setTime(el.dataset.time)));
 setTime(timeKey);
 
+// ---------------------------------------------------------------- story HUD and effects
+function toast(text) {
+  const el = $('toast');
+  el.textContent = text;
+  el.hidden = false;
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => { el.hidden = true; }, VERIFY ? 1 : 5200);
+  audio.play('objective');
+}
+// the lantern: a light the player carries, coloured by the active flame
+const lantern = new THREE.PointLight(0xff8a3a, 1.5, 10, 1.6);
+lantern.position.set(0.45, 1.0, 0.35);
+player.ch.group.add(lantern);
+const lanternMat = new THREE.MeshStandardMaterial({ color: 0xff8a3a, emissive: 0xff8a3a, emissiveIntensity: 2 });
+const lanternMesh = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.2, 0.16), lanternMat);
+lanternMesh.position.set(0, -0.72, 0.08);
+player.ch.armR.add(lanternMesh);
+function refreshFlames() {
+  const f = FLAMES[story.st.flame];
+  lantern.color.setHex(f.color);
+  lanternMat.color.setHex(f.color);
+  lanternMat.emissive.setHex(f.color);
+  const el = $('flames');
+  el.innerHTML = '';
+  for (const [k, fl] of Object.entries(FLAMES)) {
+    const chip = document.createElement('span');
+    chip.className = `flame${story.st.flames[k] ? '' : ' unknown'}${story.st.flame === k ? ' on' : ''}`;
+    chip.style.setProperty('--c', fl.css);
+    chip.textContent = story.st.flames[k] ? fl.name : '?';
+    chip.title = story.st.flames[k] ? fl.desc : 'Not yet found';
+    el.appendChild(chip);
+  }
+}
+function toggleJournal() {
+  const j = $('journal');
+  if (j.hidden) {
+    $('journal-list').innerHTML = '';
+    for (const line of story.st.journal) { const li = document.createElement('li'); li.textContent = line; $('journal-list').appendChild(li); }
+  }
+  j.hidden = !j.hidden;
+}
+function tossOut() {
+  closeDialog();
+  player.space = 'outdoor'; player.x = -46.5; player.z = -6; player.y = W.floorY(world, 'outdoor', player.x, player.z);
+  trail.length = 0;
+  for (let i = 0; i < 15; i++) trail.push({ x: player.x + 0.3 * (15 - i), z: player.z, y: player.y, space: 'outdoor' });
+  for (const c of companions) { c.space = 'outdoor'; c.x = player.x + 1.5; c.z = player.z + 0.5; c.y = player.y; }
+  audio.play('toss');
+  toast('Old Knuckles rolls over in his sleep, and one enormous hand sweeps you out of the cave. Hush, and walk, do not run.');
+  mark('tossed out of the cave');
+}
+function wakeTroll() {
+  troll.ch.group.rotation.set(0, Math.PI / 2 + 0.4, 0);
+  troll.ch.group.position.set(-67.5, world.caveY, -11);
+  sitPose(troll.ch);
+  troll.ch.body.scale.set(1, 1, 1);
+}
+function showEnding() {
+  state.endingShown = true;
+  world.story.beam.visible = true;
+  setTime('night');
+  W.WINDOW_MAT.emissiveIntensity = 3;
+  $('ending').hidden = false;
+  audio.play('ending');
+  mark('ending shown');
+}
+$('sfx-btn').addEventListener('click', () => { audio.setSfx(!audio.sfx); saveSound(); setSoundButtons(); });
+$('music-btn').addEventListener('click', () => { audio.setMusic(!audio.music); saveSound(); setSoundButtons(); });
+setSoundButtons();
+$('ending-close').addEventListener('click', () => { $('ending').hidden = true; });
+$('journal-close').addEventListener('click', () => { $('journal').hidden = true; });
+story = createStory({ world, mark: (m) => { mark(m); if (STORY_SOUND[m]) audio.play(STORY_SOUND[m]); }, toast, wakeTroll });
+refreshFlames();
+
 window.__gamecraft = {
   version: 1,
   get ready() { return state.ready; },
@@ -686,6 +871,7 @@ window.__gamecraft = {
     checkpoint: state.checkpoint, checkpoints: state.checkpoints, log: state.log,
     space: player.space, x: +player.x.toFixed(3), z: +player.z.toFixed(3), y: +player.y.toFixed(3),
     autoplay: auto.active, waypoint: auto.i,
+    story: story.STAGES[story.st.stage].id, stir: +story.st.stir.toFixed(2), tossed: story.st.tossed,
   }),
   autoplay: () => { startAutoplay(); return true; },
   step: (n = 1) => {
@@ -699,6 +885,25 @@ window.__gamecraft = {
   },
   render: () => { render(); return true; },
   setTime: (k) => { if (k in TIMES) setTime(k); return timeKey; },
+  // The stealth has to bite: without Hush you get thrown out, with Hush (walking) you do not.
+  selfTest: () => {
+    const run = (flame, speed) => {
+      const sandbox = createStory({ world: { ...world, glimmer: [] }, mark: () => {}, toast: () => {}, wakeTroll: () => {} });
+      sandbox.st.flames.hush = true; sandbox.setFlame(flame);
+      const p = { space: 'cave', x: -58, z: -6, speed };
+      let tossedAt = null;
+      for (let t = 0; t < 20 && tossedAt === null; t += DT) if (sandbox.update(DT, p) === 'toss') tossedAt = +t.toFixed(1);
+      return tossedAt;
+    };
+    const res = { ember_walk: run('ember', 4.2), ember_run: run('ember', 6.5), hush_walk: run('hush', 4.2), hush_run: run('hush', 6.5) };
+    const checks = {
+      ember_walking_gets_you_tossed: res.ember_walk !== null && res.ember_walk < 10,
+      running_is_worse_than_walking: res.ember_run !== null && res.ember_run < res.ember_walk,
+      hush_walking_is_safe: res.hush_walk === null,
+      hush_running_still_risky: res.hush_run !== null,
+    };
+    return { pass: Object.values(checks).every(Boolean), checks, summary: { seconds_until_tossed: res } };
+  },
 };
 
 updateView(1);

@@ -62,7 +62,11 @@ bun run verify     # gate, all games (Node 24; Playwright hangs under Bun)
 
 | Slug | Origin | Status |
 |---|---|---|
-| `mossbrook` | Willison's Emberwick prompt sequence, prompts 1-3 of 4, rebuilt from scratch | gate green, prompt 4 (real game) not started |
+| `mossbrook` | Willison's Emberwick prompt sequence, all 4 prompts, rebuilt from scratch | gate green: full story tour (14 checkpoints) plus stealth self-test; not yet hand-played |
 | `kaffeehaus` | Original design: Viennese coffee house management | gate green including self-test; sound; not yet hand-played |
 
-Each game folder has its own `README.md`.
+Each game folder has a `README.md` and a player `CHEATSHEET.md`
+([Mossbrook](games/mossbrook/CHEATSHEET.md), [Kaffeehaus](games/kaffeehaus/CHEATSHEET.md)).
+For building games here: [CHEATSHEET.md](CHEATSHEET.md) (commands, hook, gate
+rules, patterns that worked, known traps). For the bigger picture, what a model
+is good and bad at as a game designer: [../docs/LLM_AS_GAME_DESIGNER.md](../docs/LLM_AS_GAME_DESIGNER.md).

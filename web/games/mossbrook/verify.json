@@ -1,70 +1,138 @@
 {
   "slug": "mossbrook",
   "title": "Mossbrook",
-  "date": "2026-10-31T01:54:30.858Z",
-  "boot_ms": 817,
-  "steps": 3098,
-  "sim_seconds": 51.6,
+  "date": "2026-10-31T02:33:11.808Z",
+  "boot_ms": 2594,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "ember_walking_gets_you_tossed": true,
+      "running_is_worse_than_walking": true,
+      "hush_walking_is_safe": true,
+      "hush_running_still_risky": true
+    },
+    "summary": {
+      "seconds_until_tossed": {
+        "ember_walk": 2.7,
+        "ember_run": 1.7,
+        "hush_walk": null,
+        "hush_run": 8.3
+      }
+    }
+  },
+  "steps": 11537,
+  "sim_seconds": 192.3,
   "checkpoints": [
     {
-      "name": "tavern-ground",
-      "step": 227
+      "name": "mags",
+      "step": 308
     },
     {
-      "name": "tavern-upper",
-      "step": 522
+      "name": "wren",
+      "step": 796
     },
     {
       "name": "cellar",
-      "step": 1162
+      "step": 1396
     },
     {
-      "name": "tunnel",
-      "step": 1406
+      "name": "note",
+      "step": 1642
     },
     {
-      "name": "smithy",
-      "step": 1854
+      "name": "glimmer",
+      "step": 2042
     },
     {
-      "name": "village",
-      "step": 2070
+      "name": "hidden-door",
+      "step": 2278
     },
     {
-      "name": "cave",
-      "step": 2968
+      "name": "keepers-cellar",
+      "step": 2393
     },
     {
-      "name": "troll",
-      "step": 3098
+      "name": "bertil",
+      "step": 2838
+    },
+    {
+      "name": "moonring",
+      "step": 3892
+    },
+    {
+      "name": "roots",
+      "step": 5696
+    },
+    {
+      "name": "compact",
+      "step": 5935
+    },
+    {
+      "name": "three-hearths",
+      "step": 8677
+    },
+    {
+      "name": "keeper-wakes",
+      "step": 9956
+    },
+    {
+      "name": "well-lit",
+      "step": 11537
     }
   ],
   "shots": [
-    "shots/01-tavern-ground.png",
-    "shots/02-tavern-upper.png",
+    "shots/01-mags.png",
+    "shots/02-wren.png",
     "shots/03-cellar.png",
-    "shots/04-tunnel.png",
-    "shots/05-smithy.png",
-    "shots/06-village.png",
-    "shots/07-cave.png",
-    "shots/08-troll.png"
+    "shots/04-note.png",
+    "shots/05-glimmer.png",
+    "shots/06-hidden-door.png",
+    "shots/07-keepers-cellar.png",
+    "shots/08-bertil.png",
+    "shots/09-moonring.png",
+    "shots/10-roots.png",
+    "shots/11-compact.png",
+    "shots/12-three-hearths.png",
+    "shots/13-keeper-wakes.png",
+    "shots/14-well-lit.png"
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 4004,
+  "wall_ms": 8235,
   "console_errors": [],
   "console_warnings": [],
   "markers": [
     "GameCraft: ready",
     "GameCraft: autoplay start",
-    "GameCraft: checkpoint tavern-ground",
-    "GameCraft: checkpoint tavern-upper",
+    "GameCraft: story wren",
+    "GameCraft: checkpoint mags",
+    "GameCraft: story cellars",
+    "GameCraft: checkpoint wren",
     "GameCraft: checkpoint cellar",
-    "GameCraft: checkpoint tunnel",
-    "GameCraft: checkpoint smithy",
-    "GameCraft: checkpoint village",
-    "GameCraft: checkpoint cave",
-    "GameCraft: checkpoint troll",
+    "GameCraft: story forge-cellar",
+    "GameCraft: checkpoint note",
+    "GameCraft: story glyph",
+    "GameCraft: checkpoint glimmer",
+    "GameCraft: story cradle",
+    "GameCraft: checkpoint hidden-door",
+    "GameCraft: story bertil",
+    "GameCraft: checkpoint keepers-cellar",
+    "GameCraft: story moonring",
+    "GameCraft: checkpoint bertil",
+    "GameCraft: story roots",
+    "GameCraft: checkpoint moonring",
+    "GameCraft: story tablet",
+    "GameCraft: checkpoint roots",
+    "GameCraft: story hearths",
+    "GameCraft: checkpoint compact",
+    "GameCraft: story wake",
+    "GameCraft: checkpoint three-hearths",
+    "GameCraft: story set",
+    "GameCraft: checkpoint keeper-wakes",
+    "GameCraft: story end",
+    "GameCraft: ending shown",
+    "GameCraft: checkpoint well-lit",
+    "GameCraft: story complete, the well is lit",
     "GameCraft: tour complete, win"
   ],
   "pass": true
