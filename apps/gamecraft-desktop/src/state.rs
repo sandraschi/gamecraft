@@ -482,7 +482,7 @@ impl DesktopState {
                 .parent()
                 .and_then(|p| p.parent())
                 .map_or_else(|| game.dir.clone(), std::path::Path::to_path_buf);
-            let bun = std::env::var("GAMECRAFT_BUN").unwrap_or_else(|_| "bun".to_string());
+            let bun = bun_binary();
             match std::process::Command::new(bun.as_str())
                 .arg("run")
                 .arg("serve.ts")
@@ -752,6 +752,27 @@ impl DesktopState {
         }
         out
     }
+}
+
+/// Locate bun: explicit override, then the user install (`~/.bun/bin/bun.exe`),
+/// then PATH. The viewer used to spawn bare `bun` and failed with "program not
+/// found" on a machine where bun is installed but not on the ambient PATH.
+fn bun_binary() -> String {
+    if let Ok(explicit) = std::env::var("GAMECRAFT_BUN") {
+        if !explicit.trim().is_empty() {
+            return explicit;
+        }
+    }
+    if let Ok(home) = std::env::var("USERPROFILE") {
+        let candidate = std::path::Path::new(&home)
+            .join(".bun")
+            .join("bin")
+            .join("bun.exe");
+        if candidate.is_file() {
+            return candidate.to_string_lossy().into_owned();
+        }
+    }
+    "bun".to_string()
 }
 
 /// Find every playable project: Godot scenes under `depot/games/`, three.js
