@@ -48,6 +48,7 @@ fn handle(text: &str) -> Option<String> {
 }
 
 /// Route one method call; `Err((code, message))` becomes a JSON-RPC error.
+#[allow(clippy::too_many_lines)] // one arm per method and one JSON entry per tool; splitting would scatter the protocol surface
 fn dispatch(method: &str, msg: &serde_json::Value) -> Result<serde_json::Value, (i32, String)> {
     match method {
         "initialize" => Ok(serde_json::json!({
@@ -124,6 +125,19 @@ fn dispatch(method: &str, msg: &serde_json::Value) -> Result<serde_json::Value, 
                         "required": ["scene"],
                     },
                 },
+                {
+                    "name": "scene_verify",
+                    "description": "OPT-IN: boot a designed Godot project headless and require a win marker. Disabled unless the server runs with GAMECRAFT_MCP_ALLOW_GODOT=1, because it launches a local Godot process - the rest of this server is pure Rust and needs no engine. Returns won, the markers found, elapsed ms and the tail of engine output.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "game_path": {"type": "string", "description": "Project directory containing project.godot and main.tscn."},
+                            "frames": {"type": "integer", "default": 3600, "description": "Frame budget passed to --quit-after (60 fps)."},
+                            "autoplay": {"type": "boolean", "default": true, "description": "Set GAMECRAFT_AUTOPLAY=1 for the child so the built-in driver plays."}
+                        },
+                        "required": ["game_path"],
+                    },
+                },
             ],
         })),
         "tools/call" => {
@@ -142,6 +156,88 @@ fn dispatch(method: &str, msg: &serde_json::Value) -> Result<serde_json::Value, 
         "ping" => Ok(serde_json::json!({})),
         _ => Err((-32601, format!("method not found: {method}"))),
     }
+}
+
+/// Win markers any `GameCraft` runtime prints.
+const WIN_MARKERS: [&str; 4] = [
+    "goal reached",
+    "puzzle solved",
+    "door opened",
+    "all hostiles down",
+];
+
+/// Boot a project in headless Godot and require a win marker.
+///
+/// Opt-in by design: this is the only tool that leaves the process and starts
+/// an engine, so a client has to ask for it explicitly via the environment.
+fn scene_verify(args: &serde_json::Value) -> Result<serde_json::Value, (i32, String)> {
+    if std::env::var("GAMECRAFT_MCP_ALLOW_GODOT").ok().as_deref() != Some("1") {
+        return Err((
+            -32601_i32,
+            "scene_verify is opt-in because it launches a local Godot process. \
+             Start the server with GAMECRAFT_MCP_ALLOW_GODOT=1 to enable it."
+                .to_string(),
+        ));
+    }
+    let game = args
+        .get("game_path")
+        .and_then(|value| value.as_str())
+        .ok_or_else(|| (-32602_i32, "missing game_path".to_string()))?;
+    let frames = args
+        .get("frames")
+        .and_then(serde_json::Value::as_u64)
+        .unwrap_or(3600);
+    let autoplay = args
+        .get("autoplay")
+        .and_then(serde_json::Value::as_bool)
+        .unwrap_or(true);
+    let binary = std::env::var("GAMECRAFT_GODOT").unwrap_or_else(|_| "godot".to_string());
+    let started = std::time::Instant::now();
+    let mut command = std::process::Command::new(binary.as_str());
+    command
+        .arg("--headless")
+        .arg("--path")
+        .arg(game)
+        .arg("--fixed-fps")
+        .arg("60")
+        .arg("--quit-after")
+        .arg(frames.to_string());
+    if autoplay {
+        command.env("GAMECRAFT_AUTOPLAY", "1");
+    }
+    let output = command
+        .output()
+        .map_err(|err| (-32603_i32, format!("cannot launch {binary}: {err}")))?;
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+    let found: Vec<&str> = WIN_MARKERS
+        .iter()
+        .copied()
+        .filter(|marker| stdout.contains(marker) || stderr.contains(marker))
+        .collect();
+    let errors: Vec<&str> = stderr
+        .lines()
+        .filter(|line| line.contains("ERROR"))
+        .take(5)
+        .collect();
+    let tail: String = stdout
+        .chars()
+        .rev()
+        .take(2000)
+        .collect::<Vec<char>>()
+        .into_iter()
+        .rev()
+        .collect();
+    Ok(serde_json::json!({
+        "game_path": game,
+        "won": !found.is_empty(),
+        "markers": found,
+        "frames_budget": frames,
+        "elapsed_ms": started.elapsed().as_millis(),
+        "exit_code": output.status.code(),
+        "engine_errors": errors,
+        "tail": tail,
+    }))
 }
 
 /// Run one tool and wrap its JSON output in MCP content form.
@@ -193,6 +289,7 @@ fn call_tool(name: &str, args: &serde_json::Value) -> Result<serde_json::Value, 
                 "text": outcome.text,
             })
         }
+        "scene_verify" => scene_verify(args)?,
         _ => return Err((-32601, format!("unknown tool: {name}"))),
     };
     Ok(serde_json::json!({

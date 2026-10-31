@@ -235,7 +235,7 @@ The four that do not are unproven, not broken - all boot with zero errors:
 | `gamecraft-godot` | Deterministic `.tscn`/`.tres` parser **and serializer**, UID hashing, lint rules. |
 | `gamecraft-sim` | Deterministic gameplay sims: kinematic stepper, BFS maze and crate solvers. |
 | `gamecraft-forge` | Game builders, `GameSpec` validation and compilation, the LLM front end, thumbnail rasterizer, economy and Steam asset generators. |
-| `gamecraft-mcp` | MCP stdio server: `scene_lint`, `spatial_query`, `export_scene`, `scene_inspect`. |
+| `gamecraft-mcp` | MCP stdio server: `scene_lint`, `spatial_query`, `export_scene`, `scene_inspect`, plus opt-in `scene_verify` (boots Godot; needs `GAMECRAFT_MCP_ALLOW_GODOT=1`). |
 | `gamecraft-cli` | `lint`, `query`, `uid`, `forge`, `new`, `export`. |
 | `gamecraft-desktop` | `egui`/`wgpu` viewer: depot browser with Start Game, shaded mesh viewport, inspector, trace scrubber, undo/redo. |
 
@@ -293,4 +293,7 @@ be finished. It does not prove it is fun. See `web/README.md`.
 - `docs/NEW_GAME.md` - spec format, providers, measured model limits.
 - `docs/MCP_CLIENTS.md` - wiring the MCP server into a client.
 - `web/README.md`, `web/CHEATSHEET.md` - the three.js family and how to add a game.
+- `docs/LLM_AS_GAME_DESIGNER.md` - methods, strengths and weaknesses of a model as
+  game designer, asset generators and libraries, social VR (Overte, Resonite,
+  VRChat), licensing, and a human/model division of labour. Based on this repo.
 - `KIBITZ.md` / `KIBITZ_BACKTALK.md` - the review dialogue, kept as an audit trail.
