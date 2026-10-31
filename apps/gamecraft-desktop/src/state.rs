@@ -475,8 +475,13 @@ impl DesktopState {
         if demo {
             url.push_str("?autoplay=1");
         }
-        let port_closed = std::net::TcpStream::connect(("127.0.0.1", 11_258)).is_err();
-        if port_closed {
+        let port_open = std::net::TcpStream::connect(("127.0.0.1", 11_258)).is_ok();
+        if port_open && !probe_web_arcade() {
+            self.status =
+                "port 11258 is held by something that is not the GameCraft web server".to_string();
+            return;
+        }
+        if !port_open {
             let web_root = game
                 .dir
                 .parent()
@@ -489,7 +494,14 @@ impl DesktopState {
                 .current_dir(web_root)
                 .spawn()
             {
-                Ok(_) => std::thread::sleep(std::time::Duration::from_millis(900)),
+                Ok(_) => {
+                    for _ in 0..30 {
+                        if probe_web_arcade() {
+                            break;
+                        }
+                        std::thread::sleep(std::time::Duration::from_millis(100));
+                    }
+                }
                 Err(err) => {
                     self.status = format!("cannot start web server ({bun}): {err}");
                     return;
@@ -752,6 +764,27 @@ impl DesktopState {
         }
         out
     }
+}
+
+/// True when whatever listens on 11258 is the `GameCraft` arcade: it must answer
+/// `/api/games` with the JSON game list. A bare TCP connect is not enough - any
+/// process holding the port would otherwise get a browser opened at it.
+fn probe_web_arcade() -> bool {
+    use std::io::{Read, Write};
+    let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 11_258));
+    let Ok(mut stream) =
+        std::net::TcpStream::connect_timeout(&addr, std::time::Duration::from_millis(400))
+    else {
+        return false;
+    };
+    let _ = stream.set_read_timeout(Some(std::time::Duration::from_millis(900)));
+    let request = "GET /api/games HTTP/1.0\r\nHost: 127.0.0.1:11258\r\n\r\n";
+    if stream.write_all(request.as_bytes()).is_err() {
+        return false;
+    }
+    let mut body = String::new();
+    let _ = stream.take(8192).read_to_string(&mut body);
+    body.contains(" 200 ") && body.contains("\"slug\"")
 }
 
 /// Locate bun: explicit override, then the user install (`~/.bun/bin/bun.exe`),
