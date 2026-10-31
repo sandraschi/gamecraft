@@ -17,6 +17,7 @@ wgpu = "30"
 futures = "0.3"
 rfd = "0.15"
 gilrs = "0.11"
+image = { workspace = true }
 
 [lints]
 workspace = true

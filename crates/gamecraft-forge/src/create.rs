@@ -124,6 +124,22 @@ impl Default for Level {
     }
 }
 
+/// Maze generation parameters (only read when `archetype` is `"maze"`).
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(default)]
+pub struct MazeParams {
+    /// Board width/height in cells; must be odd, 7 through 25.
+    pub size: i32,
+    /// Deterministic generator seed.
+    pub seed: u64,
+}
+
+impl Default for MazeParams {
+    fn default() -> Self {
+        Self { size: 15, seed: 9 }
+    }
+}
+
 /// A complete game design.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
@@ -132,7 +148,7 @@ pub struct GameSpec {
     pub slug: String,
     /// Display title.
     pub title: String,
-    /// Archetype id; only `platformer` in v1.
+    /// Archetype id: `platformer` | `runner` | `pong` | `maze`.
     pub archetype: String,
     /// Visual theme.
     pub theme: Theme,
@@ -140,6 +156,8 @@ pub struct GameSpec {
     pub physics: Physics,
     /// Level layout.
     pub level: Level,
+    /// Maze generation parameters (only used when `archetype` is `"maze"`).
+    pub maze: MazeParams,
 }
 
 impl Default for GameSpec {
@@ -151,6 +169,7 @@ impl Default for GameSpec {
             theme: Theme::default(),
             physics: Physics::default(),
             level: Level::default(),
+            maze: MazeParams::default(),
         }
     }
 }
@@ -162,9 +181,13 @@ impl Default for GameSpec {
 /// Returns a human-readable reason listing every problem found.
 pub fn validate(spec: &GameSpec) -> Result<(), String> {
     let mut problems: Vec<String> = Vec::new();
-    if spec.archetype != "platformer" && spec.archetype != "runner" && spec.archetype != "pong" {
+    if spec.archetype != "platformer"
+        && spec.archetype != "runner"
+        && spec.archetype != "pong"
+        && spec.archetype != "maze"
+    {
         problems.push(format!(
-            "archetype '{}' is not supported (supported: platformer, runner, pong)",
+            "archetype '{}' is not supported (supported: platformer, runner, pong, maze)",
             spec.archetype
         ));
     }
@@ -288,6 +311,13 @@ pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
             return Err(format!("pong ball speed {ball_speed} outside 8..22"));
         }
         return crate::arcade::build_pong_with(ball_speed, &spec.slug, &spec.title);
+    }
+    if spec.archetype == "maze" {
+        let size = spec.maze.size;
+        if !(7..=25).contains(&size) || size % 2 == 0 {
+            return Err(format!("maze size {size} must be an odd number 7..=25"));
+        }
+        return crate::puzzle::build_maze_with(size, size, spec.maze.seed, &spec.slug, &spec.title);
     }
     validate(spec)?;
     let physics = &spec.physics;

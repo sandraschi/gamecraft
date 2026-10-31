@@ -507,10 +507,22 @@ pub(crate) fn left_tree(state: &mut DesktopState, ui: &mut egui::Ui) {
             }
             for (index, game) in state.depot_games.iter().enumerate() {
                 let selected = state.selected_game == Some(index);
-                if scroll
-                    .selectable_label(selected, game.title.as_str())
-                    .clicked()
-                {
+                let mut row_pick = false;
+                scroll.horizontal(|row| {
+                    if let Some(thumb) = state.thumbs.get(game.slug.as_str()) {
+                        row.add(
+                            egui::Image::new(&thumb.texture)
+                                .fit_to_exact_size(egui::Vec2::new(56.0, 32.0)),
+                        );
+                    }
+                    if row
+                        .selectable_label(selected, game.title.as_str())
+                        .clicked()
+                    {
+                        row_pick = true;
+                    }
+                });
+                if row_pick {
                     pick = Some(index);
                 }
             }

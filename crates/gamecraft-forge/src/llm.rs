@@ -444,6 +444,10 @@ Schema (all numbers are floats):\n\
 \"level\":{{\"grounds\":[{{\"x\":-6,\"w\":12}},{{\"x\":9,\"w\":12}}],\n\
 \"platforms\":[{{\"x\":2,\"y\":1.0,\"w\":2.5}}],\n\
 \"coins\":[[2.0,2.2]],\"goal_x\":18.0}}}}\n\
+Other archetypes (reply with one of these shapes instead of the platformer one):\n\
+- runner: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"runner\"}} (fixed auto-runner; theme applies)\n\
+- pong: rolling ball game; send \"physics\":{{\"speed\":14.0}} as ball speed, 8..22\n\
+- maze: {{\"slug\":\"..\",\"title\":\"..\",\"archetype\":\"maze\",\"maze\":{{\"size\":15,\"seed\":9}}}}; size odd 7..25\n\
 Rules that decide whether the level is accepted:\n\
 - The player starts on the first ground slab and runs right.\n\
 - Gaps between grounds must be jumpable: width <= 3.2 units with the default jump.\n\

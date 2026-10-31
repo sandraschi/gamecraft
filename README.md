@@ -40,6 +40,7 @@ dump. That gap is real and not hidden here.
 | `theme` | six colours: sky, horizon, ground, platforms, player, coins |
 | `physics` | run speed, jump impulse, gravity - this is the "game feel" |
 | `level` | ground slabs, floating platforms, coin positions, goal distance |
+| `maze` | size (odd 7-25) and seed - a deterministic perfect maze |
 | `title` / `slug` | name and folder |
 
 A full example is committed at `depot/games/snowy-mountain-pass/spec.json`.
@@ -48,16 +49,16 @@ A full example is committed at `depot/games/snowy-mountain-pass/spec.json`.
 
 Straight answers, because this is the part that matters:
 
-- **Three archetypes, not thirteen.** Prompts can produce `platformer`, `runner`
-  and `pong`. Ask for a shooter and the compiler rejects the spec and lists what is
-  supported - it does not silently hand back a platformer.
+- **Four archetypes, not thirteen.** Prompts can produce `platformer`, `runner`,
+  `pong` and `maze`. Ask for a shooter and the compiler rejects the spec and lists
+  what is supported - it does not silently hand back a platformer.
 - **What each archetype lets you change:** `platformer` gets the full level (ground
   slabs, platforms, coins, goal) plus physics and theme; `runner` gets theme and
   name (its jump timing is a fixed verified script); `pong` gets theme, name and
-  ball speed (8-22).
-- **The other ten genres exist but are hand-built.** The 15 demo games span
+  ball speed (8-22); `maze` gets size (odd 7-25), seed and name.
+- **The other nine genres exist but are hand-built.** The 15 demo games span
   platformer, runner, flight, driving, pong, breakout, flappy, maze, sokoban,
-  chessboard, dialogue, shooter and tower defence. Only the three above are wired to
+  chessboard, dialogue, shooter and tower defence. Only the four above are wired to
   the prompt path. Flappy stays unwired on purpose: it is one of the four that never
   proved an in-engine win, so generating it would ship games I cannot verify.
 - **Local model quality varies.** `gemma4:12b` works. `qwen3.8:27b` crashes Ollama
@@ -164,11 +165,13 @@ environment variable > built-in default.**
 
 | Field | What it does | Default |
 |---|---|---|
-| `provider` | `auto` / `local` / `openai` / `anthropic` | `auto` |
-| `model` | model id; empty = auto-pick (gemma4 family) | empty |
+| `provider` | `auto` / `local` / `openai` / `anthropic` / `deepseek` / `meta` | `auto` |
+| `model` | model id; empty = auto-pick (gemma4 family); presets in the dialog | empty |
 | `ollama_endpoint` | local server URL; empty = provider default | empty |
 | `openai_api_key` | cloud key; empty = `OPENAI_API_KEY` env | empty |
 | `anthropic_api_key` | cloud key; empty = `ANTHROPIC_API_KEY` env | empty |
+| `deepseek_api_key` | cloud key; empty = `DEEPSEEK_API_KEY` env | empty |
+| `meta_api_key` | cloud key; empty = `META_API_KEY` env | empty |
 | `godot_binary` | override for launching games | empty = `godot` |
 
 Keys are never printed or logged; the file inherits your profile's permissions.

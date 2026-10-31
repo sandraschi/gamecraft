@@ -299,9 +299,23 @@ fn maze_walls(width: i32, height: i32, seed: u64) -> Vec<(i32, i32)> {
 ///
 /// Returns a message when the trace fails verification or a node is invalid.
 pub fn build_maze() -> Result<GameParts, String> {
-    let (width, height) = (15_i32, 15_i32);
+    build_maze_with(15, 15, 9, "maze", "GameCraft Maze")
+}
+
+/// Maze with caller-supplied size, seed, and name.
+///
+/// # Errors
+///
+/// Returns a message when the trace fails verification or a node is invalid.
+pub fn build_maze_with(
+    width: i32,
+    height: i32,
+    seed: u64,
+    slug: &str,
+    title: &str,
+) -> Result<GameParts, String> {
     let goal = (width - 2, height - 2);
-    let walls = maze_walls(width, height, 9);
+    let walls = maze_walls(width, height, seed);
     let path = sim::bfs_path((1, 1), goal, walls.as_slice(), width, height)
         .ok_or_else(|| "maze has no path".to_string())?;
     if path.len() > 600 {
@@ -316,14 +330,20 @@ pub fn build_maze() -> Result<GameParts, String> {
         .map_err(|err| err.to_string())?;
     forge.ext_resource("Script", "res://scripts/gamecraft_runtime.gd", "1_runtime");
     forge.ext_resource("Script", "res://scripts/grid_walker.gd", "2_walker");
+    let span = width.max(height);
+    // Cell counts are tiny (<=25), so the int-to-float narrowing is exact.
+    #[allow(clippy::cast_precision_loss)]
+    let half = (span - 1) as f32 / 2.0;
+    #[allow(clippy::cast_precision_loss)]
+    let distance = span as f32 * 26.0 / 15.0;
     forge
-        .top_camera("Camera3D", Some(root), [7.0, 7.0], 26.0)
+        .top_camera("Camera3D", Some(root), [half, half], distance)
         .map_err(|err| err.to_string())?;
     board_base(
         &mut forge,
         root,
-        15,
-        15,
+        width,
+        height,
         [0.16, 0.18, 0.24],
         [0.12, 0.14, 0.2],
     )?;
@@ -346,34 +366,36 @@ pub fn build_maze() -> Result<GameParts, String> {
             gamecraft_core::PropertyValue::Raw(format!("[{maze_plan}]")),
         )
         .map_err(|err| err.to_string())?;
+    #[allow(clippy::cast_precision_loss)]
+    let goal_pos = [goal.0 as f32, 0.5, goal.1 as f32];
     forge
-        .area_trigger("Goal", Some(root), [13.0, 0.5, 13.0], [1.0, 2.0, 1.0])
+        .area_trigger("Goal", Some(root), goal_pos, [1.0, 2.0, 1.0])
         .map_err(|err| err.to_string())?;
     forge.connect("body_entered", "Goal", ".", "_on_goal");
     let frames = path_frames(path.as_slice(), 2);
     let used = frames.len();
     Ok(GameParts {
-        slug: "maze",
-        title: "GameCraft Maze",
+        slug: Box::leak(slug.to_string().into_boxed_str()),
+        title: Box::leak(title.to_string().into_boxed_str()),
         controls: "Arrow keys move cell to cell. Find the gold exit.",
         win_text: "Reach the exit in the far corner.",
-        seed: 9,
-        scene_text: export_scene(&forge, "maze")?,
+        seed: u32::try_from(seed).unwrap_or(9),
+        scene_text: export_scene(&forge, slug)?,
         scripts: vec![
             ("gamecraft_runtime.gd", crate::scripts::RUNTIME),
             ("grid_walker.gd", crate::scripts::WALKER),
         ],
         trace_json: format!(
-            "{{\"game\":\"maze\",\"win\":true,\"frames\":{},\"steps\":{}}}",
-            used,
-            path.len()
+            "{{\"game\":\"{slug}\",\"win\":true,\"frames\":{used},\"steps\":{steps}}}",
+            used = used,
+            steps = path.len()
         ),
         commands_json: commands_json(&forge),
         statics: vec![],
         frames,
         view: View { x: -1.0, y: -1.0, w: 8.0, h: 8.0 },
         readme_body: "Discrete maze: BFS proves the exit reachable, trace walks it.\nThe 60s timer is the par; the trace finishes far inside it.\n".to_string(),
-        summary: format!("maze: exit in {used} frames, lint clean"),
+        summary: format!("{slug}: exit in {used} frames, lint clean"),
     })
 }
 

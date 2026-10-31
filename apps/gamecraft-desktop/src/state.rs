@@ -117,6 +117,8 @@ pub(crate) struct DesktopState {
     pub(crate) app_cfg: gamecraft_core::config::AppConfig,
     /// Play overlay for the selected depot game, edited through Game settings.
     pub(crate) overlay: gamecraft_core::config::GameOverlay,
+    /// Per-game preview renders, loaded once at startup (`thumb.png`).
+    pub(crate) thumbs: HashMap<String, Thumb>,
 }
 
 /// Modal dialogs owned by the menu bar.
@@ -141,6 +143,53 @@ pub(crate) struct DepotGame {
     pub(crate) title: String,
     /// Project directory (passed to Godot as `--path`).
     pub(crate) dir: PathBuf,
+}
+
+/// A loaded preview render. The GPU handle has no `Debug`, so this wrapper
+/// reports dimensions instead - enough to diagnose a corrupt thumbnail.
+#[derive(Clone)]
+pub(crate) struct Thumb {
+    /// GPU texture shown in the depot row.
+    pub(crate) texture: egui::TextureHandle,
+}
+
+impl std::fmt::Debug for Thumb {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Thumb")
+            .field("size", &self.texture.size())
+            .finish()
+    }
+}
+
+/// Load each game's `thumb.png` once at startup. Games without one (the two
+/// spec-generated entries) simply get a text-only row; a corrupt file never
+/// blocks the shell.
+fn load_thumbs(ctx: &egui::Context, games: &[DepotGame]) -> HashMap<String, Thumb> {
+    let mut thumbs: HashMap<String, Thumb> = HashMap::new();
+    for game in games {
+        let Ok(bytes) = std::fs::read(game.dir.join("thumb.png")) else {
+            continue;
+        };
+        let Ok(decoded) = image::load_from_memory(bytes.as_slice()) else {
+            continue;
+        };
+        let rgba = decoded.to_rgba8();
+        let size = [
+            usize::try_from(rgba.width()).unwrap_or(0),
+            usize::try_from(rgba.height()).unwrap_or(0),
+        ];
+        if size[0] == 0 || size[1] == 0 {
+            continue;
+        }
+        let raw = rgba.into_raw();
+        let texture = ctx.load_texture(
+            format!("thumb-{}", game.slug),
+            egui::ColorImage::from_rgba_unmultiplied(size, raw.as_slice()),
+            egui::TextureOptions::LINEAR,
+        );
+        thumbs.insert(game.slug.clone(), Thumb { texture });
+    }
+    thumbs
 }
 
 impl DesktopState {
@@ -191,6 +240,7 @@ impl DesktopState {
             .and_then(|path| std::fs::read_to_string(path).ok())
             .unwrap_or_else(|| FALLBACK_SCENE.to_string());
         let mut state = Self::from_text(text.as_str(), deterministic_uid(FIXTURE_PATH).as_str());
+        state.thumbs = load_thumbs(&ctx.egui_ctx, state.depot_games.as_slice());
         if let Some(path) = find_up(FIXTURE_PATH) {
             state.scene_path = Some(path);
             state.status = format!("loaded {FIXTURE_PATH}");
@@ -252,6 +302,7 @@ impl DesktopState {
             dialog: None,
             app_cfg: gamecraft_core::config::AppConfig::load(),
             overlay: gamecraft_core::config::GameOverlay::default(),
+            thumbs: HashMap::new(),
         };
         state.selected = state.graph.root;
         state.refresh();

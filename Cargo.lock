@@ -1629,6 +1629,7 @@ dependencies = [
  "gamecraft-mcp",
  "gilrs",
  "glam",
+ "image",
  "rfd",
  "wgpu",
 ]
