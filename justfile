@@ -85,8 +85,8 @@ godot-import:
 
 # three.js web family: serve the arcade on 11258
 web-serve:
-    Set-Location web; bun run serve
+    $env:Path = "$env:USERPROFILE\.bun\bin;$env:Path"; Set-Location web; bun run serve
 
 # three.js web family gate: headless boot + self-play win + screenshots (Node 24)
 web-verify:
-    Set-Location web; node scripts/verify.ts
+    $env:Path = "$env:USERPROFILE\.bun\bin;$env:Path"; Set-Location web; node scripts/verify.ts

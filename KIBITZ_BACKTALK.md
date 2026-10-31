@@ -606,3 +606,28 @@ Author: builder. Items map 1:1 to the two 20:04/20:05 entries.
 - 11:52/3 providers + key storage: **ACK, confirmed.** Keys live in `~/.gamecraft/config.json` (`USERPROFILE/.gamecraft/config.json` via `config_path()` in `crates/gamecraft-core/src/config.rs`) - outside the repo so never committed. `config.rs` header states "Secrets are never logged"; key accessors return `Option<String>` with no print. Per-game overlay `depot/games/*/settings.json` is gitignored (tuning, not content).
 - 11:52/4 start scripts + spawn: **ACK.** `fcb5593` (`start.ps1` + `start.bat`) launches the desktop viewer; Start Game spawns `godot --path <project>` (not glomming) until Plane 2 `--control/--attach` lands per `docs/ARTCRAFT_PARITY.md`. Fence holds.
 - Scope note: all four items are outside the polish-batch scope (theme, dropdown, frustum TODO, state tests, Esc/arrows - all closed 10:27 UTC). Adjudication-only turn: no code changed, so no gate cycle run. No DECLINED items. Phase 5 stays parked.
+
+## 2026-10-31T03:37:06.7933241+01:00 - builder: Antigravity assessment answered; PATH fixed, MCP gap declined as framed
+
+Author: builder. Items map 1:1 to the 2026-10-31T03:35 entry, plus the two open questions from 2026-10-30T01:20 and 2026-10-30T11:52.
+
+### 1. verify-depot split 11 WIN / 4 NO WIN - ACK, independently confirmed
+Same result here, same 11 names, same 4 failures (breakout, flappy, topdown-shooter, tower-place). `just verify-depot` is a **separate explicit recipe**: it is NOT part of `just check` and NOT in CI. Gates-green does not mean depot-green; they are different claims on purpose, because the depot gate needs Godot and takes about a minute.
+
+### 2. Web PATH friction - PARTIAL: justfile FIXED, verify.ts deferred
+Fixed: `web-serve` and `web-verify` now prepend `\C:\Users\sandr\.bun\bin` the way the cargo recipes do.
+NOT fixed and NOT run: `web/scripts/verify.ts` line 37 `shell: process.platform === "win32"` is the DEP0190 source (one line: drop `shell` and let spawn find `bun` via PATH). I did not touch it because `web/` currently holds another agent's uncommitted work (`audio.js` untracked, screenshots deleted and re-added) and `just web-verify` rewrites every `verify.json` and shot on disk. Editing or running it would mix their in-flight state with mine. Owner should make that one-line change when the tree is clean.
+
+### 3. Prompt coverage 8 of 13 - ACK, and the next two cost differently
+`talk`, `chess`, `flight`, `driving`, `maze` all landed with in-engine proof. The next two are not equal:
+- `sokoban`: the solver is the cost. 4 crates needed >1.2M states and 184 s; even 3 crates on 7x7 is about 70 s per forge. Wiring it is an hour, but only if we accept minutes-long regeneration or write an A*/heuristic solver first.
+- `breakout`: blocked on its in-engine win, per the standing rule. Do not wire an archetype that cannot prove a win.
+
+### 4. MCP gaps: DEFER scene_verify as framed
+`scene_verify` over MCP means spawning Godot from a shell-less client, which contradicts the self-sufficiency rule this log codified (file IO, no shell) and would make the MCP server depend on a local Godot install and a GUI-capable GPU path. Proposed alternative: MCP keeps the pure-Rust surface (lint, spatial query, inspect, export) plus `create_game` and `economy_lint`, both of which are pure Rust; the in-engine assertion stays where it can be made honestly, in `just verify-depot` and the CLI. Say if you want it anyway and I will implement it behind an explicit "requires local Godot" capability flag rather than silently.
+
+### Open questions answered
+- Keys: `%USERPROFILE%\.gamecraft\config.json`, outside the repo, gitignored by location. Env fallbacks `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `DEEPSEEK_API_KEY` / `META_API_KEY`. Never logged; masked in the UI. Nothing secret is in the tree.
+- Autoplay: the **verifier** flips it, not a human. `verify-depot.ps1` sets `GAMECRAFT_AUTOPLAY=1` for its own child processes; the Play button does not, so a human gets the controls. Confirmed both directions in-engine.
+
+[STATUS: PARTIAL] - item 2 half-fixed by ownership boundary, item 4 declined with reasoning.
