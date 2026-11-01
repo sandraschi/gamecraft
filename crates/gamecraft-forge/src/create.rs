@@ -56,6 +56,9 @@ const SURFACE_ROLES: [&str; 2] = ["ground", "platform"];
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
 pub struct SurfaceTexture {
+    /// Name of a texture set in a catalog folder (see [`texture_catalog`]). Resolved
+    /// into the three file fields by [`resolve_sets`].
+    pub set: Option<String>,
     /// Albedo image (`png`, `jpg`, `jpeg`).
     pub albedo: String,
     /// Packed ORM image (R occlusion, G roughness, B metallic).
@@ -69,12 +72,113 @@ pub struct SurfaceTexture {
 impl Default for SurfaceTexture {
     fn default() -> Self {
         Self {
+            set: None,
             albedo: String::new(),
             orm: None,
             normal: None,
             scale: 0.25,
         }
     }
+}
+
+/// Image files of one catalog texture set.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetFiles {
+    /// Albedo image.
+    pub albedo: String,
+    /// Packed ORM image, if present.
+    pub orm: Option<String>,
+    /// Normal map image, if present.
+    pub normal: Option<String>,
+}
+
+/// Texture sets in a catalog folder: every subfolder holding an image whose name
+/// contains `albedo` is a set named after the folder. `orm` and `normal` images are
+/// matched the same way (the names the `TextureCraft` Godot preset writes).
+#[must_use]
+pub fn texture_catalog(dir: &Path) -> BTreeMap<String, SetFiles> {
+    let mut sets = BTreeMap::new();
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return sets;
+    };
+    for entry in entries.flatten() {
+        let folder = entry.path();
+        let Some(name) = folder
+            .file_name()
+            .and_then(|n| n.to_str())
+            .map(str::to_string)
+        else {
+            continue;
+        };
+        let Ok(files) = std::fs::read_dir(&folder) else {
+            continue;
+        };
+        let mut images: Vec<String> = files
+            .flatten()
+            .map(|f| f.path())
+            .filter(|p| {
+                p.extension().and_then(|e| e.to_str()).is_some_and(|e| {
+                    ["png", "jpg", "jpeg"]
+                        .iter()
+                        .any(|k| e.eq_ignore_ascii_case(k))
+                })
+            })
+            .map(|p| p.to_string_lossy().into_owned())
+            .collect();
+        images.sort();
+        let find = |key: &str| {
+            images
+                .iter()
+                .find(|p| {
+                    // Whole tokens only: "normal" must not count as "orm".
+                    Path::new(p)
+                        .file_stem()
+                        .and_then(|n| n.to_str())
+                        .is_some_and(|stem| {
+                            stem.to_ascii_lowercase()
+                                .split(|c: char| !c.is_ascii_alphanumeric())
+                                .any(|token| token == key)
+                        })
+                })
+                .cloned()
+        };
+        if let Some(albedo) = find("albedo") {
+            sets.insert(
+                name,
+                SetFiles {
+                    albedo,
+                    orm: find("orm"),
+                    normal: find("normal"),
+                },
+            );
+        }
+    }
+    sets
+}
+
+/// Fill the file fields of every surface that names a catalog `set`.
+///
+/// # Errors
+///
+/// Returns a reason naming the unknown set and the sets that do exist.
+pub fn resolve_sets(spec: &mut GameSpec, catalog: &Path) -> Result<(), String> {
+    let sets = texture_catalog(catalog);
+    for (role, surface) in &mut spec.theme.surfaces {
+        let Some(name) = surface.set.clone() else {
+            continue;
+        };
+        let Some(files) = sets.get(&name) else {
+            let known: Vec<&str> = sets.keys().map(String::as_str).collect();
+            return Err(format!(
+                "theme.surfaces.{role}.set '{name}' is not in the texture catalog (available: {})",
+                known.join(", ")
+            ));
+        };
+        surface.albedo.clone_from(&files.albedo);
+        surface.orm.clone_from(&files.orm);
+        surface.normal.clone_from(&files.normal);
+    }
+    Ok(())
 }
 
 /// Every image of a theme as `(role, map, source file, res:// path)`.
@@ -124,7 +228,12 @@ fn check_surfaces(spec: &GameSpec, problems: &mut Vec<String>) {
             problems.push(format!("theme.surfaces.{role}.scale must be 0.01..=8"));
         }
         if set.albedo.is_empty() {
-            problems.push(format!("theme.surfaces.{role}.albedo is required"));
+            problems.push(match &set.set {
+                Some(name) => {
+                    format!("theme.surfaces.{role}.set '{name}' needs a texture catalog (pass one)")
+                }
+                None => format!("theme.surfaces.{role}.albedo is required"),
+            });
         }
     }
     for (role, map, source, _) in surface_files(&spec.theme) {
@@ -947,7 +1056,27 @@ pub fn create_game(spec: &GameSpec, root: &Path) -> Result<String, String> {
 ///
 /// Returns a message when both attempts fail, or when the provider call fails.
 pub fn generate(idea: &str, config: &crate::llm::LlmConfig, root: &Path) -> Result<String, String> {
-    let prompt = crate::llm::spec_prompt(idea);
+    generate_with_textures(idea, config, root, None)
+}
+
+/// [`generate`] with an optional texture catalog folder. When given, the prompt lists
+/// the available sets, the model may pick one per surface role, and the choice is
+/// resolved to files before the game is compiled. A set name the catalog does not
+/// have is sent back as a rejection, like any other bad spec.
+///
+/// # Errors
+///
+/// Returns a message when both attempts fail, or when the provider call fails.
+pub fn generate_with_textures(
+    idea: &str,
+    config: &crate::llm::LlmConfig,
+    root: &Path,
+    catalog: Option<&Path>,
+) -> Result<String, String> {
+    let names: Vec<String> = catalog
+        .map(|dir| texture_catalog(dir).into_keys().collect())
+        .unwrap_or_default();
+    let prompt = crate::llm::spec_prompt_with(idea, names.as_slice());
     let mut last_error = String::new();
     for attempt in 0..2 {
         let instruction = if attempt == 0 {
@@ -962,13 +1091,19 @@ pub fn generate(idea: &str, config: &crate::llm::LlmConfig, root: &Path) -> Resu
             last_error = "no JSON object found in the reply".to_string();
             continue;
         };
-        let spec: GameSpec = match serde_json::from_str(json) {
+        let mut spec: GameSpec = match serde_json::from_str(json) {
             Ok(spec) => spec,
             Err(err) => {
                 last_error = format!("spec did not parse: {err}");
                 continue;
             }
         };
+        if let Some(dir) = catalog {
+            if let Err(reason) = resolve_sets(&mut spec, dir) {
+                last_error = reason;
+                continue;
+            }
+        }
         match create_game(&spec, root) {
             Ok(summary) => return Ok(summary),
             Err(reason) => last_error = reason,
@@ -1051,6 +1186,7 @@ mod tests {
         spec.theme.surfaces.insert(
             "ground".to_string(),
             SurfaceTexture {
+                set: None,
                 albedo: tiny_png("a"),
                 orm: Some(tiny_png("o")),
                 normal: Some(tiny_png("n")),
@@ -1073,6 +1209,82 @@ mod tests {
         assert!(!scene.contains("res://surfaces/platform_"));
         let findings = gamecraft_godot::scene_lint(scene.as_str());
         assert_eq!(findings.len(), 0, "{findings:?}");
+    }
+
+    fn catalog_dir(tag: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("gc-cat-{}-{tag}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        for set in ["brick_red", "granite"] {
+            std::fs::create_dir_all(dir.join(set)).expect("dir");
+            for map in ["albedo", "orm", "normal"] {
+                image::RgbaImage::from_pixel(2, 2, image::Rgba([90, 90, 90, 255]))
+                    .save(dir.join(set).join(format!("plane_Plane_{map}.png")))
+                    .expect("png");
+            }
+        }
+        std::fs::create_dir_all(dir.join("empty")).expect("dir");
+        dir
+    }
+
+    #[test]
+    fn catalog_lists_folders_that_hold_an_albedo() {
+        let dir = catalog_dir("list");
+        let sets = texture_catalog(&dir);
+        assert_eq!(
+            sets.keys().map(String::as_str).collect::<Vec<_>>(),
+            ["brick_red", "granite"]
+        );
+        let brick = &sets["brick_red"];
+        assert!(brick.albedo.ends_with("plane_Plane_albedo.png"));
+        assert!(brick
+            .orm
+            .as_deref()
+            .is_some_and(|p| p.ends_with("_orm.png")));
+        assert!(brick.normal.is_some());
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn named_sets_resolve_and_unknown_ones_are_refused() {
+        let dir = catalog_dir("resolve");
+        let mut spec = GameSpec::default();
+        spec.theme.surfaces.insert(
+            "ground".to_string(),
+            SurfaceTexture {
+                set: Some("granite".to_string()),
+                ..SurfaceTexture::default()
+            },
+        );
+        let unresolved = validate(&spec).expect_err("needs a catalog");
+        assert!(
+            unresolved.contains("needs a texture catalog"),
+            "{unresolved}"
+        );
+        resolve_sets(&mut spec, &dir).expect("resolve");
+        validate(&spec).expect("valid after resolve");
+        assert!(spec.theme.surfaces["ground"].albedo.contains("granite"));
+        spec.theme.surfaces.get_mut("ground").expect("ground").set = Some("lava".to_string());
+        let reason = resolve_sets(&mut spec, &dir).expect_err("unknown set");
+        assert!(reason.contains("available: brick_red, granite"), "{reason}");
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn a_model_style_spec_with_a_set_name_builds_a_textured_game() {
+        // Exactly what the prompt asks the model to write: a set name, no paths.
+        let reply = r#"{"slug":"brick-roofs","title":"Brick Roofs","archetype":"platformer",
+            "theme":{"surfaces":{"ground":{"set":"brick_red"},"platform":{"set":"granite"}}}}"#;
+        let mut spec: GameSpec = serde_json::from_str(reply).expect("model json");
+        let dir = catalog_dir("model");
+        resolve_sets(&mut spec, &dir).expect("resolve");
+        let root = std::env::temp_dir().join(format!("gc-model-game-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        create_game(&spec, &root).expect("create");
+        let game = root.join("depot/games/brick-roofs");
+        assert!(game.join("surfaces/ground_albedo.png").is_file());
+        assert!(game.join("surfaces/platform_normal.png").is_file());
+        let _ = std::fs::remove_dir_all(root);
+        let _ = std::fs::remove_dir_all(dir);
     }
 
     #[test]

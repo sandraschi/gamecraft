@@ -435,6 +435,24 @@ pub fn extract_json(text: &str) -> Option<&str> {
 /// The instruction the model receives.
 #[must_use]
 pub fn spec_prompt(idea: &str) -> String {
+    spec_prompt_with(idea, &[])
+}
+
+/// [`spec_prompt`] plus, when `texture_sets` is not empty, the optional
+/// `theme.surfaces` field restricted to those catalog names.
+#[must_use]
+pub fn spec_prompt_with(idea: &str, texture_sets: &[String]) -> String {
+    let textures = if texture_sets.is_empty() {
+        String::new()
+    } else {
+        format!(
+            "\nOptional (platformer only): texture a surface by adding to theme \
+             \"surfaces\":{{\"ground\":{{\"set\":\"NAME\"}},\"platform\":{{\"set\":\"NAME\"}}}}. \
+             NAME must be exactly one of: {}. Leave surfaces out for flat colours; \
+             never invent a name or a file path.\n",
+            texture_sets.join(", ")
+        )
+    };
     format!(
         "You design levels for a 2.5D platformer engine. Reply with ONE JSON object and nothing else - no prose, no markdown fences.\n\
 Schema (all numbers are floats):\n\
@@ -457,13 +475,25 @@ Rules that decide whether the level is accepted:\n\
 - Gaps between grounds must be jumpable: width <= 3.2 units with the default jump.\n\
 - goal_x must sit on the last ground slab.\n\
 - Colours are 0..1 floats. Keep 1 to 3 platforms and 2 to 5 coins.\n\
-Theme requested by the user: {idea}"
+{textures}Theme requested by the user: {idea}"
     )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn prompt_offers_texture_sets_only_when_there_are_some() {
+        let plain = spec_prompt("night forest");
+        assert!(!plain.contains("surfaces"));
+        let with = spec_prompt_with(
+            "night forest",
+            &["brick_red".to_string(), "granite".to_string()],
+        );
+        assert!(with.contains("brick_red, granite"));
+        assert!(with.contains("never invent a name"));
+    }
 
     #[test]
     fn json_is_extracted_from_fences() {

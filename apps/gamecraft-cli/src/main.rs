@@ -74,6 +74,11 @@ enum Commands {
         /// Output root; the game lands in <out>/depot/games/<slug>/.
         #[arg(long, default_value = ".")]
         out: PathBuf,
+        /// Texture catalog folder: one subfolder per set holding `*albedo*`, `*orm*`
+        /// and `*normal*` images (a `TextureCraft` Godot export per folder). Specs may
+        /// then name `theme.surfaces.<role>.set`.
+        #[arg(long)]
+        textures: Option<PathBuf>,
     },
     /// List every game (Godot and three.js) with group and last gate result.
     List {
@@ -144,6 +149,7 @@ fn main() {
             model,
             endpoint,
             out,
+            textures,
         } => cmd_new(
             prompt,
             from_spec,
@@ -151,6 +157,7 @@ fn main() {
             model.as_deref(),
             endpoint.as_deref(),
             out.as_path(),
+            textures.as_deref(),
         ),
         Commands::Export { input, out, format } => {
             cmd_export(input.as_path(), out.as_deref(), format.as_str());
@@ -475,6 +482,7 @@ fn cmd_new(
     model: Option<&str>,
     endpoint: Option<&str>,
     out: &Path,
+    textures: Option<&Path>,
 ) {
     if let Some(path) = from_spec {
         let text = match std::fs::read_to_string(&path) {
@@ -484,13 +492,20 @@ fn cmd_new(
                 std::process::exit(1);
             }
         };
-        let spec: gamecraft_forge::create::GameSpec = match serde_json::from_str(text.as_str()) {
+        let mut spec: gamecraft_forge::create::GameSpec = match serde_json::from_str(text.as_str())
+        {
             Ok(spec) => spec,
             Err(err) => {
                 eprintln!("invalid spec in {}: {err}", path.display());
                 std::process::exit(1);
             }
         };
+        if let Some(catalog) = textures {
+            if let Err(reason) = gamecraft_forge::create::resolve_sets(&mut spec, catalog) {
+                eprintln!("generation failed: {reason}");
+                std::process::exit(1);
+            }
+        }
         match gamecraft_forge::create::create_game(&spec, out) {
             Ok(summary) => println!("{summary}"),
             Err(reason) => {
@@ -534,7 +549,7 @@ fn cmd_new(
     if let Some(url) = endpoint_name.as_deref() {
         config = config.at(url);
     }
-    match gamecraft_forge::create::generate(idea.as_str(), &config, out) {
+    match gamecraft_forge::create::generate_with_textures(idea.as_str(), &config, out, textures) {
         Ok(summary) => println!("{summary}"),
         Err(reason) => {
             eprintln!("generation failed: {reason}");
