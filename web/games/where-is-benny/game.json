@@ -1,6 +1,7 @@
 {
   "slug": "where-is-benny",
   "title": "Where is Benny?",
+  "category": "Seek and find",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "Hidden-object game at a sunny funfair: an orbitable crowd with up to 44 dogs, five German Shepherd look-alikes and a Malinois, one Benny. Self-test proves there is always exactly one dog matching the poster.",

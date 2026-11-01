@@ -7,12 +7,18 @@
     "serve": "bun run serve.ts",
     "verify": "node scripts/verify.ts",
     "music-check": "node scripts/music-check.ts",
-    "music-live": "node scripts/music-live.ts"
+    "music-live": "node scripts/music-live.ts",
+    "gltf-validate": "node scripts/gltf-validate.ts",
+    "gltf-shot": "node scripts/gltf-shot.ts",
+    "pbr-check": "node scripts/pbr-check.ts",
+    "pwa-check": "node scripts/pwa-check.ts",
+    "pwa-icons": "node scripts/pwa-icons.ts"
   },
   "dependencies": {
     "three": "^0.187.0"
   },
   "devDependencies": {
+    "gltf-validator": "^2.0.0-dev.3.10",
     "playwright": "^1.64.1"
   }
 }

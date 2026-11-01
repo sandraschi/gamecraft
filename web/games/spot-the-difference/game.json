@@ -1,6 +1,7 @@
 {
   "slug": "spot-the-difference",
   "title": "Spot the Difference",
+  "category": "Seek and find",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "One cluttered room rendered twice, five changes in the second copy. Differences are picked fresh each round from the room's items; self-test proves they are always visible, separate and real.",

@@ -54,9 +54,37 @@ cd web
 bun install
 bun run serve      # http://127.0.0.1:11258/
 bun run verify     # gate, all games (Node 24; Playwright hangs under Bun)
+bun run pwa-check  # PWA gate: manifests, icons, service worker, every game offline
+bun run pwa-icons  # regenerate install icons from thumb.png (after a thumb changes)
 ```
 
 `scripts/verify.bat` runs the gate detached and writes `scripts/verify.log`.
+
+## Install and offline (PWA)
+
+Every game installs as its own app and plays offline once installed; the arcade
+index installs as "GameCraft". Nothing in a game folder is PWA boilerplate:
+
+- `serve.ts` injects the manifest link, icons and `/pwa.js` into each page at serve time.
+- `pwa.ts` generates the manifests (from `game.json`) and the service worker. The worker
+  precaches every game, `_shared`, three.js and the addons the games import, and is
+  **network-first**: a running server always wins (edits show at once), the cache only
+  answers when the network is gone. Any file change gives a new cache name.
+- Icons are `games/<slug>/icon-192.png` / `icon-512.png` (cropped from `thumb.png`) and
+  `icons/icon-*.png` (a 2x2 mosaic) for the arcade. A new game needs `bun run pwa-icons`.
+- Under `?verify` the worker is not registered, so the gameplay gate never hits a cache.
+
+**On a phone.** Service workers need a secure origin: `http://127.0.0.1` counts, a
+phone on the LAN does not. The server binds 127.0.0.1 only, so expose it over HTTPS
+on your tailnet (private, not public like Funnel):
+
+```powershell
+tailscale serve --bg 11258     # https://<machine>.<tailnet>.ts.net/  -> 127.0.0.1:11258
+```
+
+Open that URL on the phone while the server runs, then Share > Add to Home Screen
+(iOS) or Install app (Android). After one online visit everything is cached, and the
+games keep working with Goliath off.
 
 ## Games
 

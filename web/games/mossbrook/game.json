@@ -1,6 +1,7 @@
 {
   "slug": "mossbrook",
   "title": "Mossbrook",
+  "category": "Worlds and sims",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "Simon Willison's Emberwick prompt sequence (simonwillison.net/2026/Oct/28/vibe-game-development/), all 4 prompts, rebuilt from scratch",

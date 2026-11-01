@@ -1,8 +1,8 @@
 {
   "slug": "gassi",
   "title": "Gassi",
-  "date": "2026-11-01T00:47:58.270Z",
-  "boot_ms": 971,
+  "date": "2026-11-01T14:33:28.219Z",
+  "boot_ms": 424,
   "self_test": {
     "pass": true,
     "checks": {
@@ -48,7 +48,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 1822,
+  "wall_ms": 1146,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

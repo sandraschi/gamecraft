@@ -1,6 +1,7 @@
 {
   "slug": "gassi",
   "title": "Gassi",
+  "category": "Calm puzzles",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "Route memory with Benny: he walks a route once through a stylized Alsergrund (Strudlhofstiege, Berggasse 19, Votivkirche), you lead it back from memory. Self-test proves routes turn enough that blind guessing is under 3%.",

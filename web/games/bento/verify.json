@@ -1,8 +1,8 @@
 {
   "slug": "bento",
   "title": "Bento",
-  "date": "2026-11-01T00:47:56.589Z",
-  "boot_ms": 511,
+  "date": "2026-11-01T14:33:26.933Z",
+  "boot_ms": 329,
   "self_test": {
     "pass": true,
     "checks": {
@@ -43,7 +43,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 1343,
+  "wall_ms": 1200,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

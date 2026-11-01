@@ -1,8 +1,8 @@
 {
   "slug": "where-is-benny",
   "title": "Where is Benny?",
-  "date": "2026-11-01T00:48:37.904Z",
-  "boot_ms": 533,
+  "date": "2026-11-01T14:33:56.977Z",
+  "boot_ms": 283,
   "self_test": {
     "pass": true,
     "checks": {
@@ -54,7 +54,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 1658,
+  "wall_ms": 1151,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

@@ -1,8 +1,8 @@
 {
   "slug": "spot-the-difference",
   "title": "Spot the Difference",
-  "date": "2026-11-01T00:48:33.801Z",
-  "boot_ms": 549,
+  "date": "2026-11-01T14:33:54.882Z",
+  "boot_ms": 170,
   "self_test": {
     "pass": true,
     "checks": {
@@ -54,7 +54,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 1889,
+  "wall_ms": 950,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

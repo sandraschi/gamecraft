@@ -1,6 +1,7 @@
 {
   "slug": "shadow-sculpture",
   "title": "Kage-e",
+  "category": "Calm puzzles",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "Shadow puzzle: a heap of blocks built from a picture, each block at its own depth; drag it until the real shadow-mapped shadow on the wall becomes the picture. Solved by silhouette overlap, so mirror poses of symmetric pictures count too.",

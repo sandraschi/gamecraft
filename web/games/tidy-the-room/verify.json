@@ -1,8 +1,8 @@
 {
   "slug": "tidy-the-room",
   "title": "Tidy the Room",
-  "date": "2026-11-01T00:48:35.969Z",
-  "boot_ms": 482,
+  "date": "2026-11-01T14:33:55.907Z",
+  "boot_ms": 177,
   "self_test": {
     "pass": true,
     "checks": {
@@ -48,7 +48,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 1554,
+  "wall_ms": 947,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

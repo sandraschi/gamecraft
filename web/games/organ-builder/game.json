@@ -1,6 +1,7 @@
 {
   "slug": "organ-builder",
   "title": "Orgelbauer",
+  "category": "Calm puzzles",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "Ear puzzle: stand pipes in an organ so it plays a traditional tune left to right; pipe length follows pitch (L proportional to 1/f), synthesized flue-pipe voice in WebAudio. Self-test proves the bench always holds exactly the tune and a lucky order is under 1%.",

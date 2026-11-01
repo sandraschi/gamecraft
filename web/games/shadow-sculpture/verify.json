@@ -1,8 +1,8 @@
 {
   "slug": "shadow-sculpture",
   "title": "Kage-e",
-  "date": "2026-11-01T00:48:31.467Z",
-  "boot_ms": 621,
+  "date": "2026-11-01T14:33:53.799Z",
+  "boot_ms": 155,
   "self_test": {
     "pass": true,
     "checks": {
@@ -44,7 +44,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 2072,
+  "wall_ms": 1012,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

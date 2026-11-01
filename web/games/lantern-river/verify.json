@@ -1,8 +1,8 @@
 {
   "slug": "lantern-river",
   "title": "Lantern River",
-  "date": "2026-11-01T00:48:07.023Z",
-  "boot_ms": 422,
+  "date": "2026-11-01T14:33:34.940Z",
+  "boot_ms": 280,
   "self_test": {
     "pass": true,
     "checks": {
@@ -47,7 +47,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 14973,
+  "wall_ms": 12130,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

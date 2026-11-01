@@ -1,6 +1,7 @@
 {
   "slug": "kaffeehaus",
   "title": "Kaffeehaus",
+  "category": "Worlds and sims",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "Viennese coffee house management: seat, serve, bill, keep the regulars. Original design; the sim is pure logic and self-tests that good play beats random play.",

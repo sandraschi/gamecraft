@@ -1,8 +1,8 @@
 {
   "slug": "hoshi",
   "title": "Hoshi",
-  "date": "2026-11-01T00:48:00.230Z",
-  "boot_ms": 392,
+  "date": "2026-11-01T14:33:29.486Z",
+  "boot_ms": 200,
   "self_test": {
     "pass": true,
     "checks": {
@@ -48,7 +48,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 1055,
+  "wall_ms": 778,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

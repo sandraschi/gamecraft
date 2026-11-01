@@ -1,6 +1,7 @@
 {
   "slug": "tidy-the-room",
   "title": "Tidy the Room",
+  "category": "Seek and find",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "Inverse of Spot the Difference on the same room: six things scattered on the floor, a photo shows where they live, drag them home. Self-test proves no mess is pre-solved or off-screen.",

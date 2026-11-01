@@ -1,6 +1,7 @@
 {
   "slug": "bento",
   "title": "Bento",
+  "category": "Calm puzzles",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "Untimed packing puzzle: food-shaped polyominoes into a lacquer box, six sizes. Boxes are cut from a full grid so every one has an answer; a separate backtracking solver re-proves it in the self-test.",

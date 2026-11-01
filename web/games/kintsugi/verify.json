@@ -1,8 +1,8 @@
 {
   "slug": "kintsugi",
   "title": "Kintsugi",
-  "date": "2026-11-01T00:48:04.520Z",
-  "boot_ms": 608,
+  "date": "2026-11-01T14:33:32.962Z",
+  "boot_ms": 314,
   "self_test": {
     "pass": true,
     "checks": {
@@ -50,7 +50,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 2386,
+  "wall_ms": 1886,
   "console_errors": [],
   "console_warnings": [
     "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead."

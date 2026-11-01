@@ -1,6 +1,7 @@
 {
   "slug": "hoshi",
   "title": "Hoshi",
+  "category": "Seek and find",
   "family": "threejs",
   "entry": "index.html",
   "experiment": "Constellation drawing on a sky built from real star coordinates: seven figures with Western and Japanese names (Hokuto Shichisei, Tsuzumi-boshi, Orihime and Hikoboshi, Subaru, Tsuri-boshi). Self-test proves every figure is connected, fits its view and has no ambiguous neighbours.",

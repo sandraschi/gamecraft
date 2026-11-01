@@ -1,8 +1,8 @@
 {
   "slug": "organ-builder",
   "title": "Orgelbauer",
-  "date": "2026-11-01T00:48:28.721Z",
-  "boot_ms": 292,
+  "date": "2026-11-01T14:33:52.162Z",
+  "boot_ms": 133,
   "self_test": {
     "pass": true,
     "checks": {
@@ -43,7 +43,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 939,
+  "wall_ms": 649,
   "console_errors": [],
   "console_warnings": [],
   "markers": [
