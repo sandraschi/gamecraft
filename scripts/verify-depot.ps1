@@ -19,8 +19,26 @@ $budget = 3600
 $fail = 0
 $pattern = 'goal reached|puzzle solved|door opened, win|all hostiles down'
 
+# Wall-clock limit per game. A hung engine is killed instead of blocking the gate and
+# being left behind (2026-10-31: leftover engines piled up on the dev box).
+$timeoutSec = [int]($budget / 60 * 2 + 60)
+$logDir = Join-Path $env:TEMP 'gamecraft-verify-depot'
+New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+
 Get-ChildItem depot/games | ForEach-Object {
-    $out = & $godot --headless --path $_.FullName --fixed-fps 60 --quit-after $budget 2>&1 | Out-String
+    $outFile = Join-Path $logDir ("{0}.out.txt" -f $_.Name)
+    $errFile = Join-Path $logDir ("{0}.err.txt" -f $_.Name)
+    $argList = @('--headless', '--path', ('"{0}"' -f $_.FullName), '--fixed-fps', '60', '--quit-after', "$budget")
+    $p = Start-Process -FilePath $godot -ArgumentList $argList -NoNewWindow -PassThru `
+        -RedirectStandardOutput $outFile -RedirectStandardError $errFile
+    if (-not $p.WaitForExit($timeoutSec * 1000)) {
+        # Kill the whole tree, not just the top process.
+        & taskkill.exe /F /T /PID $p.Id | Out-Null
+        $fail++
+        Write-Host ("{0}: TIMEOUT after {1}s (killed)" -f $_.Name, $timeoutSec)
+        return
+    }
+    $out = (Get-Content $outFile -Raw -ErrorAction SilentlyContinue) + (Get-Content $errFile -Raw -ErrorAction SilentlyContinue)
     if ($out -match $pattern) {
         Write-Host ("{0}: WIN" -f $_.Name)
     }
