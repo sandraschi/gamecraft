@@ -1,8 +1,8 @@
 {
   "slug": "kaffeehaus",
   "title": "Kaffeehaus",
-  "date": "2026-10-31T02:33:07.518Z",
-  "boot_ms": 876,
+  "date": "2026-11-01T00:48:01.434Z",
+  "boot_ms": 453,
   "self_test": {
     "pass": true,
     "checks": {
@@ -115,7 +115,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 4146,
+  "wall_ms": 2823,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

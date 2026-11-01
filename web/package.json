@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "serve": "bun run serve.ts",
-    "verify": "node scripts/verify.ts"
+    "verify": "node scripts/verify.ts",
+    "music-check": "node scripts/music-check.ts",
+    "music-live": "node scripts/music-live.ts"
   },
   "dependencies": {
     "three": "^0.187.0"

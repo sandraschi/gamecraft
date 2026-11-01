@@ -1,8 +1,8 @@
 {
   "slug": "mossbrook",
   "title": "Mossbrook",
-  "date": "2026-10-31T02:33:11.808Z",
-  "boot_ms": 2594,
+  "date": "2026-11-01T00:48:22.193Z",
+  "boot_ms": 1708,
   "self_test": {
     "pass": true,
     "checks": {
@@ -98,7 +98,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 8235,
+  "wall_ms": 6347,
   "console_errors": [],
   "console_warnings": [],
   "markers": [

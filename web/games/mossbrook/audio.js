@@ -1,24 +1,18 @@
 // Mossbrook sound: synthesised with the Web Audio API, no asset files.
 // Place-based ambience, footsteps by surface, the troll's snore and the stir
-// heartbeat, story effects, and a quiet lute tune outdoors.
+// heartbeat, story effects, and music from the shared engine (../_shared/music.js):
+// a flute-and-lute air outdoors, a jig in the inn, a dark slow piece underground.
 // Nothing is created until init() runs from a user gesture.
+import { createMusic } from '../_shared/music.js';
 
 const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
-// D dorian, a slow walking tune: degree offsets from D4 per eighth note, null = rest
-const TUNE = [0, 3, 5, 7, 5, 3, null, 2, 0, -2, 0, 3, 5, null, 3, null,
-  7, 9, 10, 9, 7, 5, null, 3, 5, 7, 5, 3, 2, 0, null, null];
-const DORIAN = [0, 2, 3, 5, 7, 9, 10];
-const scaleNote = (deg) => {
-  if (deg === null) return null;
-  const oct = Math.floor(deg / 7), i = ((deg % 7) + 7) % 7;
-  return 62 + oct * 12 + DORIAN[i];
-};
 
 export function createAudio() {
   let ctx = null, master, sfx, music, amb, noise;
   const loops = {};
   let sfxOn = true, musicOn = true;
-  let nextNote = 0, noteIdx = 0;
+  const bands = {};
+  let current = null;
   let nextBird = 0, nextCricket = 0, nextDrip = 0, nextCrackle = 0, nextSnore = 0, nextBeat = 0;
   const last = new Map();
 
@@ -39,7 +33,16 @@ export function createAudio() {
     loops.murmur = loopNoise([{ type: 'bandpass', f: 330, q: 0.9 }]);
     loops.drone = loopTone(55, 'sine');
     loops.hum = loopTone(110, 'sine', 110.7);
-    nextNote = ctx.currentTime + 0.5;
+    bands.outdoors = createMusic({ ctx, dest: music, style: 'mossbrook', seed: 11, volume: 0.8 });
+    bands.inn = createMusic({ ctx, dest: music, style: 'inn', seed: 12, volume: 0.7 });
+    bands.deep = createMusic({ ctx, dest: music, style: 'deep', seed: 13, volume: 0.9 });
+  }
+  // one piece at a time; switching places fades one out and the next in
+  function useBand(name) {
+    if (current === name) return;
+    if (current) bands[current].stop();
+    current = name;
+    if (name) bands[name].start();
   }
   function loopNoise(filters) {
     const src = ctx.createBufferSource(); src.buffer = noise; src.loop = true;
@@ -101,22 +104,6 @@ export function createAudio() {
     },
   };
 
-  function playTune() {
-    const spn = 60 / 84 / 2; // eighth notes at 84 bpm
-    while (nextNote < ctx.currentTime + 0.25) {
-      const deg = TUNE[noteIdx % TUNE.length];
-      const n = scaleNote(deg);
-      const t = nextNote - ctx.currentTime;
-      if (n !== null) {
-        tone(midi(n), { at: t, dur: 0.9, vol: 0.04, type: 'triangle', bus: music });
-        tone(midi(n) * 2, { at: t, dur: 0.25, vol: 0.01, bus: music });
-      }
-      if (noteIdx % 8 === 0) tone(midi(50 + (Math.floor(noteIdx / 16) % 2 ? 5 : 0)), { at: t, dur: 2.4, vol: 0.035, type: 'sine', bus: music });
-      nextNote += spn;
-      noteIdx++;
-    }
-  }
-
   return {
     init,
     get ready() { return !!ctx; },
@@ -139,7 +126,9 @@ export function createAudio() {
       set(loops.murmur, above && s.indoors ? 0.02 + 0.04 * s.crowd : 0);
       set(loops.drone, s.layer === 'cave' ? 0.05 : s.layer === 'below' ? 0.025 : 0);
       set(loops.hum, above ? 0.05 * s.ring : 0);
-      if (!on) { nextNote = t + 0.3; return; }
+      // music follows the place, not the effects switch; the troll's cave keeps its own silence
+      useBand(!musicOn || !s.playing ? null : !above ? (s.layer === 'cave' ? null : 'deep') : s.indoors ? 'inn' : 'outdoors');
+      if (!on) return;
       // birds by day, crickets at dusk and night, outdoors only
       if (above && !s.indoors && !s.night && !s.dusk && t > nextBird) {
         nextBird = t + 1.5 + Math.random() * 4;
@@ -171,8 +160,6 @@ export function createAudio() {
         nextBeat = t + 0.9 - s.stir * 0.5;
         tone(58, { dur: 0.16, vol: 0.12 * s.stir }); tone(52, { at: 0.17, dur: 0.18, vol: 0.09 * s.stir });
       }
-      if (musicOn && above && !s.indoors) playTune();
-      else nextNote = t + 0.3;
     },
     setSfx(v) { sfxOn = v; }, setMusic(v) { musicOn = v; },
     get sfx() { return sfxOn; }, get music() { return musicOn; },

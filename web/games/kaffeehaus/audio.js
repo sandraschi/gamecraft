@@ -1,19 +1,16 @@
 // Kaffeehaus sound: everything synthesised with the Web Audio API, no asset files.
-// Ambience (room murmur, machine hiss), one-shot effects, and a music-box waltz.
+// Ambience (room murmur, machine hiss), one-shot effects, and a salon waltz from the
+// shared music engine (violin, e-piano, bass; ../_shared/music.js, style 'kaffeehaus').
 // Nothing is created until init() runs from a user gesture (browser autoplay rules).
+import { createMusic } from '../_shared/music.js';
 
-const WALTZ = {
-  bpm: 156,
-  // D major, a little Strauss in a very small box: D A7 A7 D G D A7 D
-  chords: [[50, 62, 66, 69], [45, 61, 64, 67], [45, 61, 64, 67], [50, 62, 66, 69], [43, 62, 67, 71], [50, 62, 66, 69], [45, 61, 64, 67], [50, 62, 66, 69]],
-};
 const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
 
 export function createAudio() {
   let ctx = null, master, sfxBus, musicBus, ambBus, noise;
   let murmur = null, hiss = null;
   let sfxOn = true, musicOn = true;
-  let nextBeat = 0, beat = 0, melodySeed = 7;
+  let band = null;
   const last = new Map();
 
   function init() {
@@ -33,7 +30,7 @@ export function createAudio() {
     murmur = loopNoise([{ type: 'bandpass', frequency: 320, Q: 0.8 }, { type: 'lowpass', frequency: 1200, Q: 0.5 }], 0);
     // espresso machine hiss, level follows the brewing groups in use
     hiss = loopNoise([{ type: 'highpass', frequency: 2600, Q: 0.7 }], 0);
-    nextBeat = ctx.currentTime + 0.3;
+    band = createMusic({ ctx, dest: musicBus, style: 'kaffeehaus', seed: 1873, volume: 0.9 });
   }
 
   function loopNoise(filters, level) {
@@ -101,30 +98,6 @@ export function createAudio() {
     closing() { [988, 784, 659, 494].forEach((f, i) => tone(f, { at: i * 0.22, dur: 0.9, vol: 0.06, type: 'triangle' })); },
   };
 
-  // ---------------------------------------------------------------- music box waltz
-  function scheduleMusic() {
-    const spb = 60 / WALTZ.bpm;
-    while (nextBeat < ctx.currentTime + 0.25) {
-      const bar = Math.floor(beat / 3) % WALTZ.chords.length, b = beat % 3;
-      const [bass, ...upper] = WALTZ.chords[bar];
-      const t = nextBeat - ctx.currentTime;
-      if (b === 0) tone(midi(bass), { at: t, dur: spb * 2.5, vol: 0.07, type: 'triangle', bus: musicBus });
-      else for (const n of upper.slice(0, 3)) tone(midi(n), { at: t, dur: spb * 0.6, vol: 0.022, type: 'triangle', bus: musicBus });
-      // melody: a chord tone an octave up, with an occasional step between
-      melodySeed = (melodySeed * 1103515245 + 12345) & 0x7fffffff;
-      const r = melodySeed / 0x7fffffff;
-      if (b === 0 || r < 0.55) {
-        let n = upper[Math.floor(r * upper.length)] + 12;
-        if (b !== 0 && r < 0.2) n += 2;
-        const bell = midi(n);
-        tone(bell, { at: t, dur: b === 0 ? spb * 2.2 : spb * 0.9, vol: 0.05, bus: musicBus });
-        tone(bell * 2, { at: t, dur: spb * 0.4, vol: 0.012, bus: musicBus });
-      }
-      nextBeat += spb;
-      beat++;
-    }
-  }
-
   return {
     init,
     get ready() { return !!ctx; },
@@ -142,8 +115,7 @@ export function createAudio() {
       const amb = sfxOn && playing ? 1 : 0;
       murmur.gain.setTargetAtTime(amb * (0.015 + crowd * 0.07) * (0.85 + 0.15 * Math.sin(t * 0.7)), t, 0.4);
       hiss.gain.setTargetAtTime(amb * brewing * 0.025, t, 0.15);
-      if (musicOn && playing) scheduleMusic();
-      else nextBeat = t + 0.2;
+      if (musicOn && playing) band.start(); else band.stop();
     },
     setSfx(v) { sfxOn = v; },
     setMusic(v) { musicOn = v; },
