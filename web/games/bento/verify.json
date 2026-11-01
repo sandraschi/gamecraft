@@ -1,0 +1,60 @@
+{
+  "slug": "bento",
+  "title": "Bento",
+  "date": "2026-11-01T00:47:56.589Z",
+  "boot_ms": 511,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "always_fills_the_box": true,
+      "pieces_in_size_range": true,
+      "pieces_connected": true,
+      "solver_agrees": true,
+      "start_turned_somewhere": true,
+      "overlap_rejected": true
+    },
+    "summary": "6 box sizes x 25 seeds, all solvable (solver worst case 910 nodes)"
+  },
+  "steps": 240,
+  "sim_seconds": 4,
+  "checkpoints": [
+    {
+      "name": "empty-box",
+      "step": 1
+    },
+    {
+      "name": "does-not-fit",
+      "step": 42
+    },
+    {
+      "name": "first-box",
+      "step": 113
+    },
+    {
+      "name": "second-box",
+      "step": 240
+    }
+  ],
+  "shots": [
+    "shots/01-empty-box.png",
+    "shots/02-does-not-fit.png",
+    "shots/03-first-box.png",
+    "shots/04-second-box.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 1343,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint empty-box",
+    "GameCraft: checkpoint does-not-fit",
+    "GameCraft: checkpoint first-box",
+    "GameCraft: checkpoint second-box",
+    "GameCraft: two boxes packed by clicking pieces in, one deliberate misfit rejected",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

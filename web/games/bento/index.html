@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Bento</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #e8584a; --bg: #e8dcc8; --panel: rgba(40, 28, 22, 0.86); }
+  #box-name { font-size: 17px; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="hud" class="panel">
+  <span class="name">&#24321;&#24403; Bento</span>
+  <span id="box-name"></span>
+  <span class="dim" id="lvl"></span>
+  <b class="stat" id="left"></b>
+  <button id="turn" title="Turn the piece you hold (R, right-click or scroll)">Turn</button>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+<div id="msg" class="panel dim">click food to pick it up &middot; R or scroll to turn &middot; click the box to set it down</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Bento</h1>
+    <p>Everything on the mat has to go into the box, with no gaps and nothing on top of anything else.</p>
+    <p><b>Click</b> a piece to pick it up. <b>Turn</b> it with R, right-click or the scroll wheel. Hover over the box: green means it fits, red means it does not. Click to set it down; click a packed piece to take it out again.</p>
+    <p class="dim">Every box was cut from a full one, so there is always an answer. Six box sizes, from a child's lunch to a jubako tier.</p>
+    <button id="help-go" class="go">Open the lid</button>
+  </div>
+</div>
+<div id="done" class="overlay" hidden>
+  <div class="card panel">
+    <h1>Packed</h1>
+    <p id="done-text"></p>
+    <button id="next" class="go">A bigger box</button>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
