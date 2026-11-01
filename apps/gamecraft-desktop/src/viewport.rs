@@ -108,7 +108,7 @@ pub(crate) fn draw_viewport(state: &mut DesktopState, ui: &mut egui::Ui) {
     let eye = state.cam_target + dir * state.cam_dist;
     let cam = build_cam(eye, state.cam_target, 60.0, rect.center(), rect.height());
     if state.show_meshes {
-        draw_meshes(&painter, state, &cam);
+        draw_meshes(&painter, state, &cam, rect);
     }
     if state.show_axes {
         draw_axes(&painter, &cam);
@@ -165,11 +165,15 @@ struct TexFill {
 ///
 /// egui's render pass has no depth buffer, so triangles are back-face culled and
 /// sorted far-to-near before painting (painter's algorithm).
-fn draw_meshes(painter: &egui::Painter, state: &mut DesktopState, cam: &Cam) {
+fn draw_meshes(painter: &egui::Painter, state: &mut DesktopState, cam: &Cam, rect: egui::Rect) {
     state
         .tex_cache
         .sync(state.scene_path.as_deref(), state.source.as_ref());
     let triangles = crate::mesh::build_scene(&state.graph, state.source.as_ref());
+    if triangles.iter().any(|tri| tri.pbr.is_some()) {
+        draw_meshes_raster(painter, state, cam, rect, &triangles);
+        return;
+    }
     let mut visible: Vec<(f32, [egui::Pos2; 3], egui::Color32, Option<TexFill>)> = Vec::new();
     for tri in triangles {
         let edge_a = tri.points[1] - tri.points[0];
@@ -232,6 +236,97 @@ fn draw_meshes(painter: &egui::Painter, state: &mut DesktopState, cam: &Cam) {
             ));
         }
     }
+}
+
+/// Render resolution divisor of the software path: one render pixel per `RASTER_STEP`
+/// screen pixels in each direction keeps the per-pixel shading interactive.
+const RASTER_STEP: f32 = 2.0;
+
+/// Materials that need per-pixel shading go through the software rasterizer, which has
+/// a depth buffer, perspective-correct UVs and normal/ORM maps. The whole mesh layer is
+/// drawn as one image, so every triangle of the scene shares one depth test.
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+fn draw_meshes_raster(
+    painter: &egui::Painter,
+    state: &mut DesktopState,
+    cam: &Cam,
+    rect: egui::Rect,
+    triangles: &[crate::mesh::Tri],
+) {
+    use crate::raster::{Material, RasterTri, View};
+    type Key = (Option<String>, Option<String>, Option<String>, [u32; 3]);
+    let width = ((rect.width() / RASTER_STEP) as usize).max(1);
+    let height = ((rect.height() / RASTER_STEP) as usize).max(1);
+    let lighting = crate::mesh::collect_lighting(&state.graph, state.source.as_ref());
+    let mut keys: Vec<Key> = Vec::new();
+    let mut materials: Vec<Material> = Vec::new();
+    let mut tris: Vec<RasterTri> = Vec::with_capacity(triangles.len());
+    for tri in triangles {
+        let rgb = |c: egui::Color32| {
+            Vec3::new(
+                f32::from(c.r()) / 255.0,
+                f32::from(c.g()) / 255.0,
+                f32::from(c.b()) / 255.0,
+            )
+        };
+        let material = match (&tri.pbr, tri.uvs) {
+            (Some(pbr), Some(_)) => {
+                let key: Key = (
+                    tri.texture.clone(),
+                    pbr.normal.clone(),
+                    pbr.orm.clone(),
+                    pbr.base.to_array().map(f32::to_bits),
+                );
+                let index = if let Some(found) = keys.iter().position(|k| *k == key) {
+                    found
+                } else {
+                    materials.push(Material {
+                        albedo: tri
+                            .texture
+                            .as_deref()
+                            .and_then(|id| state.tex_cache.mips(id)),
+                        normal: pbr
+                            .normal
+                            .as_deref()
+                            .and_then(|id| state.tex_cache.mips(id)),
+                        orm: pbr.orm.as_deref().and_then(|id| state.tex_cache.mips(id)),
+                        base: pbr.base,
+                    });
+                    keys.push(key);
+                    keys.len() - 1
+                };
+                Some(index)
+            }
+            _ => None,
+        };
+        let flat = match (&tri.pbr, material) {
+            (Some(pbr), Some(_)) => pbr.lit,
+            _ => rgb(tri.color),
+        };
+        tris.push(RasterTri {
+            points: tri.points,
+            uvs: tri.uvs,
+            material,
+            flat,
+        });
+    }
+    let view = View {
+        eye: cam.eye,
+        fwd: cam.fwd,
+        right: cam.right,
+        up: cam.up,
+        focal: cam.focal / RASTER_STEP,
+        width,
+        height,
+    };
+    let image = crate::raster::render(&view, &tris, &materials, &lighting);
+    let texture = state.tex_cache.frame_texture(painter.ctx(), image);
+    painter.image(
+        texture,
+        rect,
+        egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
+        egui::Color32::WHITE,
+    );
 }
 
 /// Per-node wireframe with collision colours and selection highlight.
@@ -484,6 +579,63 @@ material_override = SubResource("red")
         assert!(
             missing < 200,
             "no image file must fall back to flat: {missing}"
+        );
+    }
+
+    /// Red pixels and the brightest red value of the ground with an ORM and a normal map.
+    fn pbr_ground(orm: [u8; 3]) -> (usize, u8) {
+        let dir = std::env::temp_dir().join(format!("gc-pbr-{}-{}", std::process::id(), orm[2]));
+        std::fs::create_dir_all(dir.join("t")).expect("dir");
+        std::fs::write(dir.join("project.godot"), "config_version=5\n").expect("project");
+        let save = |name: &str, rgb: [u8; 3]| {
+            image::RgbaImage::from_pixel(8, 8, image::Rgba([rgb[0], rgb[1], rgb[2], 255]))
+                .save(dir.join("t").join(name))
+                .expect("png");
+        };
+        save("red.png", [220, 20, 20]);
+        save("orm.png", orm);
+        save("n.png", [128, 128, 255]);
+        let scene = SCENE
+            .replace(
+                "[sub_resource type=\"BoxMesh\"",
+                "[ext_resource type=\"Texture2D\" path=\"res://t/orm.png\" id=\"2_o\"]\n[ext_resource type=\"Texture2D\" path=\"res://t/n.png\" id=\"3_n\"]\n\n[sub_resource type=\"BoxMesh\"",
+            )
+            .replace(
+                "albedo_texture = ExtResource(\"1_r\")\n",
+                "albedo_texture = ExtResource(\"1_r\")\norm_texture = ExtResource(\"2_o\")\nnormal_enabled = true\nnormal_texture = ExtResource(\"3_n\")\n",
+            );
+        assert!(scene.contains("orm_texture"), "scene patch applied");
+        let mut state = DesktopState::from_text(&scene, "uid://viewport-pbr");
+        state.scene_path = Some(dir.join("scene.tscn"));
+        let mut harness = egui_kittest::Harness::builder()
+            .with_size(egui::vec2(480.0, 360.0))
+            .build_ui_state(
+                |ui, state: &mut DesktopState| draw_viewport(state, ui),
+                state,
+            );
+        harness.run();
+        let image = harness.render().expect("render");
+        let _ = std::fs::remove_dir_all(dir);
+        let red: Vec<_> = image
+            .pixels()
+            .filter(|px| px[0] > px[1].saturating_add(30) && px[0] > px[2].saturating_add(30))
+            .collect();
+        (red.len(), red.iter().map(|px| px[0]).max().unwrap_or(0))
+    }
+
+    #[test]
+    fn normal_and_orm_maps_go_through_the_per_pixel_path() {
+        // R = occlusion, G = roughness, B = metallic
+        let (dielectric_px, dielectric_peak) = pbr_ground([255, 200, 0]);
+        let (metal_px, metal_peak) = pbr_ground([255, 200, 255]);
+        assert!(
+            dielectric_px > 2_000,
+            "albedo must show through: {dielectric_px}"
+        );
+        assert!(metal_px > 200, "metal still draws: {metal_px}");
+        assert!(
+            metal_peak + 30 < dielectric_peak,
+            "metal loses its diffuse colour: {metal_peak} vs {dielectric_peak}"
         );
     }
 }

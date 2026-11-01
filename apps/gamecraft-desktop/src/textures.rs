@@ -7,6 +7,7 @@
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use gamecraft_godot::SceneFile;
 
@@ -19,6 +20,10 @@ pub struct TexCache {
     key: Option<(Option<PathBuf>, ExtKey)>,
     bytes: gamecraft_gltf::Textures,
     handles: HashMap<String, Option<egui::TextureHandle>>,
+    /// CPU copies with mip chains for the software rasterizer.
+    mips: HashMap<String, Option<Arc<crate::raster::Mips>>>,
+    /// The rasterizer's output, updated in place each frame.
+    frame: Option<egui::TextureHandle>,
 }
 
 impl std::fmt::Debug for TexCache {
@@ -54,7 +59,41 @@ impl TexCache {
             _ => gamecraft_gltf::Textures::new(),
         };
         self.handles.clear();
+        self.mips.clear();
         self.key = Some(key);
+    }
+
+    /// The decoded image with its mip chain, for per-pixel shading. `None` when the
+    /// image is missing or cannot be decoded.
+    pub fn mips(&mut self, texture: &str) -> Option<Arc<crate::raster::Mips>> {
+        if !self.mips.contains_key(texture) {
+            let decoded = self.bytes.get(texture).and_then(|bytes| {
+                let rgba = image::load_from_memory(bytes).ok()?.to_rgba8();
+                Some(Arc::new(crate::raster::Mips::new(rgba)))
+            });
+            self.mips.insert(texture.to_string(), decoded);
+        }
+        self.mips.get(texture).and_then(Clone::clone)
+    }
+
+    /// Upload the rasterizer frame, reusing one texture across frames.
+    pub fn frame_texture(
+        &mut self,
+        ctx: &egui::Context,
+        image: egui::ColorImage,
+    ) -> egui::TextureId {
+        if let Some(handle) = &mut self.frame {
+            handle.set(image, egui::TextureOptions::LINEAR);
+            return handle.id();
+        }
+        let handle = ctx.load_texture(
+            "gamecraft-raster-frame",
+            image,
+            egui::TextureOptions::LINEAR,
+        );
+        let id = handle.id();
+        self.frame = Some(handle);
+        id
     }
 
     /// The egui texture for an `ExtResource` id, uploading it on first use.

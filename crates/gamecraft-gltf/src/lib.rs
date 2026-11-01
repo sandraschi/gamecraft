@@ -352,6 +352,56 @@ pub fn triplanar_albedo(properties: &[(String, String)]) -> Option<(String, Uv)>
     ))
 }
 
+/// Every texture map of a triplanar material, as `ExtResource` ids.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TriplanarMaps {
+    /// `albedo_texture`.
+    pub albedo: Option<String>,
+    /// Packed occlusion/roughness/metallic: `orm_texture`, or a roughness and
+    /// metallic texture that are the same image.
+    pub orm: Option<String>,
+    /// `normal_texture`, only when `normal_enabled = true`.
+    pub normal: Option<String>,
+    /// UV mapping.
+    pub uv: Uv,
+}
+
+/// All maps of a triplanar material (same rules as the glTF export).
+///
+/// `None` when the material is not triplanar or binds no map at all.
+#[must_use]
+pub fn triplanar_maps(properties: &[(String, String)]) -> Option<TriplanarMaps> {
+    let flag = |key: &str| prop(properties, key).is_some_and(|v| v.trim() == "true");
+    if !flag("uv1_triplanar") || flag("uv1_world_triplanar") {
+        return None;
+    }
+    let id_of = |key: &str| prop(properties, key).and_then(sub_id).map(str::to_string);
+    let orm = id_of("orm_texture").or_else(|| {
+        match (id_of("roughness_texture"), id_of("metallic_texture")) {
+            (Some(r), Some(m)) if r == m => Some(r),
+            _ => None,
+        }
+    });
+    let normal = if flag("normal_enabled") {
+        id_of("normal_texture")
+    } else {
+        None
+    };
+    let albedo = id_of("albedo_texture");
+    if albedo.is_none() && orm.is_none() && normal.is_none() {
+        return None;
+    }
+    Some(TriplanarMaps {
+        albedo,
+        orm,
+        normal,
+        uv: Uv {
+            scale: geometry::vector3(properties, "uv1_scale").unwrap_or(Vec3::ONE),
+            offset: geometry::vector3(properties, "uv1_offset").unwrap_or(Vec3::ZERO),
+        },
+    })
+}
+
 impl<'a> Builder<'a> {
     fn new(graph: &'a SceneGraph, subs: &'a [SubRes], textures: &'a Textures) -> Self {
         Self {
@@ -923,6 +973,49 @@ fn tidy(v: f64) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn props(pairs: &[(&str, &str)]) -> Vec<(String, String)> {
+        pairs
+            .iter()
+            .map(|(k, v)| ((*k).to_string(), (*v).to_string()))
+            .collect()
+    }
+
+    #[test]
+    #[allow(clippy::expect_used)]
+    fn triplanar_maps_reads_every_map() {
+        let full = props(&[
+            ("uv1_triplanar", "true"),
+            ("albedo_texture", "ExtResource(\"1_a\")"),
+            ("orm_texture", "ExtResource(\"2_o\")"),
+            ("normal_enabled", "true"),
+            ("normal_texture", "ExtResource(\"3_n\")"),
+        ]);
+        let maps = triplanar_maps(&full).expect("maps");
+        assert_eq!(maps.albedo.as_deref(), Some("1_a"));
+        assert_eq!(maps.orm.as_deref(), Some("2_o"));
+        assert_eq!(maps.normal.as_deref(), Some("3_n"));
+        // a normal texture without normal_enabled is ignored, like the exporter
+        let off = props(&[
+            ("uv1_triplanar", "true"),
+            ("albedo_texture", "ExtResource(\"1_a\")"),
+            ("normal_texture", "ExtResource(\"3_n\")"),
+        ]);
+        assert_eq!(triplanar_maps(&off).expect("maps").normal, None);
+        // roughness + metallic sharing one image count as ORM
+        let split = props(&[
+            ("uv1_triplanar", "true"),
+            ("roughness_texture", "ExtResource(\"2_o\")"),
+            ("metallic_texture", "ExtResource(\"2_o\")"),
+        ]);
+        assert_eq!(
+            triplanar_maps(&split).expect("maps").orm.as_deref(),
+            Some("2_o")
+        );
+        // not triplanar: nothing
+        let flat = props(&[("albedo_texture", "ExtResource(\"1_a\")")]);
+        assert!(triplanar_maps(&flat).is_none());
+    }
 
     const SCENE: &str = r#"[gd_scene load_steps=4 format=3]
 

@@ -28,6 +28,21 @@ pub struct Tri {
     pub uvs: Option<[[f32; 2]; 3]>,
     /// `ExtResource` id of that albedo texture.
     pub texture: Option<String>,
+    /// Normal and ORM maps, when the material has any (needs the software rasterizer).
+    pub pbr: Option<Pbr>,
+}
+
+/// Maps and colours the per-pixel path needs beyond the albedo texture.
+#[derive(Debug, Clone)]
+pub struct Pbr {
+    /// `ExtResource` id of the tangent-space normal map.
+    pub normal: Option<String>,
+    /// `ExtResource` id of the packed occlusion/roughness/metallic map.
+    pub orm: Option<String>,
+    /// The material's `albedo_color`, or the node fallback colour (`0..=1`).
+    pub base: Vec3,
+    /// Per-triangle lighting factor of a white surface, for albedo-only fallback.
+    pub lit: Vec3,
 }
 
 /// Textured triangles longer than this (scene units) are split, because egui
@@ -219,10 +234,12 @@ pub fn build_scene(graph: &SceneGraph, source: Option<&SceneFile>) -> Vec<Tri> {
         }) else {
             continue;
         };
-        let textured = material_sub(node, source)
-            .and_then(|material| gamecraft_gltf::triplanar_albedo(&material.properties));
+        let maps = material_sub(node, source)
+            .and_then(|material| gamecraft_gltf::triplanar_maps(&material.properties));
+        let textured = maps.as_ref().map(|m| (m.albedo.clone(), m.uv));
+        let has_albedo = maps.as_ref().is_some_and(|m| m.albedo.is_some());
         let color = material_color(node, source).unwrap_or_else(|| {
-            if textured.is_some() {
+            if has_albedo {
                 Color32::WHITE
             } else {
                 fallback_color(node.node_type.as_str())
@@ -245,23 +262,104 @@ pub fn build_scene(graph: &SceneGraph, source: Option<&SceneFile>) -> Vec<Tri> {
                     world.transform_point3(piece[1]),
                     world.transform_point3(piece[2]),
                 ];
+                let centre = (world_points[0] + world_points[1] + world_points[2]) / 3.0;
+                let pbr = maps
+                    .as_ref()
+                    .filter(|m| m.normal.is_some() || m.orm.is_some())
+                    .map(|m| Pbr {
+                        normal: m.normal.clone(),
+                        orm: m.orm.clone(),
+                        base: linear(color),
+                        lit: linear(shade(Color32::WHITE, world_normal, centre, &lighting)),
+                    });
                 out.push(Tri {
                     points: world_points,
-                    color: shade(
-                        color,
-                        world_normal,
-                        (world_points[0] + world_points[1] + world_points[2]) / 3.0,
-                        &lighting,
-                    ),
+                    color: shade(color, world_normal, centre, &lighting),
                     uvs: textured
                         .as_ref()
                         .map(|(_, uv)| gamecraft_gltf::triplanar_uvs(&piece, normal, *uv)),
-                    texture: textured.as_ref().map(|(id, _)| id.clone()),
+                    texture: textured.as_ref().and_then(|(id, _)| id.clone()),
+                    pbr,
                 });
             }
         }
     }
     out
+}
+
+/// A surface point to shade per pixel.
+#[derive(Debug, Clone, Copy)]
+pub struct Surface {
+    /// Albedo (`0..=1`).
+    pub albedo: Vec3,
+    /// Unit shading normal.
+    pub normal: Vec3,
+    /// World position.
+    pub position: Vec3,
+    /// Unit direction from the point to the eye.
+    pub view: Vec3,
+    /// Ambient occlusion (`1` = open).
+    pub ao: f32,
+    /// Roughness (`0` mirror, `1` matte).
+    pub roughness: f32,
+    /// Metallic (`0` dielectric, `1` metal).
+    pub metallic: f32,
+}
+
+/// Per-pixel colour (`0..=1`) of a surface under the scene lights.
+///
+/// Lambert diffuse scaled by `(1 - metallic)`, Blinn-Phong specular whose exponent comes
+/// from the roughness and whose colour blends a 4% dielectric reflectance toward the
+/// albedo with the metallic value, and ambient scaled by the occlusion. A preview
+/// approximation, not Godot's PBR.
+#[must_use]
+pub fn shade_surface(s: &Surface, lighting: &Lighting) -> Vec3 {
+    let diffuse = s.albedo * (1.0 - s.metallic);
+    let spec_color = Vec3::splat(0.04).lerp(s.albedo, s.metallic);
+    let roughness = s.roughness.clamp(0.05, 1.0);
+    let alpha = roughness * roughness;
+    let shininess = (2.0 / (alpha * alpha + 1e-4) - 2.0).clamp(2.0, 512.0);
+    let norm = (shininess + 8.0) / (8.0 * std::f32::consts::PI);
+    let mut lit = s.albedo * lighting.ambient * s.ao;
+    if lighting.lights.is_empty() {
+        lit += s.albedo * 0.15 * s.ao;
+    }
+    let mut add = |to_light: Vec3, radiance: Vec3| {
+        let lambert = s.normal.dot(to_light).max(0.0);
+        if lambert <= 0.0 {
+            return;
+        }
+        let half = (to_light + s.view).normalize_or_zero();
+        let spec = s.normal.dot(half).max(0.0).powf(shininess) * norm;
+        lit += (diffuse + spec_color * spec) * radiance * lambert;
+    };
+    if lighting.lights.is_empty() {
+        add(FALLBACK_LIGHT.normalize(), Vec3::splat(0.75));
+    }
+    for light in &lighting.lights {
+        match light {
+            SceneLight::Directional {
+                direction,
+                color,
+                energy,
+            } => add(-*direction, *color * *energy),
+            SceneLight::Point {
+                position,
+                color,
+                energy,
+                range,
+            } => {
+                let to_light = *position - s.position;
+                let distance = to_light.length();
+                if distance > *range || distance < f32::EPSILON {
+                    continue;
+                }
+                let attenuation = (1.0 - distance / *range).max(0.0).powi(2);
+                add(to_light / distance, *color * (*energy * attenuation));
+            }
+        }
+    }
+    lit.min(Vec3::ONE)
 }
 
 /// Extract `id` from `SubResource("id")` / `ExtResource("id")`.

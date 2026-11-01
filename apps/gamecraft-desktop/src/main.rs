@@ -16,6 +16,7 @@
 mod gamepad;
 mod library;
 mod mesh;
+mod raster;
 mod state;
 mod textures;
 mod view;
