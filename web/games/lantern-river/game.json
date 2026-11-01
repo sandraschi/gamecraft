@@ -1,0 +1,11 @@
+{
+  "slug": "lantern-river",
+  "title": "Lantern River",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Toro nagashi at night: breathe on drifting paper lanterns to guide them into a shrine cove; misses float on, nothing is lost. Pure sim with a self-test: the current alone brings almost none home, random breathing few, careful breathing most.",
+  "author": "Claude Opus 5.5, gamecraft session 2026-11-01",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "half-lit",
+  "step_budget": 30000
+}

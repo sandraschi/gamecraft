@@ -1,0 +1,70 @@
+{
+  "slug": "kintsugi",
+  "title": "Kintsugi",
+  "date": "2026-11-01T00:48:04.520Z",
+  "boot_ms": 608,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "cracks_never_cross": true,
+      "shards_never_start_solved": true,
+      "scatter_on_cloth": true,
+      "scatter_apart": true,
+      "right_pose_snaps": true,
+      "wrong_turn_rejected": true,
+      "flipped_rejected": true,
+      "far_rejected": true
+    },
+    "summary": "80 fractures; snap accepts only the true pose"
+  },
+  "steps": 308,
+  "sim_seconds": 5.1,
+  "checkpoints": [
+    {
+      "name": "shattered",
+      "step": 1
+    },
+    {
+      "name": "unturned-shard",
+      "step": 28
+    },
+    {
+      "name": "first-shard",
+      "step": 83
+    },
+    {
+      "name": "gold-seams",
+      "step": 252
+    },
+    {
+      "name": "next-bowl",
+      "step": 308
+    }
+  ],
+  "shots": [
+    "shots/01-shattered.png",
+    "shots/02-unturned-shard.png",
+    "shots/03-first-shard.png",
+    "shots/04-gold-seams.png",
+    "shots/05-next-bowl.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 2386,
+  "console_errors": [],
+  "console_warnings": [
+    "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead."
+  ],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint shattered",
+    "GameCraft: checkpoint unturned-shard",
+    "GameCraft: checkpoint first-shard",
+    "GameCraft: checkpoint gold-seams",
+    "GameCraft: checkpoint next-bowl",
+    "GameCraft: first bowl mended with gold (4 shards), second bowl ready",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

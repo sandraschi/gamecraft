@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Lantern River</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #ffb060; --bg: #070b1a; --panel: rgba(10, 14, 30, 0.78); --font: Georgia, 'Palatino Linotype', serif; }
+  #view { cursor: crosshair; }
+  #title { position: fixed; top: 16px; left: 20px; pointer-events: none; }
+  #title .jp { font-size: 26px; letter-spacing: .2em; color: var(--accent); }
+  #title .en { color: var(--dim); font-style: italic; }
+  #hud { left: auto; right: 12px; transform: none; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="title"><div class="jp">&#28783;&#31840;&#27969;&#12375;</div><div class="en">t&#333;r&#333; nagashi, the floating lanterns</div></div>
+<div id="hud" class="panel">
+  <span>At the shrine <b class="stat" id="home">0 / 12</b> <span class="stat" id="home-extra"></span></span>
+  <span class="dim" id="floated"></span>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+<div id="msg" class="panel dim">hold on the water to breathe on the lanterns</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Lantern River</h1>
+    <p>On summer nights, paper lanterns are set on the river to carry light downstream. Tonight the little shrine on the far bank would like some of them to stay.</p>
+    <p><b>Hold</b> the pointer (or a finger) on the water and the lanterns nearby drift away from it, as if you breathed on them. Ease them into the cove under the red gate.</p>
+    <p class="dim">There is no hurry and nothing to lose: lanterns you miss float on to the sea. Every two that arrive light a stone lantern; twelve light the gate.</p>
+    <button id="help-go" class="go">Set the first lantern afloat</button>
+  </div>
+</div>
+<div id="lit" class="overlay" hidden>
+  <div class="card panel">
+    <h1>The shrine is lit</h1>
+    <p id="lit-text"></p>
+    <button id="again" class="go">Keep floating lanterns</button>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
