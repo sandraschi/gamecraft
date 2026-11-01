@@ -1,0 +1,11 @@
+{
+  "slug": "hoshi",
+  "title": "Hoshi",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Constellation drawing on a sky built from real star coordinates: seven figures with Western and Japanese names (Hokuto Shichisei, Tsuzumi-boshi, Orihime and Hikoboshi, Subaru, Tsuri-boshi). Self-test proves every figure is connected, fits its view and has no ambiguous neighbours.",
+  "author": "Claude Opus 5.5, gamecraft session 2026-11-01",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "orion",
+  "step_budget": 20000
+}

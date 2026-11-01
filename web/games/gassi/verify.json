@@ -1,0 +1,66 @@
+{
+  "slug": "gassi",
+  "title": "Gassi",
+  "date": "2026-11-01T00:47:58.270Z",
+  "boot_ms": 971,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "routes_are_simple_paths": true,
+      "routes_have_the_right_length": true,
+      "routes_start_at_a_landmark": true,
+      "routes_turn": true,
+      "guessing_does_not_work": true,
+      "every_step_is_one_block": true
+    },
+    "summary": "5 lengths x 40 routes; best blind-guess odds from 6 steps on: 1.56%"
+  },
+  "steps": 1237,
+  "sim_seconds": 20.6,
+  "checkpoints": [
+    {
+      "name": "demo-walk",
+      "step": 143
+    },
+    {
+      "name": "your-turn",
+      "step": 322
+    },
+    {
+      "name": "wrong-turn",
+      "step": 350
+    },
+    {
+      "name": "arrived",
+      "step": 502
+    },
+    {
+      "name": "longer-walk",
+      "step": 1237
+    }
+  ],
+  "shots": [
+    "shots/01-demo-walk.png",
+    "shots/02-your-turn.png",
+    "shots/03-wrong-turn.png",
+    "shots/04-arrived.png",
+    "shots/05-longer-walk.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 1822,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint demo-walk",
+    "GameCraft: checkpoint your-turn",
+    "GameCraft: checkpoint wrong-turn",
+    "GameCraft: checkpoint arrived",
+    "GameCraft: checkpoint longer-walk",
+    "GameCraft: walked 4 and 6 blocks from memory",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

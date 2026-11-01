@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Hoshi</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #ffd27a; --bg: #03050d; --panel: rgba(8, 10, 24, 0.78); --font: Georgia, 'Palatino Linotype', serif; }
+  #view { cursor: crosshair; }
+  #card { position: fixed; top: 12px; left: 12px; width: 230px; padding: 12px 14px; }
+  #name-jp { font-size: 26px; letter-spacing: .12em; color: var(--accent); }
+  #name-en { font-size: 16px; } #name-kana { font-size: 12px; color: var(--dim); font-style: italic; margin-bottom: 6px; }
+  #figure { width: 200px; height: 150px; display: block; border-top: 1px solid var(--edge); margin-top: 6px; padding-top: 4px; }
+  #card .row { display: flex; justify-content: space-between; font-size: 13px; color: var(--dim); }
+  #lore { position: fixed; left: 50%; bottom: 70px; transform: translateX(-50%); width: min(560px, calc(100vw - 24px)); text-align: center; font-style: italic; line-height: 1.5; color: #e8e0cc; text-shadow: 0 1px 6px #000; pointer-events: none; }
+  #hud { left: auto; right: 12px; transform: none; }
+  #done { background: transparent; place-items: end center; padding-bottom: 14px; pointer-events: none; }
+  #done .card { pointer-events: auto; width: auto; padding: 10px 14px; }
+  @media (max-width: 700px) { #card { width: 170px; } #figure { width: 140px; height: 105px; } }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="card" class="panel">
+  <div id="name-jp"></div>
+  <div id="name-en"></div>
+  <div id="name-kana"></div>
+  <canvas id="figure" width="400" height="300"></canvas>
+  <div class="row"><span id="count"></span><span id="round"></span></div>
+</div>
+<div id="lore"></div>
+<div id="hud" class="panel">
+  <span class="name">&#26143; Hoshi</span>
+  <button id="recenter" title="Turn back toward the constellation">Find it</button>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Hoshi</h1>
+    <p>A clear night. The card on the left shows a constellation's stick figure, with its Western and Japanese names. The stars are real: these are their actual positions in the sky.</p>
+    <p><b>Click a star, then another</b>, to draw a line between them. Lines that belong to the figure turn gold and stay; others fade. Bigger dots on the card are brighter stars.</p>
+    <p class="dim">Drag to look around, scroll to zoom. "Find it" turns you back toward the figure. No timer.</p>
+    <button id="help-go" class="go">Look up</button>
+  </div>
+</div>
+<div id="done" class="overlay" hidden>
+  <div class="card panel"><button id="next" class="primary">Next constellation</button></div>
+</div>
+<div id="end" class="overlay" hidden>
+  <div class="card panel">
+    <h1>The whole sky</h1>
+    <p>Seven figures, from the Big Dipper to the fish-hook of Scorpius. The lines you drew stay in the sky; drag around to see them.</p>
+    <button id="again" class="go">Start a new night</button>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
