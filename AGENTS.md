@@ -72,6 +72,14 @@ Plus: `just check-wasm` for the `gamecraft-core` portability probe.
 - Stable signatures: do not modify public trait signatures in `gamecraft-core` without updating `gamecraft-commands`, `gamecraft-godot`, `gamecraft-mcp`.
 - Godot UIDs (`uid://...`) must be deterministic hash of relative scene path. Never hallucinate `res://` paths.
 - Always run `just check` before marking any task complete.
+- **Never leave engines running.** Anything that launches Godot must not outlive its
+  launcher: Rust entry points call `gamecraft_mcp::proc_guard::kill_children_on_exit()`
+  at startup (Windows Job Object, children die with the process) and batch runs use
+  `proc_guard::run_with_timeout`; PowerShell gates use `Start-Process` + `WaitForExit`
+  + `taskkill /T` (see `scripts/verify-depot.ps1`). Test drivers and CUA testers: close
+  every game window you open; the viewer's Start Game now closes the previous game.
+  On 2026-10-31 21 forgotten game windows and 7 orphaned headless engines had piled up
+  on the dev box.
 - Kibitzer loop: `KIBITZ.md` is append-only for the kibitzer (never edit entries
   there); builder replies go in `KIBITZ_BACKTALK.md` tail, which the kibitzer LLM
   reads. Check both tails before each phase.

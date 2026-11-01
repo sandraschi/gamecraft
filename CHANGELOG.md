@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased - 2026-10-31 (no more leaked Godot processes)
+
+- **Cause:** the dev box had 21 Godot game windows open (the viewer's Start Game spawned
+  a new engine on every press, including gamepad A, and nothing ever closed them) plus
+  headless engines whose launcher was gone.
+- `gamecraft_mcp::proc_guard` (new): `kill_children_on_exit()` puts the process in a
+  Windows Job Object with kill-on-close, so every child dies with it (normal exit,
+  crash or kill); `run_with_timeout()` captures output and kills on a wall-clock budget.
+  Uses the `win32job` crate (Windows only); the workspace stays free of `unsafe`.
+- Viewer (`gamecraft-desktop`): job guard at startup; Start Game / Demo closes the game
+  it started before launching the next one (status line says so).
+- MCP server: job guard at startup; `scene_verify` gets a wall-clock limit (default
+  frames/60*2+60 s, `timeout_s` to override) and reports `timed_out`.
+- `scripts/verify-depot.ps1`: per-game timeout with `taskkill /T` instead of waiting
+  forever.
+- AGENTS.md rule: never leave engines running.
+- Gates: `cargo fmt --check`, `cargo clippy --workspace --all-targets --all-features
+  -D warnings`, `cargo test --workspace` green on Goliath (incl. 3 new proc_guard tests:
+  finish within budget, kill on timeout, job guard idempotent).
+
 ## 0.12.0 - 2026-10-31 (Mossbrook prompt 4: The Quiet Well)
 
 - **Story** (`web/games/mossbrook/story.js`): 14-stage quest grown from seeds
