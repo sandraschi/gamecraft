@@ -10,13 +10,14 @@
 //! means a new level, theme and physics feel - not a new mechanic. Unknown
 //! archetypes are rejected with the supported list rather than silently mapped.
 
-use crate::model::{Forge, GameParts};
+use crate::model::{Forge, GameParts, SurfaceIds};
 use crate::render::{Glyph, View};
 use crate::scripts;
 use crate::textures;
 use gamecraft_core::PropertyValue;
 use gamecraft_sim as sim;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use std::path::Path;
 
 /// Colour triple, `0.0..=1.0`.
@@ -38,6 +39,111 @@ pub struct Theme {
     pub player: Rgb,
     /// Coin colour.
     pub coin: Rgb,
+    /// Optional PBR texture sets by role (`ground`, `platform`). Platformer only.
+    /// Roles without an entry keep their flat colour.
+    pub surfaces: BTreeMap<String, SurfaceTexture>,
+}
+
+/// Roles a theme can texture.
+const SURFACE_ROLES: [&str; 2] = ["ground", "platform"];
+
+/// A PBR texture set for one surface, as image files on disk (for example a
+/// `TextureCraft` "Godot 4 (ORM)" export). The files are copied into the game.
+///
+/// Tiling matters: the maps repeat every `1 / scale` units, and most procedural
+/// materials have visible seams at the repeat (only brick, tile and weave kinds
+/// were measured seamless).
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(default)]
+pub struct SurfaceTexture {
+    /// Albedo image (`png`, `jpg`, `jpeg`).
+    pub albedo: String,
+    /// Packed ORM image (R occlusion, G roughness, B metallic).
+    pub orm: Option<String>,
+    /// Normal map image.
+    pub normal: Option<String>,
+    /// Repeats per scene unit; `0.25` repeats every 4 units.
+    pub scale: f32,
+}
+
+impl Default for SurfaceTexture {
+    fn default() -> Self {
+        Self {
+            albedo: String::new(),
+            orm: None,
+            normal: None,
+            scale: 0.25,
+        }
+    }
+}
+
+/// Every image of a theme as `(role, map, source file, res:// path)`.
+fn surface_files(theme: &Theme) -> Vec<(String, &'static str, String, String)> {
+    let mut out = Vec::new();
+    for (role, set) in &theme.surfaces {
+        let maps = [
+            ("albedo", Some(set.albedo.as_str())),
+            ("orm", set.orm.as_deref()),
+            ("normal", set.normal.as_deref()),
+        ];
+        for (map, source) in maps {
+            let Some(source) = source else { continue };
+            let ext = Path::new(source)
+                .extension()
+                .and_then(|e| e.to_str())
+                .map_or_else(|| "png".to_string(), str::to_ascii_lowercase);
+            out.push((
+                role.clone(),
+                map,
+                source.to_string(),
+                format!("res://surfaces/{role}_{map}.{ext}"),
+            ));
+        }
+    }
+    out
+}
+
+/// Problems with `theme.surfaces`, appended to a validation list.
+fn check_surfaces(spec: &GameSpec, problems: &mut Vec<String>) {
+    if spec.theme.surfaces.is_empty() {
+        return;
+    }
+    if spec.archetype != "platformer" {
+        problems.push(format!(
+            "theme.surfaces is only supported for the platformer archetype, not '{}'",
+            spec.archetype
+        ));
+    }
+    for (role, set) in &spec.theme.surfaces {
+        if !SURFACE_ROLES.contains(&role.as_str()) {
+            problems.push(format!(
+                "theme.surfaces role '{role}' is unknown (supported: ground, platform)"
+            ));
+        }
+        if !(0.01..=8.0).contains(&set.scale) {
+            problems.push(format!("theme.surfaces.{role}.scale must be 0.01..=8"));
+        }
+        if set.albedo.is_empty() {
+            problems.push(format!("theme.surfaces.{role}.albedo is required"));
+        }
+    }
+    for (role, map, source, _) in surface_files(&spec.theme) {
+        let image = Path::new(&source)
+            .extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| {
+                ["png", "jpg", "jpeg"]
+                    .iter()
+                    .any(|k| e.eq_ignore_ascii_case(k))
+            });
+        if !image {
+            problems.push(format!(
+                "theme.surfaces.{role}.{map} must be a png or jpg file: {source}"
+            ));
+        } else if !Path::new(&source).is_file() {
+            problems.push(format!("theme.surfaces.{role}.{map} not found: {source}"));
+        }
+    }
 }
 
 impl Default for Theme {
@@ -49,6 +155,7 @@ impl Default for Theme {
             platform: [0.29, 0.63, 0.35],
             player: [0.35, 0.59, 1.0],
             coin: [1.0, 0.8, 0.24],
+            surfaces: BTreeMap::new(),
         }
     }
 }
@@ -270,6 +377,7 @@ impl Default for GameSpec {
 /// Returns a human-readable reason listing every problem found.
 pub fn validate(spec: &GameSpec) -> Result<(), String> {
     let mut problems: Vec<String> = Vec::new();
+    check_surfaces(spec, &mut problems);
     if spec.archetype != "platformer"
         && spec.archetype != "runner"
         && spec.archetype != "pong"
@@ -526,9 +634,39 @@ pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
     forge.ext_resource("Script", "res://scripts/coin.gd", "3_coin");
     forge.ext_resource("Script", "res://scripts/camera_follow.gd", "4_camera");
     forge.ext_resource("Script", "res://scripts/autoplay.gd", "5_autoplay");
+    let mut surface_ids: BTreeMap<String, SurfaceIds> = BTreeMap::new();
+    for (role, set) in &spec.theme.surfaces {
+        let res = |map: &str| {
+            surface_files(&spec.theme)
+                .into_iter()
+                .find(|(r, m, _, _)| r == role && *m == map)
+                .map(|(_, _, _, path)| path)
+        };
+        let mut register = |map: &str| {
+            res(map).map(|path| {
+                forge.ext_resource(
+                    "Texture2D",
+                    path.as_str(),
+                    format!("surf_{role}_{map}").as_str(),
+                )
+            })
+        };
+        let albedo = register("albedo").ok_or_else(|| format!("surface {role} has no albedo"))?;
+        let orm = register("orm");
+        let normal = register("normal");
+        surface_ids.insert(
+            role.clone(),
+            SurfaceIds {
+                albedo,
+                orm,
+                normal,
+                scale: set.scale,
+            },
+        );
+    }
 
     for (index, ground) in level.grounds.iter().enumerate() {
-        forge
+        let body = forge
             .solid_box(
                 format!("Ground{index}").as_str(),
                 "StaticBody3D",
@@ -540,9 +678,14 @@ pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
                 spec.theme.ground[2],
             )
             .map_err(|err| err.to_string())?;
+        if let Some(ids) = surface_ids.get("ground") {
+            forge
+                .apply_surface(body, ids)
+                .map_err(|err| err.to_string())?;
+        }
     }
     for (index, platform) in level.platforms.iter().enumerate() {
-        forge
+        let body = forge
             .solid_box(
                 format!("Platform{index}").as_str(),
                 "StaticBody3D",
@@ -554,6 +697,11 @@ pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
                 spec.theme.platform[2],
             )
             .map_err(|err| err.to_string())?;
+        if let Some(ids) = surface_ids.get("platform") {
+            forge
+                .apply_surface(body, ids)
+                .map_err(|err| err.to_string())?;
+        }
     }
     let start_x = level.grounds.first().map_or(0.0, |ground| ground.x + 1.0);
     let player = forge
@@ -726,8 +874,17 @@ pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
             h: 14.0,
         },
         readme_body: format!(
-            "Generated from a GameSpec by the local/cloud model path.\nArchetype: {}. Goal at x={:.1}. Physics: speed {:.1}, jump {:.1}, gravity {:.1}.\nThe spec is saved next to this folder as `spec.json` - the level is reproducible from it.\n",
-            spec.archetype, level.goal_x, physics.speed, physics.jump_velocity, physics.gravity
+            "Generated from a GameSpec by the local/cloud model path.\nArchetype: {}. Goal at x={:.1}. Physics: speed {:.1}, jump {:.1}, gravity {:.1}.\nThe spec is saved next to this folder as `spec.json` - the level is reproducible from it.\n{}",
+            spec.archetype, level.goal_x, physics.speed,
+            physics.jump_velocity,
+            physics.gravity,
+            if spec.theme.surfaces.is_empty() {
+                ""
+            } else {
+                "\nTextured surfaces (`surfaces/`) must be imported once before Godot can load \
+                 them: run `godot --headless --path . --import` (or open the project in the \
+                 editor). Until then the scene fails to load.\n"
+            }
         ),
         summary: format!(
             "{}: generated platformer, goal in {} frames, lint clean",
@@ -768,6 +925,13 @@ pub fn create_game(spec: &GameSpec, root: &Path) -> Result<String, String> {
     }
     let dir = root.join("depot").join("games").join(spec.slug.as_str());
     crate::write_game(&dir, &parts)?;
+    for (_, _, source, res) in surface_files(&spec.theme) {
+        let target = dir.join(res.trim_start_matches("res://"));
+        if let Some(parent) = target.parent() {
+            std::fs::create_dir_all(parent).map_err(|err| err.to_string())?;
+        }
+        std::fs::copy(&source, &target).map_err(|err| format!("copy {source}: {err}"))?;
+    }
     let spec_json = serde_json::to_string_pretty(spec).map_err(|err| err.to_string())?;
     crate::write_text(&dir.join("spec.json"), spec_json.as_str())?;
     Ok(parts.summary)
@@ -832,6 +996,7 @@ mod create_tests {
     }
 }
 #[cfg(test)]
+#[allow(clippy::expect_used)]
 mod tests {
     use super::*;
 
@@ -871,6 +1036,79 @@ mod tests {
         if let Err(reason) = outcome {
             assert!(reason.contains("not completable"), "{reason}");
         }
+    }
+
+    fn tiny_png(name: &str) -> String {
+        let path = std::env::temp_dir().join(format!("gc-surf-{}-{name}.png", std::process::id()));
+        image::RgbaImage::from_pixel(4, 4, image::Rgba([180, 60, 40, 255]))
+            .save(&path)
+            .expect("png");
+        path.to_string_lossy().into_owned()
+    }
+
+    fn textured_spec() -> GameSpec {
+        let mut spec = GameSpec::default();
+        spec.theme.surfaces.insert(
+            "ground".to_string(),
+            SurfaceTexture {
+                albedo: tiny_png("a"),
+                orm: Some(tiny_png("o")),
+                normal: Some(tiny_png("n")),
+                scale: 0.5,
+            },
+        );
+        spec
+    }
+
+    #[test]
+    fn surfaces_become_triplanar_materials_on_ground_only() {
+        let spec = textured_spec();
+        let parts = compile(&spec).expect("compile");
+        let scene = parts.scene_text;
+        assert!(scene.contains("ORMMaterial3D"), "{scene}");
+        assert!(scene.contains("uv1_triplanar = true"));
+        assert!(scene.contains("res://surfaces/ground_albedo.png"));
+        assert!(scene.contains("res://surfaces/ground_orm.png"));
+        assert!(scene.contains("res://surfaces/ground_normal.png"));
+        assert!(!scene.contains("res://surfaces/platform_"));
+        let findings = gamecraft_godot::scene_lint(scene.as_str());
+        assert_eq!(findings.len(), 0, "{findings:?}");
+    }
+
+    #[test]
+    fn surface_files_are_copied_into_the_game() {
+        let root = std::env::temp_dir().join(format!("gc-surf-game-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let mut spec = textured_spec();
+        spec.slug = "surf-test".to_string();
+        create_game(&spec, root.as_path()).expect("create");
+        let dir = root.join("depot/games/surf-test/surfaces");
+        for name in ["ground_albedo.png", "ground_orm.png", "ground_normal.png"] {
+            assert!(dir.join(name).is_file(), "{name} missing");
+        }
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn bad_surfaces_are_rejected_with_reasons() {
+        let mut spec = GameSpec::default();
+        spec.theme.surfaces.insert(
+            "sky".to_string(),
+            SurfaceTexture {
+                albedo: "C:/nope/missing.png".to_string(),
+                ..SurfaceTexture::default()
+            },
+        );
+        let reason = validate(&spec).expect_err("must fail");
+        assert!(reason.contains("role 'sky' is unknown"), "{reason}");
+        assert!(reason.contains("not found"), "{reason}");
+        let mut runner = textured_spec();
+        runner.archetype = "runner".to_string();
+        let reason = validate(&runner).expect_err("must fail");
+        assert!(
+            reason.contains("only supported for the platformer"),
+            "{reason}"
+        );
     }
 
     #[test]

@@ -682,6 +682,52 @@ impl Forge {
         id
     }
 
+    /// Triplanar PBR material from a texture set, returning its sub id.
+    ///
+    /// Lit (not unshaded): albedo, ORM and normal maps only mean something under
+    /// lighting. Triplanar because forge boxes carry no UVs.
+    pub fn surface_material(&mut self, base: &str, set: &SurfaceIds) -> String {
+        let id = format!("{base}_surf{}", self.serial);
+        self.serial = self.serial.saturating_add(1);
+        let scale = format!("Vector3({0}, {0}, {0})", set.scale);
+        let ext = |ext_id: &str| format!("ExtResource(\"{ext_id}\")");
+        let mut props = vec![
+            ("uv1_triplanar".to_string(), "true".to_string()),
+            ("uv1_scale".to_string(), scale),
+            ("albedo_texture".to_string(), ext(set.albedo.as_str())),
+        ];
+        if let Some(orm) = &set.orm {
+            props.push(("orm_texture".to_string(), ext(orm.as_str())));
+        }
+        if let Some(normal) = &set.normal {
+            props.push(("normal_enabled".to_string(), "true".to_string()));
+            props.push(("normal_texture".to_string(), ext(normal.as_str())));
+        }
+        self.sub
+            .push(("ORMMaterial3D".to_string(), id.clone(), props));
+        id
+    }
+
+    /// Swap a solid body's mesh material for a triplanar texture set.
+    ///
+    /// # Errors
+    ///
+    /// Returns the bus error when the node has no mesh child.
+    pub fn apply_surface(&mut self, node: NodeId, set: &SurfaceIds) -> Result<(), CommandError> {
+        let Some(child) = self
+            .graph
+            .get(node)
+            .and_then(|current| current.children.first().copied())
+        else {
+            return Err(CommandError::Invalid(format!(
+                "node {node} has no mesh child to texture"
+            )));
+        };
+        let material = self.surface_material("surface", set);
+        self.set_prop(child, "material_override", Self::sub_ref(material.as_str()))?;
+        Ok(())
+    }
+
     /// Swap a solid body's mesh material for a textured one.
     ///
     /// # Errors
@@ -782,4 +828,17 @@ impl Default for Forge {
     fn default() -> Self {
         Self::new()
     }
+}
+
+/// `ExtResource` ids of one surface's texture maps, plus the triplanar scale.
+#[derive(Debug, Clone)]
+pub struct SurfaceIds {
+    /// Albedo map id.
+    pub albedo: String,
+    /// Packed occlusion/roughness/metallic map id.
+    pub orm: Option<String>,
+    /// Normal map id.
+    pub normal: Option<String>,
+    /// Texture repeats per scene unit (`uv1_scale`).
+    pub scale: f32,
 }
