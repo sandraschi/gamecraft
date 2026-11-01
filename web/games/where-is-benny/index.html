@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Where is Benny?</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #f2a83a; --bg: #9ad0f0; --panel: rgba(30, 24, 18, 0.84); }
+  #poster { position: fixed; top: 12px; left: 12px; width: 240px; padding: 10px 12px 12px; background: #f6efe0; color: #2a1a0e; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,.3); font-family: Georgia, serif; }
+  #poster h2 { margin: 0; font-size: 22px; letter-spacing: .04em; text-align: center; }
+  #poster .sub { text-align: center; font-size: 12px; color: #7a6a58; margin-bottom: 6px; }
+  #portrait { display: block; width: 100%; aspect-ratio: 1.3; border: 2px solid #2a1a0e; border-radius: 3px; background: #f6efe0; }
+  #want { font-size: 14px; margin-top: 6px; line-height: 1.35; }
+  #hud { left: auto; right: 12px; transform: none; }
+  @media (max-width: 700px) { #poster { width: 170px; } #poster h2 { font-size: 17px; } #want { font-size: 12px; } #hud { top: auto; bottom: 12px; } }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="poster">
+  <h2>HAVE YOU SEEN BENNY?</h2>
+  <div class="sub" id="round"></div>
+  <canvas id="portrait"></canvas>
+  <div id="want"></div>
+</div>
+
+<div id="hud" class="panel">
+  <span class="stat" id="time">0:00</span>
+  <button id="hint">Hint</button>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Where is Benny?</h1>
+    <p>Benny went to the fair and wandered off. He is a German Shepherd, and there are <b>several</b> German Shepherds here today. The poster shows exactly what Benny is wearing and carrying.</p>
+    <p><b>Drag</b> to look around, <b>scroll</b> or pinch to zoom, <b>right-drag</b> to slide. <b>Click</b> a dog to check it. Look-alikes will tell you what is different.</p>
+    <p class="dim">Three rounds, each crowd bigger. After 30 seconds a hint tells you which stall he is near.</p>
+    <button id="help-go" class="go">Start looking</button>
+  </div>
+</div>
+
+<div id="found" class="overlay" hidden>
+  <div class="card panel">
+    <h1>There he is!</h1>
+    <p id="found-text"></p>
+    <button id="found-next" class="go">Next round</button>
+  </div>
+</div>
+
+<div id="day" class="overlay" hidden>
+  <div class="card panel">
+    <h1>Good boy, Benny</h1>
+    <p id="day-text"></p>
+    <button id="again" class="go">Another day at the fair</button>
+  </div>
+</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

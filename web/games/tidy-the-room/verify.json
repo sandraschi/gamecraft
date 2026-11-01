@@ -1,0 +1,66 @@
+{
+  "slug": "tidy-the-room",
+  "title": "Tidy the Room",
+  "date": "2026-11-01T00:48:35.969Z",
+  "boot_ms": 482,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "never_pre_solved": true,
+      "always_six": true,
+      "on_open_floor": true,
+      "spread_out": true,
+      "varied": true,
+      "on_screen": true
+    },
+    "summary": "80 seeds, 71 distinct messes"
+  },
+  "steps": 279,
+  "sim_seconds": 4.7,
+  "checkpoints": [
+    {
+      "name": "messy-room",
+      "step": 1
+    },
+    {
+      "name": "wrong-place",
+      "step": 31
+    },
+    {
+      "name": "half-tidy",
+      "step": 124
+    },
+    {
+      "name": "all-tidy",
+      "step": 217
+    },
+    {
+      "name": "next-mess",
+      "step": 279
+    }
+  ],
+  "shots": [
+    "shots/01-messy-room.png",
+    "shots/02-wrong-place.png",
+    "shots/03-half-tidy.png",
+    "shots/04-all-tidy.png",
+    "shots/05-next-mess.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 1554,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint messy-room",
+    "GameCraft: checkpoint wrong-place",
+    "GameCraft: checkpoint half-tidy",
+    "GameCraft: checkpoint all-tidy",
+    "GameCraft: checkpoint next-mess",
+    "GameCraft: room 1 tidy in 7 moves (one deliberate detour), room 2 messed up differently",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}
