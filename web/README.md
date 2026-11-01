@@ -64,6 +64,24 @@ bun run verify     # gate, all games (Node 24; Playwright hangs under Bun)
 |---|---|---|
 | `mossbrook` | Willison's Emberwick prompt sequence, all 4 prompts, rebuilt from scratch | gate green: full story tour (14 checkpoints) plus stealth self-test; not yet hand-played |
 | `kaffeehaus` | Original design: Viennese coffee house management | gate green including self-test; sound; not yet hand-played |
+| `spot-the-difference` | Calm batch 2026-11-01: one room rendered twice, 5 fresh differences per round | gate green incl. self-test; not yet hand-played |
+| `tidy-the-room` | Same room: six things on the floor, a photo of where they live | gate green incl. self-test; not yet hand-played |
+| `where-is-benny` | Funfair crowd, up to 44 dogs, five shepherd look-alikes, one Benny | gate green incl. self-test; not yet hand-played |
+| `kintsugi` | Turn and flip shards home, cracks fill with gold | gate green incl. self-test; not yet hand-played |
+| `shadow-sculpture` | Kage-e: turn a junk heap until its shadow is a picture | gate green incl. self-test; not yet hand-played |
+| `lantern-river` | Toro nagashi: breathe lanterns into a shrine cove; pure sim | gate green incl. self-test; sound; not yet hand-played |
+| `hoshi` | Draw constellations on a real-coordinate sky, Western and Japanese names | gate green incl. self-test; not yet hand-played |
+| `bento` | Polyomino packing, generator plus independent solver | gate green incl. self-test; not yet hand-played |
+| `gassi` | Route memory with Benny in a stylized Alsergrund | gate green incl. self-test; not yet hand-played |
+| `organ-builder` | Orgelbauer: order pipes by ear so the organ plays a tune; WebAudio voice | gate green incl. self-test; sound; not yet hand-played |
+| `robot-sorting` | Boomy sorts parcels with first-match IF/THEN rules | gate green incl. self-test; not yet hand-played |
+
+The calm batch shares `games/_shared/` (no `game.json`, so the arcade and the
+verifier skip it): `gc.js` owns the hook contract, fixed-step loop, verify mode,
+seeded rng, picking helpers, storage and a tiny synth; `ui.css` the common look;
+`room.js` the procedural room used by Spot the Difference and Tidy the Room.
+Every one of them has a self-test and at least one deliberate wrong move in its
+tour (a negative check that the mechanic actually bites).
 
 Each game folder has a `README.md` and a player `CHEATSHEET.md`
 ([Mossbrook](games/mossbrook/CHEATSHEET.md), [Kaffeehaus](games/kaffeehaus/CHEATSHEET.md)).
