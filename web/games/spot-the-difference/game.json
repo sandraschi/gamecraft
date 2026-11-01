@@ -1,0 +1,11 @@
+{
+  "slug": "spot-the-difference",
+  "title": "Spot the Difference",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "One cluttered room rendered twice, five changes in the second copy. Differences are picked fresh each round from the room's items; self-test proves they are always visible, separate and real.",
+  "author": "Claude Opus 5.5, gamecraft session 2026-11-01",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "three-found",
+  "step_budget": 20000
+}

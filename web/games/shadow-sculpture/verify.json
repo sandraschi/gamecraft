@@ -1,0 +1,61 @@
+{
+  "slug": "shadow-sculpture",
+  "title": "Kage-e",
+  "date": "2026-11-01T00:48:31.467Z",
+  "boot_ms": 621,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "assist_basin_reachable": true,
+      "exact_pose_is_perfect": true,
+      "start_is_a_jumble": true,
+      "side_view_is_a_jumble": true,
+      "asymmetric_mirror_fails": true,
+      "near_pose_solves": true,
+      "enough_blocks": true
+    },
+    "summary": "6 pictures x 6 seeds; worst starting match 53%"
+  },
+  "steps": 338,
+  "sim_seconds": 5.6,
+  "checkpoints": [
+    {
+      "name": "junk-heap",
+      "step": 1
+    },
+    {
+      "name": "wrong-way",
+      "step": 50
+    },
+    {
+      "name": "fuji",
+      "step": 212
+    },
+    {
+      "name": "house",
+      "step": 338
+    }
+  ],
+  "shots": [
+    "shots/01-junk-heap.png",
+    "shots/02-wrong-way.png",
+    "shots/03-fuji.png",
+    "shots/04-house.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 2072,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint junk-heap",
+    "GameCraft: checkpoint wrong-way",
+    "GameCraft: checkpoint fuji",
+    "GameCraft: checkpoint house",
+    "GameCraft: Fuji and the house both cast from a jumble by dragging alone",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

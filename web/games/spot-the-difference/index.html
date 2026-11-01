@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Spot the Difference</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #f2b84a; --bg: #1a1612; }
+  .frame { position: fixed; border: 2px solid rgba(255, 240, 210, .25); border-radius: 6px; pointer-events: none; }
+  .frame span { position: absolute; left: 8px; top: 6px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 240, 210, .7); }
+  #rings { position: fixed; inset: 0; pointer-events: none; }
+  .ring { position: fixed; border: 3px solid var(--accent); border-radius: 50%; box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 14px rgba(242,184,74,.6); pointer-events: none; }
+  .miss { position: fixed; width: 26px; height: 26px; margin: -13px 0 0 -13px; pointer-events: none; }
+  .miss::before, .miss::after { content: ''; position: absolute; left: 11px; top: 0; width: 4px; height: 26px; background: #f07060; border-radius: 2px; transform: rotate(45deg); }
+  .miss::after { transform: rotate(-45deg); }
+  .hint { position: fixed; border: 2px dashed rgba(242,184,74,.9); border-radius: 50%; pointer-events: none; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div class="frame" id="frame-a"><span>Before</span></div>
+<div class="frame" id="frame-b"><span>After</span></div>
+<div id="rings"></div>
+
+<div id="hud" class="panel">
+  <span class="name">Spot the Difference</span>
+  <span>Found <b class="stat" id="found">0 / 5</b></span>
+  <span class="stat" id="time">0:00</span>
+  <button id="hint" title="Circle a region with something changed (after 20 s without a find)">Hint</button>
+  <button id="new" title="A fresh set of differences">New round</button>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Spot the Difference</h1>
+    <p>Two photos of the same room. Someone has been in the right one: <b>five things changed</b>. A colour, something missing, something moved, turned or grown.</p>
+    <p>Click a difference on either picture. Gold rings mark what you found. A wrong click just shows a small cross; there is no penalty and no clock pressure.</p>
+    <p class="dim">Stuck? After 20 seconds without a find, Hint circles an area. Every round changes different things.</p>
+    <button id="help-go" class="go">Look closely</button>
+  </div>
+</div>
+
+<div id="done" class="overlay" hidden>
+  <div class="card panel">
+    <h1>All five found</h1>
+    <p id="done-text"></p>
+    <p class="dim" id="done-list"></p>
+    <button id="next" class="go">Another round</button>
+  </div>
+</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>
