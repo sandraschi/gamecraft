@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Orgelbauer</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #f2c24a; --bg: #2a1e18; --font: Georgia, 'Palatino Linotype', serif; }
+  #tune { font-style: italic; font-size: 17px; }
+  #holding { color: var(--accent); min-width: 80px; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="hud" class="panel">
+  <span class="name">Orgelbauer</span>
+  <span class="dim" id="lvl"></span>
+  <span id="tune"></span>
+  <span class="dim" id="filled"></span>
+  <span id="holding"></span>
+  <button id="listen" title="Hear the tune (L)">Listen</button>
+  <button id="play" class="primary" title="Play the organ (P)">Play</button>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+<div id="msg" class="panel dim">click a pipe to hear it and pick it up &middot; click a hole to stand it there</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Orgelbauer</h1>
+    <p>The little organ lost its pipes. When you press <b>Play</b>, it sounds its pipes from left to right. Make it play the tune.</p>
+    <p><b>Listen</b> to the tune as often as you like. Click a pipe to hear it and pick it up, then click a hole to stand it there. Click a placed pipe to take it out again; putting a pipe on an occupied hole swaps them.</p>
+    <p class="dim">Like on a real organ, a longer pipe sounds lower. After playing, green tags are right notes and red ones are wrong. Every tune is traditional.</p>
+    <button id="help-go" class="go">Open the workshop</button>
+  </div>
+</div>
+<div id="done" class="overlay" hidden>
+  <div class="card panel">
+    <h1>It plays!</h1>
+    <p id="done-text"></p>
+    <button id="next" class="go">Next tune</button>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

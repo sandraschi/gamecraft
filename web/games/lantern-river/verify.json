@@ -1,0 +1,65 @@
+{
+  "slug": "lantern-river",
+  "title": "Lantern River",
+  "date": "2026-11-01T00:48:07.023Z",
+  "boot_ms": 422,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "current_alone_rarely_brings_lanterns_home": true,
+      "random_breathing_is_not_enough": true,
+      "careful_breathing_works": true,
+      "careful_beats_random": true,
+      "nothing_is_ever_lost": true
+    },
+    "summary": "about 150 lanterns per policy reached the shrine: idle 0%, random 0%, careful 99%"
+  },
+  "steps": 3765,
+  "sim_seconds": 62.8,
+  "checkpoints": [
+    {
+      "name": "first-lantern",
+      "step": 602
+    },
+    {
+      "name": "drifts-past",
+      "step": 1874
+    },
+    {
+      "name": "first-home",
+      "step": 1968
+    },
+    {
+      "name": "half-lit",
+      "step": 2616
+    },
+    {
+      "name": "shrine-lit",
+      "step": 3765
+    }
+  ],
+  "shots": [
+    "shots/01-first-lantern.png",
+    "shots/02-drifts-past.png",
+    "shots/03-first-home.png",
+    "shots/04-half-lit.png",
+    "shots/05-shrine-lit.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 14973,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint first-lantern",
+    "GameCraft: checkpoint drifts-past",
+    "GameCraft: checkpoint first-home",
+    "GameCraft: checkpoint half-lit",
+    "GameCraft: checkpoint shrine-lit",
+    "GameCraft: shrine lit with 12 lanterns, 2 floated on",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}
