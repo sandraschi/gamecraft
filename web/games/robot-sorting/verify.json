@@ -1,0 +1,72 @@
+{
+  "slug": "robot-sorting",
+  "title": "Boomy Sorts",
+  "date": "2026-11-01T00:48:29.804Z",
+  "boot_ms": 383,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "answer_sorts_everything": true,
+      "answer_fits_the_slots": true,
+      "doing_nothing_is_not_enough": true,
+      "wrong_order_fails": true,
+      "every_outcome_appears": true,
+      "answer_right_for_every_kind": true
+    },
+    "summary": "5 levels x 15 shifts; reference programs sort all 16 parcel kinds, empty and wrong-order programs fail"
+  },
+  "steps": 4550,
+  "sim_seconds": 75.8,
+  "checkpoints": [
+    {
+      "name": "factory-floor",
+      "step": 1
+    },
+    {
+      "name": "no-rules",
+      "step": 867
+    },
+    {
+      "name": "red-left",
+      "step": 1734
+    },
+    {
+      "name": "two-colours",
+      "step": 2676
+    },
+    {
+      "name": "order-matters",
+      "step": 3618
+    },
+    {
+      "name": "big-ones",
+      "step": 4550
+    }
+  ],
+  "shots": [
+    "shots/01-factory-floor.png",
+    "shots/02-no-rules.png",
+    "shots/03-red-left.png",
+    "shots/04-two-colours.png",
+    "shots/05-order-matters.png",
+    "shots/06-big-ones.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 1270,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint factory-floor",
+    "GameCraft: checkpoint no-rules",
+    "GameCraft: checkpoint red-left",
+    "GameCraft: checkpoint two-colours",
+    "GameCraft: checkpoint order-matters",
+    "GameCraft: checkpoint big-ones",
+    "GameCraft: three jobs sorted; an empty program and a wrong rule order were both caught by the bins",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

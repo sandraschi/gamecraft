@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Kage-e</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #f2b45a; --bg: #1a1820; }
+  #view { cursor: grab; } #view:active { cursor: grabbing; }
+  #meter { width: 120px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; }
+  #bar { height: 100%; background: var(--accent); width: 2%; transition: width .2s; }
+  #shape { font-size: 18px; letter-spacing: .1em; }
+  #reveal { position: fixed; left: 50%; top: 18%; transform: translateX(-50%); font: italic 32px Georgia, serif; color: #2a1a0e; text-shadow: 0 1px 0 rgba(255,255,255,.5); pointer-events: none; }
+  #msg { font-size: 14px; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="reveal"></div>
+<div id="hud" class="panel">
+  <span class="name">Kage-e</span>
+  <span class="dim" id="level"></span>
+  <span id="shape" title="What the shadow should become"></span>
+  <span id="meter"><div id="bar"></div></span>
+  <span class="stat" id="match">0%</span>
+  <button id="peek" title="Show the outline on the wall">Peek</button>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+<div id="msg" class="panel dim">drag to turn the sculpture &middot; arrow keys work too</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Kage-e</h1>
+    <p>Someone hung a heap of junk blocks in front of a lamp. From exactly one direction, its shadow on the wall becomes a picture. The name of the picture is at the top, in Japanese; the meter shows how close the shadow is.</p>
+    <p><b>Drag</b> left and right to spin it, up and down to tip it. Arrow keys nudge.</p>
+    <p class="dim">Peek draws the picture's outline on the wall if you want it. No timer, nothing to lose.</p>
+    <button id="help-go" class="go">Turn on the lamp</button>
+  </div>
+</div>
+<div id="done" class="overlay" hidden>
+  <div class="card panel">
+    <h1>Kage-e</h1>
+    <p id="done-text"></p>
+    <button id="next" class="go">Next sculpture</button>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
