@@ -1,0 +1,73 @@
+{
+  "slug": "spot-the-difference",
+  "title": "Spot the Difference",
+  "date": "2026-11-01T00:48:33.801Z",
+  "boot_ms": 549,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "five_every_time": true,
+      "distinct_items": true,
+      "nothing_tiny": true,
+      "no_overlaps": true,
+      "all_visible_changes": true,
+      "unchanged_room_matches": true,
+      "varied_rounds": true
+    },
+    "summary": "60 seeds, 60 distinct difference sets"
+  },
+  "steps": 348,
+  "sim_seconds": 5.8,
+  "checkpoints": [
+    {
+      "name": "room-built",
+      "step": 1
+    },
+    {
+      "name": "wrong-click",
+      "step": 36
+    },
+    {
+      "name": "first-found",
+      "step": 84
+    },
+    {
+      "name": "three-found",
+      "step": 180
+    },
+    {
+      "name": "all-found",
+      "step": 276
+    },
+    {
+      "name": "next-room",
+      "step": 348
+    }
+  ],
+  "shots": [
+    "shots/01-room-built.png",
+    "shots/02-wrong-click.png",
+    "shots/03-first-found.png",
+    "shots/04-three-found.png",
+    "shots/05-all-found.png",
+    "shots/06-next-room.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 1889,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint room-built",
+    "GameCraft: checkpoint wrong-click",
+    "GameCraft: checkpoint first-found",
+    "GameCraft: checkpoint three-found",
+    "GameCraft: checkpoint all-found",
+    "GameCraft: checkpoint next-room",
+    "GameCraft: round 1 solved (5 of 5, 1 deliberate miss), round 2 dealt with a new difference set",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

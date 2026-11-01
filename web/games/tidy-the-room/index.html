@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Tidy the Room</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #8fd0a8; --bg: #1a1612; }
+  #view { cursor: grab; }
+  #photo-frame { position: fixed; z-index: 2; border: 6px solid #f6f0e2; border-radius: 3px; box-shadow: 0 8px 26px rgba(0,0,0,.5); cursor: zoom-in; }
+  #photo-frame span { position: absolute; left: 0; top: -30px; font: italic 13px Georgia, serif; color: #2a1a0e; background: #f6f0e2; padding: 2px 10px; border-radius: 3px 3px 0 0; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="photo-frame" title="How the room should look (click to enlarge)"><span>how it looked this morning</span></div>
+<canvas id="view"></canvas>
+
+<div id="hud" class="panel">
+  <span class="name">Tidy the Room</span>
+  <b class="stat" id="left"></b>
+  <span id="moves" class="dim"></span>
+  <span class="stat" id="time">0:00</span>
+  <button id="new" title="A different mess">New mess</button>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Tidy the Room</h1>
+    <p>A lively afternoon happened. Six things ended up on the floor. The photo in the corner shows how the room looked this morning.</p>
+    <p><b>Drag each thing back where it belongs.</b> When you are close enough it clicks into place. Anywhere else, it simply stays where you put it.</p>
+    <p class="dim">Click the photo to enlarge it. No timer pressure; the clock is only there for curiosity.</p>
+    <button id="help-go" class="go">Roll up sleeves</button>
+  </div>
+</div>
+
+<div id="done" class="overlay" hidden>
+  <div class="card panel">
+    <h1>Spotless</h1>
+    <p id="done-text"></p>
+    <button id="next" class="go">Another afternoon</button>
+  </div>
+</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

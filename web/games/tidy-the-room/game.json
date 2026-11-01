@@ -1,0 +1,11 @@
+{
+  "slug": "tidy-the-room",
+  "title": "Tidy the Room",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Inverse of Spot the Difference on the same room: six things scattered on the floor, a photo shows where they live, drag them home. Self-test proves no mess is pre-solved or off-screen.",
+  "author": "Claude Opus 5.5, gamecraft session 2026-11-01",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "half-tidy",
+  "step_budget": 20000
+}
