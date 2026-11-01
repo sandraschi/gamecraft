@@ -4,8 +4,9 @@
 //! through `gamecraft-commands` (the same bus the desktop and the depot forge
 //! use), so an export is reproducible from one provenance rule everywhere.
 //!
-//! Format is a parameter, not a tool: `godot4` today, `overte` (or any other
-//! target) later, without a rename or a second schema in the client's context.
+//! Format is a parameter, not a tool: `godot4` (.tscn text) and `gltf` (glTF 2.0
+//! JSON with the buffer embedded) today; further targets are new values here,
+//! never a rename or a second schema in the client's context.
 
 use gamecraft_commands::{AddNodeCommand, Command, SetPropertyCommand, SetTransformCommand};
 use gamecraft_core::{NodeId, PropertyValue, SceneGraph, Transform};
@@ -14,8 +15,12 @@ use glam::Vec3;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
-/// The only format implemented today.
+/// Godot 4 `.tscn` text.
 pub const FORMAT_GODOT4: &str = "godot4";
+/// glTF 2.0, as one self-contained JSON string (base64 buffer).
+pub const FORMAT_GLTF: &str = "gltf";
+/// Every format `export_spec` accepts.
+pub const FORMATS: [&str; 2] = [FORMAT_GODOT4, FORMAT_GLTF];
 
 /// One node in a JSON scene spec.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -321,9 +326,10 @@ fn build_graph(spec: &SceneSpec) -> Result<SceneGraph, String> {
 /// Returns a message when the format is unsupported, the spec is structurally
 /// invalid, or serialization fails.
 pub fn export_spec(spec: &SceneSpec, format: &str) -> Result<ExportOutcome, String> {
-    if format != FORMAT_GODOT4 {
+    if !FORMATS.contains(&format) {
         return Err(format!(
-            "unsupported format '{format}' (supported: {FORMAT_GODOT4})"
+            "unsupported format '{format}' (supported: {})",
+            FORMATS.join(", ")
         ));
     }
     let graph = build_graph(spec)?;
@@ -334,6 +340,27 @@ pub fn export_spec(spec: &SceneSpec, format: &str) -> Result<ExportOutcome, Stri
             .map_or_else(|| "scene".to_string(), |node| node.name.clone());
         gamecraft_godot::deterministic_uid(format!("res://{root_name}.tscn").as_str())
     });
+    if format == FORMAT_GLTF {
+        let subs: Vec<gamecraft_gltf::SubRes> = spec
+            .sub_resources
+            .iter()
+            .map(|res| gamecraft_gltf::SubRes {
+                kind: res.resource_type.clone(),
+                id: res.id.clone(),
+                properties: res
+                    .properties
+                    .iter()
+                    .map(|(key, value)| (key.clone(), value.clone()))
+                    .collect(),
+            })
+            .collect();
+        let gltf = gamecraft_gltf::export(&graph, &subs)?;
+        return Ok(ExportOutcome {
+            text: gltf.to_gltf_embedded(),
+            uid,
+            nodes: spec.nodes.len(),
+        });
+    }
     let connections: Vec<ConnectionDecl> = spec
         .connections
         .iter()
@@ -461,6 +488,37 @@ mod tests {
         };
         let outcome = export_spec(&spec, FORMAT_GODOT4);
         assert!(outcome.is_err());
+    }
+
+    #[test]
+    fn spec_exports_to_gltf() {
+        let parsed = serde_json::from_value::<SceneSpec>(serde_json::json!({
+            "nodes": [
+                {"name": "World", "type": "Node3D"},
+                {"name": "Crate", "type": "MeshInstance3D", "parent": ".", "position": [1.0, 0.5, 0.0],
+                 "properties": {"mesh": {"raw": "SubResource(\"box\")"}}}
+            ],
+            "sub_resources": [{"type": "BoxMesh", "id": "box", "properties": {"size": "Vector3(1, 1, 1)"}}]
+        }));
+        assert!(parsed.is_ok());
+        let Ok(spec) = parsed else { return };
+        let outcome = export_spec(&spec, FORMAT_GLTF);
+        assert!(outcome.is_ok(), "{outcome:?}");
+        if let Ok(outcome) = outcome {
+            let doc: serde_json::Value = serde_json::from_str(&outcome.text).unwrap_or_default();
+            assert_eq!(
+                doc.pointer("/asset/version"),
+                Some(&serde_json::json!("2.0"))
+            );
+            assert_eq!(
+                doc.pointer("/nodes/1/translation"),
+                Some(&serde_json::json!([1.0, 0.5, 0.0]))
+            );
+            assert_eq!(doc.pointer("/nodes/1/mesh"), Some(&serde_json::json!(0)));
+            assert!(outcome
+                .text
+                .contains("data:application/octet-stream;base64,"));
+        }
     }
 
     #[test]

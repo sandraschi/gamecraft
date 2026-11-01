@@ -100,6 +100,8 @@ pub(crate) struct DesktopState {
     pub(crate) scene_path: Option<PathBuf>,
     /// Parsed source, kept so a save can restore ext/sub resources verbatim.
     pub(crate) source: Option<SceneFile>,
+    /// Albedo textures for the loaded scene.
+    pub(crate) tex_cache: crate::textures::TexCache,
     /// Draw ground axes.
     pub(crate) show_axes: bool,
     /// Draw shaded mesh geometry built from the scene's own primitives.
@@ -124,6 +126,18 @@ pub(crate) struct DesktopState {
     pub(crate) overlay: gamecraft_core::config::GameOverlay,
     /// Per-game preview renders, loaded once at startup (`thumb.png`).
     pub(crate) thumbs: HashMap<String, Thumb>,
+    /// Text filter over the depot list (title, slug or group); empty shows all.
+    pub(crate) depot_filter: String,
+    /// Library (card grid plus detail card) instead of the scene editor.
+    pub(crate) library: bool,
+    /// Light theme instead of dark.
+    pub(crate) light: bool,
+    /// Gate running in the background, if any.
+    pub(crate) verify_job: Option<VerifyJob>,
+    /// Cheat sheet of the selected game: (slug, text), read once per selection.
+    pub(crate) sheet: Option<(String, String)>,
+    /// Scroll the selected card into view on the next frame (keyboard navigation).
+    pub(crate) scroll_to_selected: bool,
 }
 
 /// Modal dialogs owned by the menu bar.
@@ -139,26 +153,73 @@ pub(crate) enum Dialog {
     GameOverlay,
 }
 
-/// Which runtime a depot entry belongs to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum GameKind {
-    /// Godot 4 project under `depot/games/`.
-    Godot,
-    /// three.js page under `web/games/`.
-    Web,
+pub(crate) use gamecraft_mcp::catalog::{GameKind, GODOT_GROUPS, WEB_GROUPS};
+
+/// One playable project. This is the shared catalog entry, so the app, the CLI
+/// (`gamecraft-cli list`) and the MCP server (`game_list`) agree on titles,
+/// groups, descriptions and the last gate result.
+pub(crate) type DepotGame = gamecraft_mcp::catalog::GameEntry;
+
+/// A gate run on a background thread so the shell stays responsive.
+#[derive(Debug)]
+pub(crate) struct VerifyJob {
+    /// Game being verified.
+    pub(crate) slug: String,
+    /// Delivers the gate result once.
+    pub(crate) rx: std::sync::mpsc::Receiver<Result<serde_json::Value, String>>,
 }
 
-/// One playable project discovered under `depot/games/` or `web/games/`.
-#[derive(Debug, Clone)]
-pub(crate) struct DepotGame {
-    /// Which runtime launches it.
-    pub(crate) kind: GameKind,
-    /// Folder name (`platformer`, `flight`, ...).
-    pub(crate) slug: String,
-    /// Display label.
-    pub(crate) title: String,
-    /// Project directory (passed to Godot as `--path`).
-    pub(crate) dir: PathBuf,
+/// Darker amber for text and strokes on the light theme (the bright one fails contrast there).
+pub(crate) const ACCENT_DARK: egui::Color32 = egui::Color32::from_rgb(168, 104, 0);
+
+/// Apply the dark or light theme. Both use hairline (0.5 pt) low-contrast borders
+/// so panels separate without boxing everything in.
+pub(crate) fn apply_theme(ctx: &egui::Context, light: bool) {
+    ctx.set_theme(if light {
+        egui::Theme::Light
+    } else {
+        egui::Theme::Dark
+    });
+    let mut visuals = if light {
+        egui::Visuals::light()
+    } else {
+        egui::Visuals::dark()
+    };
+    let line = if light {
+        visuals.override_text_color = Some(egui::Color32::from_rgb(26, 28, 34));
+        visuals.panel_fill = egui::Color32::from_rgb(246, 244, 239);
+        visuals.window_fill = egui::Color32::from_rgb(252, 251, 248);
+        visuals.extreme_bg_color = egui::Color32::from_rgb(255, 255, 255);
+        visuals.faint_bg_color = egui::Color32::from_rgb(236, 233, 226);
+        visuals.widgets.active.fg_stroke = egui::Stroke::new(1.5, ACCENT_DARK);
+        visuals.hyperlink_color = ACCENT_DARK;
+        visuals.selection.bg_fill = egui::Color32::from_rgba_unmultiplied(214, 140, 0, 60);
+        visuals.selection.stroke = egui::Stroke::new(1.0, ACCENT_DARK);
+        egui::Color32::from_rgb(214, 209, 198)
+    } else {
+        // Contrast: egui's defaults are mid-greys on near-black, which is hard to
+        // read on a dark panel. Force a bright text colour and give each widget
+        // state a clearly different stroke.
+        visuals.override_text_color = Some(egui::Color32::from_rgb(234, 237, 244));
+        visuals.panel_fill = egui::Color32::from_rgb(16, 18, 24);
+        visuals.window_fill = egui::Color32::from_rgb(22, 25, 33);
+        visuals.extreme_bg_color = egui::Color32::from_rgb(9, 11, 16);
+        visuals.faint_bg_color = egui::Color32::from_rgb(30, 33, 42);
+        visuals.widgets.noninteractive.fg_stroke =
+            egui::Stroke::new(1.0, egui::Color32::from_rgb(214, 219, 229));
+        visuals.widgets.inactive.fg_stroke =
+            egui::Stroke::new(1.0, egui::Color32::from_rgb(226, 230, 238));
+        visuals.widgets.hovered.fg_stroke =
+            egui::Stroke::new(1.5, egui::Color32::from_rgb(255, 255, 255));
+        visuals.widgets.active.fg_stroke = egui::Stroke::new(1.5, ACCENT);
+        visuals.hyperlink_color = ACCENT;
+        visuals.selection.bg_fill = egui::Color32::from_rgba_unmultiplied(255, 190, 60, 45);
+        visuals.selection.stroke = egui::Stroke::new(1.0, ACCENT);
+        egui::Color32::from_rgb(46, 50, 62)
+    };
+    visuals.widgets.noninteractive.bg_stroke = egui::Stroke::new(0.5, line);
+    visuals.window_stroke = egui::Stroke::new(0.5, line);
+    ctx.set_visuals(visuals);
 }
 
 /// A loaded preview render. The GPU handle has no `Debug`, so this wrapper
@@ -212,26 +273,7 @@ impl DesktopState {
     /// Load the fixture (or the fallback scene) and probe the adapter.
     #[must_use]
     pub(crate) fn load(ctx: &eframe::CreationContext<'_>) -> Self {
-        let mut visuals = egui::Visuals::dark();
-        // Contrast: egui's defaults are mid-greys on near-black, which is hard to
-        // read on a dark panel. Force a bright text colour and give each widget
-        // state a clearly different stroke, then bump the type sizes.
-        visuals.override_text_color = Some(egui::Color32::from_rgb(234, 237, 244));
-        visuals.panel_fill = egui::Color32::from_rgb(16, 18, 24);
-        visuals.window_fill = egui::Color32::from_rgb(22, 25, 33);
-        visuals.extreme_bg_color = egui::Color32::from_rgb(9, 11, 16);
-        visuals.faint_bg_color = egui::Color32::from_rgb(30, 33, 42);
-        visuals.widgets.noninteractive.fg_stroke =
-            egui::Stroke::new(1.0, egui::Color32::from_rgb(214, 219, 229));
-        visuals.widgets.inactive.fg_stroke =
-            egui::Stroke::new(1.0, egui::Color32::from_rgb(226, 230, 238));
-        visuals.widgets.hovered.fg_stroke =
-            egui::Stroke::new(1.5, egui::Color32::from_rgb(255, 255, 255));
-        visuals.widgets.active.fg_stroke = egui::Stroke::new(1.5, ACCENT);
-        visuals.hyperlink_color = ACCENT;
-        visuals.selection.bg_fill = egui::Color32::from_rgba_unmultiplied(255, 190, 60, 45);
-        visuals.selection.stroke = egui::Stroke::new(1.0, ACCENT);
-        ctx.egui_ctx.set_visuals(visuals);
+        apply_theme(&ctx.egui_ctx, false);
         ctx.egui_ctx.all_styles_mut(|style| {
             use egui::{FontFamily, FontId, TextStyle};
             style
@@ -308,6 +350,7 @@ impl DesktopState {
             scene_uid,
             scene_path: None,
             source: scene,
+            tex_cache: crate::textures::TexCache::default(),
             show_axes: true,
             show_meshes: true,
             show_boxes: false,
@@ -320,6 +363,12 @@ impl DesktopState {
             app_cfg: gamecraft_core::config::AppConfig::load(),
             overlay: gamecraft_core::config::GameOverlay::default(),
             thumbs: HashMap::new(),
+            depot_filter: String::new(),
+            library: true,
+            light: false,
+            verify_job: None,
+            sheet: None,
+            scroll_to_selected: false,
         };
         state.selected = state.graph.root;
         state.refresh();
@@ -835,63 +884,244 @@ fn bun_binary() -> String {
     "bun".to_string()
 }
 
-/// Find every playable project: Godot scenes under `depot/games/`, three.js
-/// pages under `web/games/`. Two runtimes, one list.
+/// Every playable project via the shared catalog (Godot under `depot/games/`,
+/// three.js under `web/games/`). The root comes from `GAMECRAFT_ROOT` or by
+/// walking up from the working directory and the executable.
 fn discover_depot() -> Vec<DepotGame> {
-    let mut games: Vec<DepotGame> = Vec::new();
-    if let Some(root) = find_up_dir("depot/games") {
-        collect_games(root.as_path(), "main.tscn", GameKind::Godot, &mut games);
-    }
-    if let Some(root) = find_up_dir("web/games") {
-        collect_games(root.as_path(), "game.json", GameKind::Web, &mut games);
-    }
-    games.sort_by(|left, right| left.slug.cmp(&right.slug));
-    games
+    gamecraft_mcp::catalog::find_root(None)
+        .map(|root| gamecraft_mcp::catalog::discover(root.as_path()))
+        .unwrap_or_default()
 }
 
-/// Append every child directory of `root` that contains `marker`.
-fn collect_games(root: &Path, marker: &str, kind: GameKind, out: &mut Vec<DepotGame>) {
-    let Ok(entries) = std::fs::read_dir(root) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let dir = entry.path();
-        if !dir.join(marker).is_file() {
-            continue;
+/// Was the gate result a pass? Web results carry `verify.pass`, Godot ones `won`.
+fn gate_passed(value: &serde_json::Value) -> bool {
+    value
+        .pointer("/verify/pass")
+        .or_else(|| value.get("won"))
+        .and_then(serde_json::Value::as_bool)
+        .unwrap_or(false)
+}
+
+impl DesktopState {
+    /// Games passing the filter, grouped as the sidebar and the grid show them:
+    /// runtime, then group (known groups first), then title.
+    #[must_use]
+    pub(crate) fn visible_sections(&self) -> Vec<(GameKind, String, Vec<usize>)> {
+        let filter = self.depot_filter.trim().to_lowercase();
+        let mut out = Vec::new();
+        for (kind, known) in [
+            (GameKind::Godot, &GODOT_GROUPS[..]),
+            (GameKind::Web, &WEB_GROUPS[..]),
+        ] {
+            let mut groups: Vec<String> = known.iter().map(|g| (*g).to_string()).collect();
+            for game in self.depot_games.iter().filter(|g| g.kind == kind) {
+                if !groups.contains(&game.group) {
+                    groups.push(game.group.clone());
+                }
+            }
+            for group in groups {
+                let members: Vec<usize> = (0..self.depot_games.len())
+                    .filter(|&i| {
+                        self.depot_games.get(i).is_some_and(|g| {
+                            g.kind == kind
+                                && g.group == group
+                                && gamecraft_mcp::catalog::matches(g, filter.as_str())
+                        })
+                    })
+                    .collect();
+                if !members.is_empty() {
+                    out.push((kind, group, members));
+                }
+            }
         }
-        let slug = dir
-            .file_name()
-            .and_then(|name| name.to_str())
+        out
+    }
+
+    /// Move the selection `step` places through the visible games, wrapping.
+    pub(crate) fn step_selection(&mut self, step: i64) {
+        let order: Vec<usize> = self
+            .visible_sections()
+            .into_iter()
+            .flat_map(|(_, _, members)| members)
+            .collect();
+        let Some(&first) = order.first() else {
+            return;
+        };
+        let next = match self
+            .selected_game
+            .and_then(|s| order.iter().position(|&i| i == s))
+        {
+            Some(pos) => {
+                let len = i64::try_from(order.len()).unwrap_or(1);
+                let at = (i64::try_from(pos).unwrap_or(0) + step).rem_euclid(len);
+                order
+                    .get(usize::try_from(at).unwrap_or(0))
+                    .copied()
+                    .unwrap_or(first)
+            }
+            None => first,
+        };
+        self.load_depot(next);
+        self.scroll_to_selected = true;
+    }
+
+    /// The selected game's cheat sheet, read from disk once per selection.
+    pub(crate) fn cheatsheet(&mut self) -> Option<String> {
+        let game = self.selected_game.and_then(|i| self.depot_games.get(i))?;
+        if let Some((slug, text)) = &self.sheet {
+            if *slug == game.slug {
+                return Some(text.clone()).filter(|t| !t.is_empty());
+            }
+        }
+        let text = gamecraft_mcp::catalog::report(game)
+            .get("cheatsheet")
+            .and_then(serde_json::Value::as_str)
             .unwrap_or_default()
             .to_string();
-        if slug.is_empty() {
-            continue;
-        }
-        out.push(DepotGame {
-            kind,
-            title: slug.replace('-', " "),
-            slug,
-            dir,
-        });
+        self.sheet = Some((game.slug.clone(), text.clone()));
+        Some(text).filter(|t| !t.is_empty())
     }
-}
 
-/// Resolve a repo-relative **directory** by walking up from the cwd.
-///
-/// `find_up` checks `is_file`, which never matches `depot/games` - the reason the
-/// depot list first came up empty.
-fn find_up_dir(relative: &str) -> Option<PathBuf> {
-    let mut cursor = std::env::current_dir().ok()?;
-    for _ in 0..5 {
-        let candidate = cursor.join(relative);
-        if candidate.is_dir() {
-            return Some(candidate);
+    /// Run the selected game's gate on a background thread (web: headless
+    /// self-play; Godot: headless boot to a win marker). One at a time.
+    pub(crate) fn run_tests(&mut self) {
+        if let Some(job) = &self.verify_job {
+            self.status = format!("the gate for {} is still running", job.slug);
+            return;
         }
-        if !cursor.pop() {
-            break;
+        let Some(game) = self
+            .selected_game
+            .and_then(|i| self.depot_games.get(i))
+            .cloned()
+        else {
+            self.status = "pick a game first".to_string();
+            return;
+        };
+        let Some(root) = gamecraft_mcp::catalog::find_root(None) else {
+            self.status = "no GameCraft repo found; set GAMECRAFT_ROOT".to_string();
+            return;
+        };
+        let (tx, rx) = std::sync::mpsc::channel();
+        let slug = game.slug.clone();
+        std::thread::spawn(move || {
+            let result = match game.kind {
+                GameKind::Web => {
+                    gamecraft_mcp::catalog::web_verify(root.as_path(), game.slug.as_str(), 300)
+                }
+                GameKind::Godot => {
+                    gamecraft_mcp::catalog::godot_verify(game.dir.as_path(), 3600, true, Some(300))
+                }
+            };
+            let _ = tx.send(result);
+        });
+        self.status = format!("running the gate for {slug} (headless, up to 5 min)");
+        self.verify_job = Some(VerifyJob { slug, rx });
+    }
+
+    /// Pick up a finished gate: report it and re-read the catalog so the card
+    /// shows the new result.
+    pub(crate) fn poll_verify(&mut self) {
+        let Some(job) = &self.verify_job else {
+            return;
+        };
+        let outcome = match job.rx.try_recv() {
+            Ok(result) => result,
+            Err(std::sync::mpsc::TryRecvError::Empty) => return,
+            Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                Err("the gate thread ended without a result".to_string())
+            }
+        };
+        let slug = job.slug.clone();
+        self.verify_job = None;
+        self.status = match outcome {
+            Ok(value) if gate_passed(&value) => format!("{slug}: gate passed"),
+            Ok(value) => {
+                let why = value
+                    .pointer("/verify/failed")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("no win marker");
+                format!("{slug}: gate FAILED ({why})")
+            }
+            Err(reason) => format!("{slug}: could not run the gate: {reason}"),
+        };
+        self.rediscover();
+    }
+
+    /// Re-read the catalog, keeping the selection by slug.
+    pub(crate) fn rediscover(&mut self) {
+        let keep = self
+            .selected_game
+            .and_then(|i| self.depot_games.get(i))
+            .map(|g| (g.slug.clone(), g.kind));
+        self.depot_games = discover_depot();
+        self.selected_game = keep.and_then(|(slug, kind)| {
+            self.depot_games
+                .iter()
+                .position(|g| g.slug == slug && g.kind == kind)
+        });
+        self.sheet = None;
+    }
+
+    /// Write the current graph (edits included) as glTF: `.gltf` gives text with
+    /// the buffer embedded, anything else binary `.glb`.
+    pub(crate) fn export_gltf(&mut self, path: &Path) {
+        let subs: Vec<gamecraft_gltf::SubRes> = self
+            .source
+            .as_ref()
+            .map(|file| {
+                file.sub_resources
+                    .iter()
+                    .map(gamecraft_gltf::SubRes::from)
+                    .collect()
+            })
+            .unwrap_or_default();
+        let text_form = path
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("gltf"));
+        let textures = match (self.source.as_ref(), self.scene_path.as_ref()) {
+            (Some(file), Some(scene)) => {
+                gamecraft_gltf::load_textures(file, gamecraft_gltf::project_root(scene).as_path())
+            }
+            _ => gamecraft_gltf::Textures::new(),
+        };
+        let written =
+            gamecraft_gltf::export_textured(&self.graph, &subs, &textures).and_then(|gltf| {
+                let bytes = if text_form {
+                    gltf.to_gltf_embedded().into_bytes()
+                } else {
+                    gltf.to_glb()?
+                };
+                std::fs::write(path, &bytes).map_err(|e| e.to_string())?;
+                Ok(gltf.stats)
+            });
+        self.status = match written {
+            Ok(s) => format!(
+                "exported {}: {} meshes, {} triangles, {} lights, {} textures",
+                path.display(),
+                s.meshes,
+                s.triangles,
+                s.lights,
+                s.textures
+            ),
+            Err(err) => format!("glTF export failed: {err}"),
+        };
+    }
+
+    /// Show the selected game's folder in Explorer.
+    pub(crate) fn open_folder(&mut self) {
+        let Some(dir) = self.selected_game_dir() else {
+            self.status = "pick a game first".to_string();
+            return;
+        };
+        let opener = if cfg!(windows) {
+            "explorer"
+        } else {
+            "xdg-open"
+        };
+        if let Err(err) = std::process::Command::new(opener).arg(&dir).spawn() {
+            self.status = format!("cannot open {}: {err}", dir.display());
         }
     }
-    None
 }
 
 /// Resolve a repo-relative path by walking up from the working directory.
@@ -940,6 +1170,57 @@ mod tests {
 
     /// Root plus one healthy body with a shape.
     const TINY: &str = "[gd_scene load_steps=2 format=3 uid=\"uid://tiny\"]\n\n[node name=\"Root\" type=\"Node3D\"]\n\n[node name=\"Good\" type=\"StaticBody3D\" parent=\".\"]\n\n[node name=\"Shape\" type=\"CollisionShape3D\" parent=\"Good\"]\n";
+
+    /// A catalog entry for navigation tests.
+    fn entry(kind: GameKind, slug: &str, group: &str) -> DepotGame {
+        DepotGame {
+            kind,
+            slug: slug.to_string(),
+            title: slug.to_string(),
+            group: group.to_string(),
+            description: String::new(),
+            dir: PathBuf::from(slug),
+            verify: None,
+        }
+    }
+
+    #[test]
+    fn keyboard_navigation_follows_grid_order_and_filter() {
+        let mut state = DesktopState::from_text(TINY, "uid://fallback");
+        // Stored alphabetically; shown Godot first, then by known group order.
+        state.depot_games = vec![
+            entry(GameKind::Web, "bento", "Calm puzzles"),
+            entry(GameKind::Godot, "maze", "Puzzles"),
+            entry(GameKind::Godot, "pong", "Arcade"),
+            entry(GameKind::Web, "hoshi", "Seek and find"),
+        ];
+        state.selected_game = None;
+        let slug = |s: &DesktopState| {
+            s.selected_game
+                .and_then(|i| s.depot_games.get(i))
+                .map(|g| g.slug.clone())
+                .unwrap_or_default()
+        };
+        state.step_selection(1);
+        assert_eq!(slug(&state), "pong");
+        state.step_selection(1);
+        assert_eq!(slug(&state), "maze");
+        state.step_selection(1);
+        assert_eq!(slug(&state), "hoshi");
+        state.step_selection(1);
+        assert_eq!(slug(&state), "bento");
+        state.step_selection(1);
+        assert_eq!(slug(&state), "pong", "wraps");
+        state.step_selection(-1);
+        assert_eq!(slug(&state), "bento", "wraps backwards");
+        state.depot_filter = "seek".to_string();
+        state.step_selection(1);
+        assert_eq!(
+            slug(&state),
+            "hoshi",
+            "filtered-out selection jumps to the first match"
+        );
+    }
 
     #[test]
     fn undo_redo_depth_tracks_stack() {

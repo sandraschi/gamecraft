@@ -235,9 +235,11 @@ The four that do not are unproven, not broken - all boot with zero errors:
 | `gamecraft-godot` | Deterministic `.tscn`/`.tres` parser **and serializer**, UID hashing, lint rules. |
 | `gamecraft-sim` | Deterministic gameplay sims: kinematic stepper, BFS maze and crate solvers. |
 | `gamecraft-forge` | Game builders, `GameSpec` validation and compilation, the LLM front end, thumbnail rasterizer, economy and Steam asset generators. |
-| `gamecraft-mcp` | MCP stdio server: `scene_lint`, `spatial_query`, `export_scene`, `scene_inspect`, plus opt-in `scene_verify` (boots Godot; needs `GAMECRAFT_MCP_ALLOW_GODOT=1`). |
-| `gamecraft-cli` | `lint`, `query`, `uid`, `forge`, `new`, `export`. |
-| `gamecraft-desktop` | `egui`/`wgpu` viewer: depot browser with Start Game, shaded mesh viewport, inspector, trace scrubber, undo/redo. |
+| `gamecraft-gltf` | Deterministic glTF 2.0 export (`.glb` or embedded `.gltf`): hierarchy, primitive meshes shared by geometry, PBR colours, lights, camera. Also owns the primitive tessellation the desktop viewport draws. Gate: `just gltf-gate` (Khronos validator + three.js render). |
+| `gamecraft-bevy` | GameCraft games on Bevy 0.20 on top of `gamecraft-sim`: headless logic plugin plus an optional windowed renderer (`render` feature). First game: a 29x29 maze that plays itself. Gate: `just bevy-gate`. |
+| `gamecraft-mcp` | MCP stdio server, dual-era (stateless `2026-07-28` with `server/discover`, plus the `initialize` handshake for `2025-11-25` back to `2024-11-05`): scene tools `scene_lint`, `spatial_query`, `scene_inspect`, `export_scene`; catalog tools `game_list`, `game_report`, `game_verify`, `game_create`; opt-in `scene_verify`. Every result is a one-sentence summary plus `structuredContent`; failures are `isError` results that say what to do next. Also hosts `catalog`, the game catalog shared with CLI and desktop. See `docs/MCP_CLIENTS.md`. |
+| `gamecraft-cli` | `lint`, `query`, `uid`, `forge`, `new`, `export`, `gltf <scene> [--out]` / `gltf --depot-out <dir>`, plus catalog parity `list [--filter] [--json]`, `report <slug> [--json]`, `verify <slug> [--timeout] [--json]`. |
+| `gamecraft-desktop` | `egui`/`wgpu` app. **Library** mode (default): card grid of all Godot and three.js games by category, detail card with description, last gate result, cheat sheet, Play / Watch demo / Run tests / Open folder; `/` filter, arrows, Enter. **Editor** mode: scene tree, shaded viewport, inspector, lint, trace scrubber, undo/redo. Light/dark toggle, Ctrl+wheel UI zoom, golden-PNG tests (`egui_kittest`). |
 
 Games are **compiled from a spec, never hand-written in GDScript** - that is what
 makes the byte-identical depot gate possible.

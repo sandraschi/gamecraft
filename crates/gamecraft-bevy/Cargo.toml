@@ -1,0 +1,36 @@
+[package]
+name = "gamecraft-bevy"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "L3 Bevy 0.20 runtime for GameCraft games: logic plugins tested headless, rendering behind the `render` feature"
+
+# Fleet standard (mcd standards/rust-crates/BEVY.md): Bevy lives only in this crate,
+# default features off, each feature added back on purpose. Justification is in
+# docs/TARGETS_PLAN.md, step 3.
+[features]
+default = []
+# Window, PBR rendering and keyboard: what the playable binary needs. No audio, UI,
+# sprites, scenes, picking or gamepad.
+render = [
+    "bevy/3d_bevy_render",
+    "bevy/default_app",
+    "bevy/multi_threaded",
+    "bevy/bevy_winit",
+    "bevy/keyboard",
+]
+# Fast relinking while iterating on the binary: `cargo run --features render,dev ...`
+dev = ["bevy/dynamic_linking"]
+
+[dependencies]
+# Logic only by default: ECS, app, time. `cargo test -p gamecraft-bevy` never builds a renderer.
+bevy = { version = "0.20.1", default-features = false, features = ["std"] }
+gamecraft-sim = { workspace = true }
+
+[[bin]]
+name = "gamecraft-bevy-maze"
+path = "src/bin/maze.rs"
+required-features = ["render"]
+
+[lints]
+workspace = true

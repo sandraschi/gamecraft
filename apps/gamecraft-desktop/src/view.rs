@@ -1,6 +1,6 @@
 //! Side panels: command palette, scene tree, inspector, lint list, trace bar.
 
-use crate::state::{DesktopState, Dialog};
+use crate::state::{DesktopState, Dialog, GameKind};
 use gamecraft_core::NodeId;
 use std::path::PathBuf;
 
@@ -13,35 +13,48 @@ const ADDABLE: [&str; 5] = [
     "MeshInstance3D",
 ];
 
+/// File menu: open, reload, save as, export glTF, quit.
+fn file_menu(state: &mut DesktopState, menu: &mut egui::Ui) {
+    if menu.button("Open scene").clicked() {
+        if let Some(path) = pick_scene() {
+            state.load_from_path(path.as_path());
+        }
+        menu.close();
+    }
+    let can_reload = state.scene_path.is_some();
+    if menu
+        .add_enabled(can_reload, egui::Button::new("Reload"))
+        .clicked()
+    {
+        state.reload();
+        menu.close();
+    }
+    if menu.button("Save as").clicked() {
+        if let Some(path) = save_scene_as(state.scene_path.as_ref()) {
+            state.save_to_path(path.as_path());
+        }
+        menu.close();
+    }
+    if menu
+        .button("Export glTF")
+        .on_hover_text("The scene as it is now (edits included) as .glb, or .gltf text")
+        .clicked()
+    {
+        if let Some(path) = export_gltf_as(state.scene_path.as_ref()) {
+            state.export_gltf(path.as_path());
+        }
+        menu.close();
+    }
+    menu.separator();
+    if menu.button("Quit").clicked() {
+        menu.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
+    }
+}
+
 /// Menu bar: File / Edit / View / Help.
 pub(crate) fn menu_bar(state: &mut DesktopState, ui: &mut egui::Ui) {
     egui::MenuBar::new().ui(ui, |bar| {
-        bar.menu_button("File", |menu| {
-            if menu.button("Open scene").clicked() {
-                if let Some(path) = pick_scene() {
-                    state.load_from_path(path.as_path());
-                }
-                menu.close();
-            }
-            let can_reload = state.scene_path.is_some();
-            if menu
-                .add_enabled(can_reload, egui::Button::new("Reload"))
-                .clicked()
-            {
-                state.reload();
-                menu.close();
-            }
-            if menu.button("Save as").clicked() {
-                if let Some(path) = save_scene_as(state.scene_path.as_ref()) {
-                    state.save_to_path(path.as_path());
-                }
-                menu.close();
-            }
-            menu.separator();
-            if menu.button("Quit").clicked() {
-                menu.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
-            }
-        });
+        bar.menu_button("File", |menu| file_menu(state, menu));
         bar.menu_button("Edit", |menu| {
             let can_undo = state.stack.undo_len() > 0;
             if menu
@@ -140,6 +153,26 @@ fn save_scene_as(current: Option<&PathBuf>) -> Option<PathBuf> {
         dialog = dialog.set_file_name("scene.tscn");
     }
     dialog.save_file()
+}
+
+/// Native save dialog for a glTF export, defaulting next to the scene.
+fn export_gltf_as(current: Option<&PathBuf>) -> Option<PathBuf> {
+    let mut dialog = rfd::FileDialog::new()
+        .set_title("Export glTF")
+        .add_filter("glTF binary", &["glb"])
+        .add_filter("glTF text", &["gltf"]);
+    let stem = current
+        .and_then(|path| {
+            if let Some(parent) = path.parent() {
+                dialog = dialog.clone().set_directory(parent);
+            }
+            path.parent()
+                .and_then(|p| p.file_name())
+                .and_then(|n| n.to_str())
+                .map(str::to_string)
+        })
+        .unwrap_or_else(|| "scene".to_string());
+    dialog.set_file_name(format!("{stem}.glb")).save_file()
 }
 
 /// Locate `depot/games` by walking up from the working directory.
@@ -340,8 +373,22 @@ pub(crate) fn top_bar(state: &mut DesktopState, ui: &mut egui::Ui) {
         menu_bar(state, ui);
         ui.horizontal(|row| {
             row.label("GameCraft");
+            row.selectable_value(&mut state.library, true, "Library")
+                .on_hover_text("All games as cards, with details and the gate");
+            row.selectable_value(&mut state.library, false, "Editor")
+                .on_hover_text("Scene tree, 3D viewport, inspector and lint");
+            mode_extras(state, row);
+            row.separator();
+            if state.library {
+                row.label(state.status.clone());
+                return;
+            }
             row.monospace(state.scene_uid.as_str());
-            row.text_edit_singleline(&mut state.palette_query);
+            row.add(
+                egui::TextEdit::singleline(&mut state.palette_query)
+                    .hint_text("command")
+                    .desired_width(150.0),
+            );
             let undo = row
                 .add_enabled(state.stack.undo_len() > 0, egui::Button::new("Undo"))
                 .clicked();
@@ -360,6 +407,28 @@ pub(crate) fn top_bar(state: &mut DesktopState, ui: &mut egui::Ui) {
         show_palette_dropdown(state, ui);
     });
     palette_keys(state, ui);
+}
+
+/// Theme toggle and zoom readout (click resets to 100 %).
+fn mode_extras(state: &mut DesktopState, row: &mut egui::Ui) {
+    let theme_label = if state.light { "Dark" } else { "Light" };
+    if row
+        .button(theme_label)
+        .on_hover_text("Switch between light and dark")
+        .clicked()
+    {
+        state.light = !state.light;
+        crate::state::apply_theme(row.ctx(), state.light);
+    }
+    let zoom = row.ctx().zoom_factor();
+    let pct = format!("{:.0}%", zoom * 100.0);
+    if row
+        .small_button(pct)
+        .on_hover_text("UI zoom: Ctrl + mouse wheel or Ctrl +/-. Click to reset.")
+        .clicked()
+    {
+        row.ctx().set_zoom_factor(1.0);
+    }
 }
 
 /// Vertical dropdown under the input; click runs, keys navigate.
@@ -494,43 +563,126 @@ fn run_palette(state: &mut DesktopState, kind: &PaletteKind) {
     }
 }
 
-/// Left panel: depot quick-select above the scene tree.
-pub(crate) fn left_tree(state: &mut DesktopState, ui: &mut egui::Ui) {
-    ui.heading(format!("Depot ({})", state.depot_games.len()));
+/// Groups of one runtime in display order: the known ones first, then any new ones.
+fn ordered_groups(state: &DesktopState, kind: GameKind, known: &[&str]) -> Vec<String> {
+    let mut groups: Vec<String> = known.iter().map(|g| (*g).to_string()).collect();
+    for game in state.depot_games.iter().filter(|g| g.kind == kind) {
+        if !groups.contains(&game.group) {
+            groups.push(game.group.clone());
+        }
+    }
+    groups
+}
+
+/// Does a game pass the sidebar filter? Matches title, slug or group, any case.
+fn matches(game: &crate::state::DepotGame, filter: &str) -> bool {
+    filter.is_empty()
+        || [game.title.as_str(), game.slug.as_str(), game.group.as_str()]
+            .iter()
+            .any(|text| text.to_lowercase().contains(filter))
+}
+
+/// One depot row: thumbnail and selectable title. Returns true when clicked.
+fn depot_row(state: &DesktopState, ui: &mut egui::Ui, index: usize) -> bool {
+    let Some(game) = state.depot_games.get(index) else {
+        return false;
+    };
+    let selected = state.selected_game == Some(index);
+    let mut clicked = false;
+    ui.horizontal(|row| {
+        if let Some(thumb) = state.thumbs.get(game.slug.as_str()) {
+            row.add(
+                egui::Image::new(&thumb.texture).fit_to_exact_size(egui::Vec2::new(48.0, 27.0)),
+            );
+        }
+        clicked = row
+            .selectable_label(selected, game.title.as_str())
+            .clicked();
+    });
+    clicked
+}
+
+/// The depot list: runtime sections, each with collapsible groups. Returns the clicked game.
+fn depot_list(state: &DesktopState, ui: &mut egui::Ui) -> Option<usize> {
+    let filter = state.depot_filter.trim().to_lowercase();
     let mut pick: Option<usize> = None;
+    let list_height = (ui.available_height() * 0.5).max(160.0);
     egui::ScrollArea::vertical()
         .id_salt("depot_list")
-        .max_height(150.0)
+        .max_height(list_height)
         .show(ui, |scroll| {
             if state.depot_games.is_empty() {
                 scroll.label("no depot found next to the working directory");
             }
-            for (index, game) in state.depot_games.iter().enumerate() {
-                let selected = state.selected_game == Some(index);
-                let mut row_pick = false;
-                scroll.horizontal(|row| {
-                    if let Some(thumb) = state.thumbs.get(game.slug.as_str()) {
-                        row.add(
-                            egui::Image::new(&thumb.texture)
-                                .fit_to_exact_size(egui::Vec2::new(56.0, 32.0)),
-                        );
-                    }
-                    if row
-                        .selectable_label(selected, game.title.as_str())
-                        .clicked()
-                    {
-                        row_pick = true;
-                    }
-                    if game.kind == crate::state::GameKind::Web {
-                        row.weak("web");
+            for (kind, label, known) in [
+                (GameKind::Godot, "Godot", &crate::state::GODOT_GROUPS[..]),
+                (GameKind::Web, "three.js", &crate::state::WEB_GROUPS[..]),
+            ] {
+                let in_kind: Vec<usize> = (0..state.depot_games.len())
+                    .filter(|&i| {
+                        state
+                            .depot_games
+                            .get(i)
+                            .is_some_and(|g| g.kind == kind && matches(g, filter.as_str()))
+                    })
+                    .collect();
+                if in_kind.is_empty() {
+                    continue;
+                }
+                let mut header =
+                    egui::CollapsingHeader::new(format!("{label} ({})", in_kind.len()))
+                        .id_salt(("depot_kind", label))
+                        .default_open(true);
+                if !filter.is_empty() {
+                    header = header.open(Some(true));
+                }
+                header.show(scroll, |section| {
+                    for group in ordered_groups(state, kind, known) {
+                        let members: Vec<usize> = in_kind
+                            .iter()
+                            .copied()
+                            .filter(|&i| state.depot_games.get(i).is_some_and(|g| g.group == group))
+                            .collect();
+                        if members.is_empty() {
+                            continue;
+                        }
+                        // closed by default, except the group holding the current game; a filter opens all
+                        let holds_selected =
+                            state.selected_game.is_some_and(|s| members.contains(&s));
+                        let mut sub =
+                            egui::CollapsingHeader::new(format!("{group} ({})", members.len()))
+                                .id_salt(("depot_group", label, group.as_str()))
+                                .default_open(holds_selected);
+                        if !filter.is_empty() {
+                            sub = sub.open(Some(true));
+                        }
+                        sub.show(section, |list| {
+                            for &index in &members {
+                                if depot_row(state, list, index) {
+                                    pick = Some(index);
+                                }
+                            }
+                        });
                     }
                 });
-                if row_pick {
-                    pick = Some(index);
-                }
+            }
+            if !filter.is_empty()
+                && !state
+                    .depot_games
+                    .iter()
+                    .any(|g| matches(g, filter.as_str()))
+            {
+                scroll.weak("nothing matches");
             }
         });
-    if let Some(index) = pick {
+    pick
+}
+
+/// Left panel: depot quick-select (runtime, then collapsible groups) above the scene tree.
+pub(crate) fn left_tree(state: &mut DesktopState, ui: &mut egui::Ui) {
+    ui.heading(format!("Depot ({})", state.depot_games.len()));
+    crate::library::filter_box(state, ui, 170.0);
+    if let Some(index) = depot_list(state, ui) {
         state.load_depot(index);
     }
     let can_start = state.selected_game.is_some();

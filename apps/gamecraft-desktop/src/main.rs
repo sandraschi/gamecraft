@@ -1,6 +1,11 @@
-//! `gamecraft-desktop`: `egui`/`wgpu` viewport shell, in-process on L1.
+//! `gamecraft-desktop`: `egui`/`wgpu` game library and viewport shell, in-process on L1.
 //!
-//! Left scene tree with lint badges, center `wgpu` viewport with AABB and
+//! Library mode (the default): every game as a card grouped by runtime and
+//! category, a detail card with description, last gate result, cheat sheet and
+//! Play / Watch demo / Run tests / Open folder. Keyboard: `/` filter, arrows,
+//! Enter. Ctrl+wheel zooms the UI; the top bar switches light/dark.
+//!
+//! Editor mode: left scene tree with lint badges, center `wgpu` viewport with AABB and
 //! collision overlays plus frustum, right inspector with the live lint list,
 //! bottom 60-frame trace scrubber, top command palette with undo/redo.
 //!
@@ -9,8 +14,10 @@
 //! returns to the scene root. Keyboard and mouse stay fully functional.
 
 mod gamepad;
+mod library;
 mod mesh;
 mod state;
+mod textures;
 mod view;
 mod viewport;
 
@@ -65,21 +72,39 @@ impl DesktopState {
 impl eframe::App for DesktopState {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         view::top_bar(self, ui);
-        egui::containers::Panel::left("scene_tree").show(ui, |ui| {
-            view::left_tree(self, ui);
-        });
-        egui::containers::Panel::right("inspector").show(ui, |ui| {
-            view::right_panels(self, ui);
-        });
-        egui::containers::Panel::bottom("trace_bar").show(ui, |ui| {
-            view::bottom_trace(self, ui);
-        });
-        egui::containers::CentralPanel::default().show(ui, |ui| {
-            viewport::draw_viewport(self, ui);
-        });
+        if self.library {
+            egui::containers::Panel::right("game_detail").show(ui, |ui| {
+                library::detail(self, ui);
+            });
+            egui::containers::CentralPanel::default().show(ui, |ui| {
+                library::grid(self, ui);
+            });
+        } else {
+            egui::containers::Panel::left("scene_tree").show(ui, |ui| {
+                view::left_tree(self, ui);
+            });
+            egui::containers::Panel::right("inspector").show(ui, |ui| {
+                view::right_panels(self, ui);
+            });
+            egui::containers::Panel::bottom("trace_bar").show(ui, |ui| {
+                view::bottom_trace(self, ui);
+            });
+            egui::containers::CentralPanel::default().show(ui, |ui| {
+                viewport::draw_viewport(self, ui);
+            });
+        }
         view::dialogs(self, ui.ctx());
-        self.refresh();
-        self.record_frame();
+        library::keys(self, ui.ctx());
+        library::wheel_zoom(ui.ctx());
+        self.poll_verify();
+        if self.verify_job.is_some() {
+            ui.ctx()
+                .request_repaint_after(std::time::Duration::from_millis(250));
+        }
+        if !self.library {
+            self.refresh();
+            self.record_frame();
+        }
 
         let pad = self.gamepad.poll();
         if pad.connected {

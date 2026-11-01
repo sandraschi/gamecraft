@@ -90,3 +90,16 @@ web-serve:
 # three.js web family gate: headless boot + self-play win + screenshots (Node 24)
 web-verify:
     $env:Path = "$env:USERPROFILE\.bun\bin;$env:Path"; Set-Location web; node scripts/verify.ts
+
+# PWA gate: manifests + icons, service worker precache, every game boots offline
+web-pwa:
+    $env:Path = "$env:USERPROFILE\\.bun\\bin;$env:Path"; Set-Location web; node scripts/pwa-check.ts
+
+# glTF gate: export every depot scene, Khronos-validate (0 errors), render each in three.js
+gltf-gate:
+    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:USERPROFILE\\.bun\\bin;$env:Path"; cargo run -q -p gamecraft-cli -- gltf --depot-out target/gltf; if ($LASTEXITCODE) { exit 1 }; Set-Location web; node --no-deprecation scripts/gltf-validate.ts ../target/gltf; if ($LASTEXITCODE) { exit 1 }; node --no-deprecation scripts/gltf-shot.ts ../target/gltf/shots (Get-ChildItem ../target/gltf/*.glb | ForEach-Object FullName)
+
+# Bevy gate: headless logic tests (autoplay wins on the shortest path), then the real
+# windowed build plays itself to the win marker and saves target/bevy/maze.png
+bevy-gate:
+    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo test -q -p gamecraft-bevy; if ($LASTEXITCODE) { exit 1 }; cargo build -q -p gamecraft-bevy --features render --bin gamecraft-bevy-maze; if ($LASTEXITCODE) { exit 1 }; New-Item -ItemType Directory -Force target/bevy | Out-Null; $out = & ./target/debug/gamecraft-bevy-maze.exe --autoplay --exit-on-win --screenshot target/bevy/maze.png 2>$null | Out-String; Write-Host $out.Trim(); if ($out -notmatch 'goal reached' -or -not (Test-Path target/bevy/maze.png)) { Write-Host 'bevy maze: no win marker or no screenshot'; exit 1 }; Add-Type -AssemblyName System.Drawing; $bmp = [System.Drawing.Bitmap]::FromFile((Resolve-Path target/bevy/maze.png)); $bg = $bmp.GetPixel(0,0); $clip = 0; foreach ($x in 0..($bmp.Width-1)) { foreach ($y in 0,1,($bmp.Height-2),($bmp.Height-1)) { if ($bmp.GetPixel($x,$y) -ne $bg) { $clip++ } } }; foreach ($y in 0..($bmp.Height-1)) { foreach ($x in 0,1,($bmp.Width-2),($bmp.Width-1)) { if ($bmp.GetPixel($x,$y) -ne $bg) { $clip++ } } }; $bmp.Dispose(); if ($clip) { Write-Host "bevy maze: clipped at the screenshot border ($clip px)"; exit 1 }; Write-Host 'bevy maze: PASS'

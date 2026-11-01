@@ -1,4 +1,6 @@
-//! `gamecraft-cli`: `lint` / `query` / `uid` over Godot scene files.
+//! `gamecraft-cli`: scene tools (`lint`, `query`, `uid`, `export`), game making
+//! (`forge`, `new`) and the game catalog (`list`, `report`, `verify`), the same
+//! catalog the MCP server and the desktop app read.
 
 use clap::{Parser, Subcommand};
 use std::path::{Path, PathBuf};
@@ -8,7 +10,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "gamecraft-cli",
     version,
-    about = "Lint and query Godot 4 scenes"
+    about = "Make, list, verify and inspect GameCraft games (Godot 4 and three.js)"
 )]
 struct Cli {
     /// Subcommand to run.
@@ -73,6 +75,45 @@ enum Commands {
         #[arg(long, default_value = ".")]
         out: PathBuf,
     },
+    /// List every game (Godot and three.js) with group and last gate result.
+    List {
+        /// Free-text filter over title, slug, group and kind.
+        #[arg(long, default_value = "")]
+        filter: String,
+        /// Print JSON instead of a table.
+        #[arg(long)]
+        json: bool,
+    },
+    /// One game in detail: description, gate record, cheat sheet.
+    Report {
+        /// Game slug (folder name), e.g. `where-is-benny`.
+        slug: String,
+        /// Print JSON instead of text.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Run one game's gate now (web: headless self-play; Godot: headless boot to a win marker).
+    Verify {
+        /// Game slug (folder name).
+        slug: String,
+        /// Wall-clock limit in seconds.
+        #[arg(long, default_value_t = 300)]
+        timeout: u64,
+        /// Print JSON instead of one line.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Convert a Godot scene to glTF 2.0 (`.glb`, or `.gltf` with the buffer embedded).
+    Gltf {
+        /// Scene file, e.g. `depot/games/platformer/main.tscn`. Omit with `--depot-out`.
+        input: Option<PathBuf>,
+        /// Output file; `.gltf` writes text, anything else binary. Default: input with `.glb`.
+        #[arg(long)]
+        out: Option<PathBuf>,
+        /// Export every depot game's `main.tscn` into this folder as `<slug>.glb`.
+        #[arg(long)]
+        depot_out: Option<PathBuf>,
+    },
     /// Export a JSON scene spec to engine text (same engine as the MCP tool).
     Export {
         /// Input scene spec (JSON).
@@ -113,6 +154,243 @@ fn main() {
         ),
         Commands::Export { input, out, format } => {
             cmd_export(input.as_path(), out.as_deref(), format.as_str());
+        }
+        Commands::Gltf {
+            input,
+            out,
+            depot_out,
+        } => match (input, depot_out) {
+            (_, Some(dir)) => cmd_gltf_depot(dir.as_path()),
+            (Some(input), None) => {
+                let target = out.unwrap_or_else(|| input.with_extension("glb"));
+                if let Err(reason) = write_gltf(input.as_path(), target.as_path()) {
+                    eprintln!("{reason}");
+                    std::process::exit(1);
+                }
+            }
+            (None, None) => {
+                eprintln!("give a scene file, or --depot-out <dir> for every depot game");
+                std::process::exit(2);
+            }
+        },
+        Commands::List { filter, json } => cmd_list(filter.as_str(), json),
+        Commands::Report { slug, json } => cmd_report(slug.as_str(), json),
+        Commands::Verify {
+            slug,
+            timeout,
+            json,
+        } => cmd_verify(slug.as_str(), timeout, json),
+    }
+}
+
+use gamecraft_mcp::catalog::{self, GameEntry, GameKind};
+
+/// Convert one scene file and print what went in.
+fn write_gltf(input: &Path, target: &Path) -> Result<(), String> {
+    let gltf =
+        gamecraft_gltf::from_tscn_file(input).map_err(|e| format!("{}: {e}", input.display()))?;
+    let text_form = target
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("gltf"));
+    let bytes = if text_form {
+        gltf.to_gltf_embedded().into_bytes()
+    } else {
+        gltf.to_glb()?
+    };
+    std::fs::write(target, &bytes)
+        .map_err(|e| format!("cannot write {}: {e}", target.display()))?;
+    let s = gltf.stats;
+    println!(
+        "{}: {} nodes, {} meshes, {} materials, {} triangles, {} lights, {} cameras, {} bytes",
+        target.display(),
+        s.nodes,
+        s.meshes,
+        s.materials,
+        s.triangles,
+        s.lights,
+        s.cameras,
+        bytes.len()
+    );
+    if s.textures > 0 || s.textures_skipped > 0 {
+        let hint = if s.textures_skipped > 0 {
+            " (only triplanar materials export textures)"
+        } else {
+            ""
+        };
+        println!(
+            "  textures: {} embedded, {} not exported{hint}",
+            s.textures, s.textures_skipped
+        );
+    }
+    Ok(())
+}
+
+/// Every Godot depot game to `<dir>/<slug>.glb`; exits 1 if any fails.
+fn cmd_gltf_depot(dir: &Path) {
+    let root = root_or_exit();
+    if let Err(e) = std::fs::create_dir_all(dir) {
+        eprintln!("cannot create {}: {e}", dir.display());
+        std::process::exit(1);
+    }
+    let mut failed = 0_usize;
+    for game in catalog::discover(root.as_path())
+        .iter()
+        .filter(|g| g.kind == GameKind::Godot)
+    {
+        let target = dir.join(format!("{}.glb", game.slug));
+        if let Err(reason) = write_gltf(game.dir.join("main.tscn").as_path(), target.as_path()) {
+            eprintln!("{reason}");
+            failed += 1;
+        }
+    }
+    if failed > 0 {
+        eprintln!("{failed} scene(s) failed");
+        std::process::exit(1);
+    }
+}
+
+/// The repo root or a clear exit.
+fn root_or_exit() -> PathBuf {
+    catalog::find_root(None).unwrap_or_else(|| {
+        eprintln!("no GameCraft repo here: run inside the repo or set GAMECRAFT_ROOT");
+        std::process::exit(1);
+    })
+}
+
+/// One game by slug, or exit with suggestions.
+fn game_or_exit(slug: &str) -> (PathBuf, GameEntry) {
+    let root = root_or_exit();
+    let games = catalog::discover(root.as_path());
+    if let Some(game) = catalog::find(&games, slug, None) {
+        return (root, game.clone());
+    }
+    let close = catalog::suggest(&games, slug);
+    if close.is_empty() {
+        eprintln!("no game '{slug}'; `gamecraft-cli list` shows them all");
+    } else {
+        eprintln!("no game '{slug}'; did you mean: {}?", close.join(", "));
+    }
+    std::process::exit(1);
+}
+
+fn status_word(game: &GameEntry) -> String {
+    match &game.verify {
+        Some(v) if v.pass => format!("pass  {}", v.progress),
+        Some(v) => format!("FAIL  {}", v.failed.clone().unwrap_or_default()),
+        None => "never verified".to_string(),
+    }
+}
+
+/// List entry: a grouped table, or JSON.
+fn cmd_list(filter: &str, json: bool) {
+    let root = root_or_exit();
+    let games: Vec<GameEntry> = catalog::discover(root.as_path())
+        .into_iter()
+        .filter(|g| catalog::matches(g, filter))
+        .collect();
+    if json {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&games).unwrap_or_else(|_| "[]".to_string())
+        );
+        return;
+    }
+    for (kind, label, groups) in [
+        (GameKind::Godot, "Godot", &catalog::GODOT_GROUPS[..]),
+        (GameKind::Web, "three.js", &catalog::WEB_GROUPS[..]),
+    ] {
+        let mine: Vec<&GameEntry> = games.iter().filter(|g| g.kind == kind).collect();
+        if mine.is_empty() {
+            continue;
+        }
+        println!("{label} ({})", mine.len());
+        let mut order: Vec<String> = groups.iter().map(|g| (*g).to_string()).collect();
+        for g in &mine {
+            if !order.contains(&g.group) {
+                order.push(g.group.clone());
+            }
+        }
+        for group in order {
+            let members: Vec<&&GameEntry> = mine.iter().filter(|g| g.group == group).collect();
+            if members.is_empty() {
+                continue;
+            }
+            println!("  {group}");
+            for g in members {
+                println!("    {:<22} {:<26} {}", g.slug, g.title, status_word(g));
+            }
+        }
+    }
+}
+
+/// Report entry: readable summary, or the full JSON report.
+fn cmd_report(slug: &str, json: bool) {
+    let (_, game) = game_or_exit(slug);
+    let report = catalog::report(&game);
+    if json {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&report).unwrap_or_default()
+        );
+        return;
+    }
+    println!("{} ({}, {})", game.title, game.kind.as_str(), game.group);
+    println!("{}", game.dir.display());
+    if !game.description.is_empty() {
+        println!("\n{}", game.description);
+    }
+    println!("\nlast gate: {}", status_word(&game));
+    if let Some(v) = &game.verify {
+        if !v.when.is_empty() {
+            println!("when:      {}", v.when);
+        }
+        if let Some(st) = &v.self_test {
+            println!("self-test: {st}");
+        }
+    }
+    if let Some(sheet) = report.get("cheatsheet").and_then(serde_json::Value::as_str) {
+        println!("\n{sheet}");
+    }
+}
+
+/// Verify entry: runs the gate, prints one line (or JSON), exits 1 on failure.
+fn cmd_verify(slug: &str, timeout: u64, json: bool) {
+    let (root, game) = game_or_exit(slug);
+    let run = match game.kind {
+        GameKind::Web => catalog::web_verify(root.as_path(), game.slug.as_str(), timeout),
+        GameKind::Godot => catalog::godot_verify(game.dir.as_path(), 3600, true, Some(timeout)),
+    };
+    match run {
+        Ok(value) => {
+            let pass = value
+                .pointer("/verify/pass")
+                .or_else(|| value.get("won"))
+                .and_then(serde_json::Value::as_bool)
+                .unwrap_or(false);
+            if json {
+                println!("{value}");
+            } else {
+                let why = value
+                    .pointer("/verify/failed")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("no win marker");
+                println!(
+                    "{}: {}",
+                    game.slug,
+                    if pass {
+                        "PASS".to_string()
+                    } else {
+                        format!("FAIL ({why})")
+                    }
+                );
+            }
+            if !pass {
+                std::process::exit(1);
+            }
+        }
+        Err(reason) => {
+            eprintln!("{}: could not run the gate: {reason}", game.slug);
+            std::process::exit(1);
         }
     }
 }

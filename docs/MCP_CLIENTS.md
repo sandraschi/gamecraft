@@ -53,13 +53,59 @@ the IDE's MCP panel does not list it, add the same path there by hand.
 Restart the client after editing (Claude Desktop and Cursor read MCP config only
 at startup; opencode re-reads on new session).
 
+## Protocol and result contract
+
+- Dual-era. **Modern** `2026-07-28` (stateless): no handshake, the version
+  rides in each request's `_meta["io.modelcontextprotocol/protocolVersion"]`;
+  `server/discover` lists versions, capabilities and `instructions`; results
+  carry `resultType: "complete"` and `_meta["io.modelcontextprotocol/serverInfo"]`;
+  `tools/list` carries `ttlMs` (1 h) and `cacheScope: "public"`. An unknown
+  version gets error `-32022` with `data.supported`. **Legacy** `2025-11-25`,
+  `2025-06-18`, `2025-03-26`, `2024-11-05`: the `initialize` handshake, which
+  returns `instructions` and negotiates to the client's revision (anything
+  unknown gets `2025-11-25`).
+- Every tool has a `title`, `annotations` (`readOnlyHint`, `destructiveHint`,
+  `idempotentHint`, `openWorldHint: false`) and an `outputSchema`.
+- A result's first text block is one plain sentence ("28 games (15 Godot, 13
+  web); none failing."); the second is the JSON. The same data is in
+  `structuredContent` with `success` and `message`.
+- A failed tool call is a **result** with `isError: true`, not a JSON-RPC
+  error, so the model sees it and can recover. Shape (fleet dialogic returns):
+  `{success: false, error, message, dialogic: {suggestion, remediation}}`, and
+  the text reads "what went wrong / What to do / Next: <tool call>". Example:
+  `game_report {"slug":"benny"}` answers "There is no game 'benny'." with
+  `Next: game_report {"slug": "where-is-benny"}`.
+- Only protocol faults (unknown tool, malformed JSON) are JSON-RPC errors.
+
+## Environment
+
+| Variable | Effect |
+|---|---|
+| `GAMECRAFT_ROOT` | Repo root for the catalog tools. Default: walk up from the working directory and the executable looking for `depot/games` or `web/games`. |
+| `GAMECRAFT_MCP_ALLOW_WEB=1` | Lets `game_verify` run the three.js gate (headless browser, up to minutes). Off by default. |
+| `GAMECRAFT_MCP_ALLOW_GODOT=1` | Lets `game_verify` and `scene_verify` boot Godot. Off by default. |
+| `GAMECRAFT_GODOT` | Godot binary (default `godot`). |
+
 ## Tools
+
+Scene tools (read-only; each takes `scene_text` or `scene_file`, plus `root` for `res://` paths):
 
 | Tool | Arguments | Returns |
 |---|---|---|
-| `scene_lint` | `scene_text` | Array of findings. Codes: `ERR_MISSING_COLLISION_SHAPE`, `ERR_UNRESOLVED_SIGNAL_TARGET`, `ERR_UNRESOLVED_RESOURCE`, `ERR_SCENE_PARSE`. Empty array = clean. |
-| `spatial_query` | `scene_text`, `node_path` | World-space AABB of a subtree: `{node, empty, min, max}`. |
-| `export_scene` | `format` (`godot4`), `scene` | Deterministic `.tscn` text: `{format, uid, nodes, bytes, text}`. |
+| `scene_lint` | scene | Array of findings. Codes: `ERR_MISSING_COLLISION_SHAPE`, `ERR_UNRESOLVED_SIGNAL_TARGET`, `ERR_UNRESOLVED_RESOURCE`, `ERR_SCENE_PARSE`. Empty array = clean. |
+| `spatial_query` | scene, `node_path` | World-space AABB of a subtree: `{node, empty, min, max}`. |
+| `scene_inspect` | scene, `operation` (`tree`/`signals`/`property`/`find`), `node_path`, `query`, `offset` | Paginated node tree, every signal with resolved/reason, one node's properties, or a name/type search. |
+| `export_scene` | `format` (`godot4` or `gltf`), `scene` | Deterministic text: `{format, uid, nodes, bytes, text}`. `godot4` gives `.tscn`; `gltf` gives glTF 2.0 JSON with the buffer embedded as base64 (primitive meshes, PBR colours, lights, camera; no collision shapes or scripts). |
+
+Catalog tools (the same catalog `gamecraft-cli list` and the desktop library read):
+
+| Tool | Arguments | Returns |
+|---|---|---|
+| `game_list` | `filter?`, `kind?` (`godot`/`web`), `root?` | Every game with kind, group, title, description, last gate result. |
+| `game_report` | `slug`, `kind?`, `root?` | One game: gate record, cheat sheet, README, screenshot paths. Unknown slugs get suggestions. |
+| `game_verify` | `slug`, `kind?`, `timeout_s?` (300), `root?` | Runs the gate now (web: headless self-play with checkpoints; Godot: headless boot to a win marker). Opt-in, see Environment. |
+| `game_create` | `spec?`, `explain?`, `root?` | `explain: true` returns the GameSpec guide; with a `spec` it validates and writes a new Godot game. The only tool that writes. |
+| `scene_verify` | `game_path`, `frames?`, `autoplay?`, `timeout_s?` | Boots a Godot project headless and reports the trace. Opt-in. |
 
 `export_scene` takes format as a parameter on purpose: a second target (Overte,
 glTF, another engine) is a new enum value, not a new tool in the client's

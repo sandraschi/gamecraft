@@ -10,6 +10,7 @@ gamecraft-core = { workspace = true }
 gamecraft-mcp = { path = "../../crates/gamecraft-mcp" }
 gamecraft-godot = { path = "../../crates/gamecraft-godot" }
 gamecraft-forge = { path = "../../crates/gamecraft-forge" }
+gamecraft-gltf = { workspace = true }
 clap = { workspace = true }
 serde_json = { workspace = true }
 

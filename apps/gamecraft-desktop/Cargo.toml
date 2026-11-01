@@ -9,6 +9,7 @@ description = "L3 GameCraft egui/wgpu viewport shell, in-process on gamecraft-co
 gamecraft-core = { workspace = true }
 gamecraft-commands = { workspace = true }
 gamecraft-godot = { workspace = true }
+gamecraft-gltf = { workspace = true }
 gamecraft-mcp = { path = "../../crates/gamecraft-mcp" }
 glam = { workspace = true }
 eframe = "0.37"
@@ -18,6 +19,11 @@ futures = "0.3"
 rfd = "0.15"
 gilrs = "0.11"
 image = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+# Golden PNG tests of the library screen (headless wgpu). Refresh with UPDATE_SNAPSHOTS=1.
+egui_kittest = { version = "0.37", features = ["wgpu", "snapshot"] }
 
 [lints]
 workspace = true

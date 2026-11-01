@@ -155,13 +155,22 @@ fn draw_axes(painter: &egui::Painter, cam: &Cam) {
     }
 }
 
+/// Texture and coordinates for one textured triangle.
+struct TexFill {
+    texture: egui::TextureId,
+    uvs: [[f32; 2]; 3],
+}
+
 /// Shaded triangles built from the scene's own mesh primitives.
 ///
 /// egui's render pass has no depth buffer, so triangles are back-face culled and
 /// sorted far-to-near before painting (painter's algorithm).
-fn draw_meshes(painter: &egui::Painter, state: &DesktopState, cam: &Cam) {
+fn draw_meshes(painter: &egui::Painter, state: &mut DesktopState, cam: &Cam) {
+    state
+        .tex_cache
+        .sync(state.scene_path.as_deref(), state.source.as_ref());
     let triangles = crate::mesh::build_scene(&state.graph, state.source.as_ref());
-    let mut visible: Vec<(f32, [egui::Pos2; 3], egui::Color32)> = Vec::new();
+    let mut visible: Vec<(f32, [egui::Pos2; 3], egui::Color32, Option<TexFill>)> = Vec::new();
     for tri in triangles {
         let edge_a = tri.points[1] - tri.points[0];
         let edge_b = tri.points[2] - tri.points[0];
@@ -188,7 +197,14 @@ fn draw_meshes(painter: &egui::Painter, state: &DesktopState, cam: &Cam) {
             .map(|point| (*point - cam.eye).dot(cam.fwd))
             .sum::<f32>()
             / 3.0;
-        visible.push((depth, screen, tri.color));
+        let fill = match (tri.uvs, tri.texture.as_deref()) {
+            (Some(uvs), Some(name)) => state
+                .tex_cache
+                .id(painter.ctx(), name)
+                .map(|texture| TexFill { texture, uvs }),
+            _ => None,
+        };
+        visible.push((depth, screen, tri.color, fill));
     }
     visible.sort_by(|left, right| {
         right
@@ -196,12 +212,25 @@ fn draw_meshes(painter: &egui::Painter, state: &DesktopState, cam: &Cam) {
             .partial_cmp(&left.0)
             .unwrap_or(std::cmp::Ordering::Equal)
     });
-    for (_, points, color) in visible {
-        painter.add(egui::Shape::convex_polygon(
-            points.to_vec(),
-            color,
-            egui::Stroke::NONE,
-        ));
+    for (_, points, color, fill) in visible {
+        if let Some(fill) = fill {
+            let mut mesh = egui::epaint::Mesh::with_texture(fill.texture);
+            for (position, uv) in points.iter().zip(fill.uvs) {
+                mesh.vertices.push(egui::epaint::Vertex {
+                    pos: *position,
+                    uv: egui::pos2(uv[0], uv[1]),
+                    color,
+                });
+            }
+            mesh.indices.extend([0, 1, 2]);
+            painter.add(egui::Shape::mesh(mesh));
+        } else {
+            painter.add(egui::Shape::convex_polygon(
+                points.to_vec(),
+                color,
+                egui::Stroke::NONE,
+            ));
+        }
     }
 }
 
@@ -393,5 +422,68 @@ fn draw_ghost(painter: &egui::Painter, state: &DesktopState, cam: &Cam) {
                 stroke,
             );
         }
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod tests {
+    use super::*;
+
+    const SCENE: &str = r#"[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://t/red.png" id="1_r"]
+
+[sub_resource type="BoxMesh" id="slab"]
+size = Vector3(6, 1, 6)
+
+[sub_resource type="ORMMaterial3D" id="red"]
+uv1_scale = Vector3(1, 1, 1)
+uv1_triplanar = true
+albedo_texture = ExtResource("1_r")
+
+[node name="World" type="Node3D"]
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("slab")
+material_override = SubResource("red")
+"#;
+
+    /// Pixels that are clearly red: the texture is solid red, the flat fallback grey.
+    fn red_pixels(with_texture: bool) -> usize {
+        let dir = std::env::temp_dir().join(format!("gc-vp-{}-{with_texture}", std::process::id()));
+        std::fs::create_dir_all(dir.join("t")).expect("dir");
+        std::fs::write(dir.join("project.godot"), "config_version=5\n").expect("project");
+        if with_texture {
+            image::RgbaImage::from_pixel(8, 8, image::Rgba([220, 20, 20, 255]))
+                .save(dir.join("t").join("red.png"))
+                .expect("png");
+        }
+        let mut state = DesktopState::from_text(SCENE, "uid://viewport-test");
+        state.scene_path = Some(dir.join("scene.tscn"));
+        let mut harness = egui_kittest::Harness::builder()
+            .with_size(egui::vec2(480.0, 360.0))
+            .build_ui_state(
+                |ui, state: &mut DesktopState| draw_viewport(state, ui),
+                state,
+            );
+        harness.run();
+        let image = harness.render().expect("render");
+        let _ = std::fs::remove_dir_all(dir);
+        image
+            .pixels()
+            .filter(|px| px[0] > px[1].saturating_add(60) && px[0] > px[2].saturating_add(60))
+            .count()
+    }
+
+    #[test]
+    fn textured_ground_renders_with_its_texture() {
+        let textured = red_pixels(true);
+        let missing = red_pixels(false);
+        assert!(textured > 2_000, "textured red pixels: {textured}");
+        assert!(
+            missing < 200,
+            "no image file must fall back to flat: {missing}"
+        );
     }
 }

@@ -3,7 +3,7 @@ name = "gamecraft-mcp"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "L2 hand-rolled MCP 2024-11-05 stdio server: scene_lint + spatial_query"
+description = "L2 hand-rolled MCP stdio server (dual-era: 2026-07-28 stateless plus initialize for 2025-11-25..2024-11-05): scene tools, game catalog, verify, create"
 
 [[bin]]
 name = "gamecraft-mcp"
@@ -17,6 +17,8 @@ path = "src/lib.rs"
 gamecraft-core = { workspace = true }
 gamecraft-commands = { workspace = true }
 gamecraft-godot = { workspace = true }
+gamecraft-gltf = { workspace = true }
+gamecraft-forge = { path = "../gamecraft-forge" }
 glam = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

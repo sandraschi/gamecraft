@@ -231,6 +231,52 @@ pub fn bfs_path(
     None
 }
 
+/// Perfect maze by seeded depth-first carving on odd cells; every other cell is a
+/// wall. Shared by the Godot forge and the Bevy runtime, so both build the same level
+/// from the same seed.
+#[must_use]
+pub fn maze_walls(width: i32, height: i32, seed: u64) -> Vec<(i32, i32)> {
+    let mut carved: Vec<(i32, i32)> = vec![(1, 1)];
+    let mut stack: Vec<(i32, i32)> = vec![(1, 1)];
+    let mut state = seed | 1;
+    while let Some(&(x, y)) = stack.last() {
+        let mut options: Vec<(i32, i32)> = Vec::new();
+        for (dx, dy) in [(2, 0), (-2, 0), (0, 2), (0, -2)] {
+            let nx = x + dx;
+            let ny = y + dy;
+            let inside = nx > 0 && ny > 0 && nx < width - 1 && ny < height - 1;
+            if inside && !carved.contains(&(nx, ny)) {
+                options.push((nx, ny));
+            }
+        }
+        if options.is_empty() {
+            stack.pop();
+            continue;
+        }
+        state = state
+            .wrapping_mul(6_364_136_223_846_793_005)
+            .wrapping_add(1_442_695_040_888_963_407);
+        let bound = u64::try_from(options.len()).unwrap_or(1);
+        let pick = usize::try_from((state >> 33) % bound).unwrap_or(0);
+        let Some(&(nx, ny)) = options.get(pick) else {
+            stack.pop();
+            continue;
+        };
+        carved.push((i32::midpoint(x, nx), i32::midpoint(y, ny)));
+        carved.push((nx, ny));
+        stack.push((nx, ny));
+    }
+    let mut walls: Vec<(i32, i32)> = Vec::new();
+    for x in 0..width {
+        for y in 0..height {
+            if !carved.contains(&(x, y)) {
+                walls.push((x, y));
+            }
+        }
+    }
+    walls
+}
+
 /// Sokoban solver state: player plus sorted crate cells.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SokoState {

@@ -4,6 +4,7 @@
 //! in `gamecraft-godot` (so `gamecraft-forge` does not depend on this crate) and
 //! are re-exported here unchanged.
 
+pub mod catalog;
 pub mod input;
 pub mod inspect;
 pub mod proc_guard;
