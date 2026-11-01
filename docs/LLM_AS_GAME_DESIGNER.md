@@ -315,9 +315,14 @@ Verdict for gamecraft: **worldlabs-mcp useful now** (direct fit with `web/`),
 - *Solid:* `overte_domain_status`, `overte_entity_spawn` (including permanent
   entities) and `overte_script_inject` verified live against a real domain; also
   update, delete, animate, nearby search and fixtures.
-- *Limit:* every live action goes through a bridge script running inside the
-  Overte Interface (the desktop GUI client). No headless path, so the
-  bot-plays-it gate does not carry over.
+- *Limit (as checked):* every live action went through a bridge script running
+  inside the Overte Interface (the desktop GUI client). No headless path, so the
+  bot-plays-it gate did not carry over.
+- *Update 2026-10-31, later that night:* fixed in overte-mcp. The bridge now runs
+  headless as a domain persistent script on an assignment-client
+  (`overte_bridge_install`), simulated-success responses were removed, and
+  `just e2e-headless` checks it against a real domain. Verified so far by unit tests
+  and a protocol harness only; the live run is pending (see overte-mcp STATUS.md).
 - *Splats:* Overte does not render them; Marble worlds arrive only as the coarse
   GLB plus panorama. The SPZ-to-mesh route is designed, not built.
 - *Open in its STATUS.md:* end-to-end avatar GLB with animation, skybox plus
