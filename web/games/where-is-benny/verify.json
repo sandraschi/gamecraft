@@ -1,0 +1,73 @@
+{
+  "slug": "where-is-benny",
+  "title": "Where is Benny?",
+  "date": "2026-11-01T00:48:37.904Z",
+  "boot_ms": 533,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "exactly_one_benny": true,
+      "four_plus_shepherd_lookalikes": true,
+      "lookalikes_differ_by_one": true,
+      "malinois_is_not_benny": true,
+      "every_wrong_dog_explained": true,
+      "nobody_inside_stalls": true,
+      "varied_outfits": true
+    },
+    "summary": "60 fairs, 17 different Benny outfits"
+  },
+  "steps": 288,
+  "sim_seconds": 4.8,
+  "checkpoints": [
+    {
+      "name": "fair-open",
+      "step": 1
+    },
+    {
+      "name": "look-alike",
+      "step": 72
+    },
+    {
+      "name": "found-1",
+      "step": 108
+    },
+    {
+      "name": "found-2",
+      "step": 180
+    },
+    {
+      "name": "found-3",
+      "step": 252
+    },
+    {
+      "name": "day-over",
+      "step": 288
+    }
+  ],
+  "shots": [
+    "shots/01-fair-open.png",
+    "shots/02-look-alike.png",
+    "shots/03-found-1.png",
+    "shots/04-found-2.png",
+    "shots/05-found-3.png",
+    "shots/06-day-over.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 1658,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint fair-open",
+    "GameCraft: checkpoint look-alike",
+    "GameCraft: checkpoint found-1",
+    "GameCraft: checkpoint found-2",
+    "GameCraft: checkpoint found-3",
+    "GameCraft: checkpoint day-over",
+    "GameCraft: three rounds, Benny found each time among 24/34/44 dogs",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}
