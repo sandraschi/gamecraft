@@ -1,0 +1,60 @@
+{
+  "slug": "organ-builder",
+  "title": "Orgelbauer",
+  "date": "2026-11-01T00:48:28.721Z",
+  "boot_ms": 292,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "bench_holds_exactly_the_tune": true,
+      "longer_pipe_lower_note": true,
+      "pipes_fit_the_case": true,
+      "bench_never_presolved": true,
+      "blind_order_is_unlikely": true,
+      "checker_rejects_a_swap": true
+    },
+    "summary": "5 tunes; best odds of a lucky order 0.48%"
+  },
+  "steps": 991,
+  "sim_seconds": 16.5,
+  "checkpoints": [
+    {
+      "name": "empty-organ",
+      "step": 1
+    },
+    {
+      "name": "wrong-notes",
+      "step": 380
+    },
+    {
+      "name": "frere-jacques",
+      "step": 662
+    },
+    {
+      "name": "entchen",
+      "step": 991
+    }
+  ],
+  "shots": [
+    "shots/01-empty-organ.png",
+    "shots/02-wrong-notes.png",
+    "shots/03-frere-jacques.png",
+    "shots/04-entchen.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 939,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint empty-organ",
+    "GameCraft: checkpoint wrong-notes",
+    "GameCraft: checkpoint frere-jacques",
+    "GameCraft: checkpoint entchen",
+    "GameCraft: Frère Jacques fixed after one wrong try, Alle meine Entchen first time",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

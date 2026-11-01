@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Boomy Sorts</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #f2c43a; --bg: #dfe6ee; --panel: rgba(24, 28, 36, 0.88); }
+  #program { position: fixed; top: 12px; left: 12px; width: 380px; padding: 12px 14px; max-height: calc(100vh - 24px); overflow: auto; }
+  #goal-title { font-size: 17px; font-weight: 600; color: var(--accent); }
+  #goal { margin: 4px 0 10px; line-height: 1.45; font-size: 14px; }
+  .rule { display: flex; align-items: center; gap: 5px; margin: 5px 0; font-size: 13px; }
+  .rule .n { width: 18px; color: var(--dim); }
+  .rule.off span:not(.n) { color: var(--dim); }
+  select { font: 13px var(--font); color: var(--ink); background: #2a2e38; border: 1px solid var(--edge); border-radius: 6px; padding: 3px 4px; max-width: 120px; }
+  select:disabled { opacity: .5; }
+  #run { margin-top: 10px; width: 100%; padding: 8px; font-size: 15px; }
+  #result { margin-top: 8px; font-size: 14px; min-height: 1.4em; }
+  .legend { margin-top: 10px; font-size: 12px; color: var(--dim); line-height: 1.5; }
+  #hud { left: auto; right: 12px; transform: none; }
+  @media (max-width: 760px) { #program { width: calc(100vw - 24px); top: auto; bottom: 12px; max-height: 46vh; } select { max-width: 92px; } }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="program" class="panel">
+  <div id="goal-title"></div>
+  <div id="goal"></div>
+  <div id="rules"></div>
+  <button id="run" class="primary">Run the shift</button>
+  <div id="result"></div>
+  <div class="legend">Boomy checks the rules from the top and follows the <b>first</b> one that matches. A parcel no rule matches rides on.</div>
+</div>
+<div id="hud" class="panel">
+  <span class="name">Boomy Sorts</span>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Boomy Sorts</h1>
+    <p>Boomy is a small robot at the end of a conveyor belt. Each parcel stops in front of him, and he sends it into the LEFT bin, the RIGHT bin, or lets it ride ON.</p>
+    <p>Tell him how with a few rules: <b>IF</b> a parcel is red (and, optionally, big, or has a star) <b>THEN</b> send it somewhere. He reads the rules from the top and follows the first one that fits.</p>
+    <p class="dim">Run the shift and watch. Parcels that end up in the wrong bin get a red flag. Change a rule and run again; the shift is the same each time, so you can compare. Nothing breaks.</p>
+    <button id="help-go" class="go">Switch Boomy on</button>
+  </div>
+</div>
+<div id="done" class="overlay" hidden>
+  <div class="card panel">
+    <h1>All sorted</h1>
+    <p id="done-text"></p>
+    <button id="next" class="go">Next job</button>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

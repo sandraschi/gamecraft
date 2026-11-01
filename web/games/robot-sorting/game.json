@@ -1,0 +1,11 @@
+{
+  "slug": "robot-sorting",
+  "title": "Boomy Sorts",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Gentle programming puzzle: a Raspbot-like robot sorts parcels by colour, size and star using first-match IF/THEN rules. Five jobs; self-test proves reference programs sort all 16 parcel kinds while empty and wrong-order programs fail on every shift.",
+  "author": "Claude Opus 5.5, gamecraft session 2026-11-01",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "order-matters",
+  "step_budget": 30000
+}
