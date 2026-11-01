@@ -18,6 +18,7 @@ pub mod puzzle;
 pub mod render;
 pub mod scripts;
 pub mod textures;
+pub mod tiling;
 
 use gamecraft_godot::scene_lint;
 use gamecraft_godot::{build_graph, parse_tscn};

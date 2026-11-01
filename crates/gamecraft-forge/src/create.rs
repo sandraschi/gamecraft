@@ -67,6 +67,10 @@ pub struct SurfaceTexture {
     pub normal: Option<String>,
     /// Repeats per scene unit; `0.25` repeats every 4 units.
     pub scale: f32,
+    /// Lay each map out as a 2x2 mirrored block (see [`crate::tiling::mirror_tile`]) so
+    /// that textures with a visible seam tile cleanly. The images are written as PNG at
+    /// twice the size and `scale` is halved internally, so the texel density is unchanged.
+    pub mirror: bool,
 }
 
 impl Default for SurfaceTexture {
@@ -77,6 +81,7 @@ impl Default for SurfaceTexture {
             orm: None,
             normal: None,
             scale: 0.25,
+            mirror: false,
         }
     }
 }
@@ -192,10 +197,15 @@ fn surface_files(theme: &Theme) -> Vec<(String, &'static str, String, String)> {
         ];
         for (map, source) in maps {
             let Some(source) = source else { continue };
-            let ext = Path::new(source)
-                .extension()
-                .and_then(|e| e.to_str())
-                .map_or_else(|| "png".to_string(), str::to_ascii_lowercase);
+            // mirrored maps are re-encoded, always as PNG
+            let ext = if set.mirror {
+                "png".to_string()
+            } else {
+                Path::new(source)
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .map_or_else(|| "png".to_string(), str::to_ascii_lowercase)
+            };
             out.push((
                 role.clone(),
                 map,
@@ -769,7 +779,11 @@ pub fn compile(spec: &GameSpec) -> Result<GameParts, String> {
                 albedo,
                 orm,
                 normal,
-                scale: set.scale,
+                scale: if set.mirror {
+                    set.scale * 0.5
+                } else {
+                    set.scale
+                },
             },
         );
     }
@@ -1034,16 +1048,30 @@ pub fn create_game(spec: &GameSpec, root: &Path) -> Result<String, String> {
     }
     let dir = root.join("depot").join("games").join(spec.slug.as_str());
     crate::write_game(&dir, &parts)?;
-    for (_, _, source, res) in surface_files(&spec.theme) {
+    for (role, map, source, res) in surface_files(&spec.theme) {
         let target = dir.join(res.trim_start_matches("res://"));
         if let Some(parent) = target.parent() {
             std::fs::create_dir_all(parent).map_err(|err| err.to_string())?;
         }
-        std::fs::copy(&source, &target).map_err(|err| format!("copy {source}: {err}"))?;
+        if spec.theme.surfaces.get(&role).is_some_and(|set| set.mirror) {
+            write_mirrored(&source, &target, map == "normal")?;
+        } else {
+            std::fs::copy(&source, &target).map_err(|err| format!("copy {source}: {err}"))?;
+        }
     }
     let spec_json = serde_json::to_string_pretty(spec).map_err(|err| err.to_string())?;
     crate::write_text(&dir.join("spec.json"), spec_json.as_str())?;
     Ok(parts.summary)
+}
+
+/// Write `source` as a 2x2 mirrored PNG block at `target`.
+fn write_mirrored(source: &str, target: &Path, normal_map: bool) -> Result<(), String> {
+    let image = image::open(source)
+        .map_err(|err| format!("mirror {source}: {err}"))?
+        .to_rgba8();
+    crate::tiling::mirror_tile(&image, normal_map)
+        .save_with_format(target, image::ImageFormat::Png)
+        .map_err(|err| format!("write {}: {err}", target.display()))
 }
 
 /// Ask a model for a spec, then compile it.
@@ -1191,6 +1219,7 @@ mod tests {
                 orm: Some(tiny_png("o")),
                 normal: Some(tiny_png("n")),
                 scale: 0.5,
+                mirror: false,
             },
         );
         spec
@@ -1299,6 +1328,52 @@ mod tests {
             assert!(dir.join(name).is_file(), "{name} missing");
         }
         let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn mirrored_surfaces_are_written_as_2x2_blocks_at_half_the_scale() {
+        let root = std::env::temp_dir().join(format!("gc-mirror-game-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        // an asymmetric source so a mirror cannot be mistaken for a copy, saved as JPEG
+        // to prove the output is re-encoded as PNG
+        let source = std::env::temp_dir().join(format!("gc-mirror-src-{}.jpg", std::process::id()));
+        image::RgbImage::from_fn(6, 4, |x, y| {
+            image::Rgb([
+                u8::try_from(x * 40).unwrap_or(0),
+                u8::try_from(y * 60).unwrap_or(0),
+                90,
+            ])
+        })
+        .save(&source)
+        .expect("jpg");
+        let mut spec = GameSpec {
+            slug: "mirror-test".to_string(),
+            ..GameSpec::default()
+        };
+        spec.theme.surfaces.insert(
+            "ground".to_string(),
+            SurfaceTexture {
+                albedo: source.to_string_lossy().into_owned(),
+                scale: 0.5,
+                mirror: true,
+                ..SurfaceTexture::default()
+            },
+        );
+        create_game(&spec, root.as_path()).expect("create");
+        let game = root.join("depot/games/mirror-test");
+        let written = image::open(game.join("surfaces/ground_albedo.png")).expect("png written");
+        assert_eq!((written.width(), written.height()), (12, 8));
+        let scene = std::fs::read_to_string(game.join("main.tscn")).expect("scene");
+        assert!(
+            scene.contains("res://surfaces/ground_albedo.png"),
+            "{scene}"
+        );
+        assert!(
+            scene.contains("uv1_scale = Vector3(0.25, 0.25, 0.25)"),
+            "scale halves: {scene}"
+        );
+        let _ = std::fs::remove_dir_all(&root);
+        let _ = std::fs::remove_file(source);
     }
 
     #[test]
