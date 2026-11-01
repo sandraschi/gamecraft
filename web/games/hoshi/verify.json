@@ -1,0 +1,66 @@
+{
+  "slug": "hoshi",
+  "title": "Hoshi",
+  "date": "2026-11-01T00:48:00.230Z",
+  "boot_ms": 392,
+  "self_test": {
+    "pass": true,
+    "checks": {
+      "every_line_uses_real_stars": true,
+      "figures_are_connected": true,
+      "no_duplicate_lines": true,
+      "background_never_crowds_a_named_star": true,
+      "figure_fits_its_view": true,
+      "named_stars_separable_on_screen": true
+    },
+    "summary": "7 constellations, 48 named stars, 2400 background stars"
+  },
+  "steps": 1411,
+  "sim_seconds": 23.5,
+  "checkpoints": [
+    {
+      "name": "night-sky",
+      "step": 239
+    },
+    {
+      "name": "wrong-pair",
+      "step": 240
+    },
+    {
+      "name": "big-dipper",
+      "step": 387
+    },
+    {
+      "name": "cassiopeia",
+      "step": 820
+    },
+    {
+      "name": "orion",
+      "step": 1411
+    }
+  ],
+  "shots": [
+    "shots/01-night-sky.png",
+    "shots/02-wrong-pair.png",
+    "shots/03-big-dipper.png",
+    "shots/04-cassiopeia.png",
+    "shots/05-orion.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 1055,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint night-sky",
+    "GameCraft: checkpoint wrong-pair",
+    "GameCraft: checkpoint big-dipper",
+    "GameCraft: checkpoint cassiopeia",
+    "GameCraft: checkpoint orion",
+    "GameCraft: Big Dipper, Cassiopeia and Orion drawn star to star by clicking the sky",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

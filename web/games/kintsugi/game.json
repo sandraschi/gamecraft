@@ -1,0 +1,11 @@
+{
+  "slug": "kintsugi",
+  "title": "Kintsugi",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Calm puzzle: four bowls broken along seeded jagged cracks; turn, flip and slide shards home, then gold flows into the seams. No timer, no fail state. Self-test proves cracks never cross and only the true pose snaps.",
+  "author": "Claude Opus 5.5, gamecraft session 2026-11-01",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "gold-seams",
+  "step_budget": 20000
+}

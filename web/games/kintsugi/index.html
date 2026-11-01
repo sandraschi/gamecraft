@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Kintsugi</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #f2c24a; --bg: #15100c; --font: Georgia, 'Palatino Linotype', serif; }
+  #title { position: fixed; top: 16px; left: 20px; pointer-events: none; }
+  #title .jp { font-size: 30px; letter-spacing: .2em; color: var(--accent); }
+  #title #bowl-name { font-size: 20px; } #title #bowl-sub { color: var(--dim); font-style: italic; }
+  #tools { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; padding: 8px 12px; }
+  #tools .dim { font-size: 13px; margin-left: 6px; }
+  #hud { left: auto; right: 12px; transform: none; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="title"><div class="jp">&#37329;&#32153;&#12366;</div><div id="bowl-name"></div><div id="bowl-sub"></div></div>
+<div id="hud" class="panel">
+  <span class="stat" id="left"></span>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+<div id="tools" class="panel">
+  <button id="turn-l" title="Turn left (Q, scroll)">&#8634; Turn</button>
+  <button id="turn-r" title="Turn right (E, scroll)">Turn &#8635;</button>
+  <button id="flip" title="Flip over (F)">Flip</button>
+  <span class="dim">pick a shard, turn it, slide it home</span>
+</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Kintsugi</h1>
+    <p>A bowl fell. Its foot is still standing in the middle of the cloth; the shards lie around it.</p>
+    <p><b>Drag</b> a shard toward its place. <b>Turn</b> it (Q / E, scroll, or the buttons) and <b>flip</b> it (F) until its edges match. When it fits, it settles home.</p>
+    <p class="dim">When the last shard is home, the cracks fill with gold. Kintsugi is the Japanese art of mending with gold: the break becomes part of the bowl's history rather than something to hide.</p>
+    <button id="help-go" class="go">Begin</button>
+  </div>
+</div>
+<div id="done" class="overlay" hidden>
+  <div class="card panel">
+    <h1>Mended</h1>
+    <p id="done-text"></p>
+    <button id="next" class="go">Next bowl</button>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
