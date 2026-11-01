@@ -10,6 +10,8 @@ use std::io::{BufRead, Write};
 const PROTOCOL_VERSION: &str = "2024-11-05";
 
 fn main() {
+    // Any Godot this server launches dies with it, even if the client kills us mid-run.
+    let _ = gamecraft_mcp::proc_guard::kill_children_on_exit();
     let stdin = std::io::stdin();
     let lines = stdin.lock().lines();
     for line in lines {
@@ -127,13 +129,14 @@ fn dispatch(method: &str, msg: &serde_json::Value) -> Result<serde_json::Value, 
                 },
                 {
                     "name": "scene_verify",
-                    "description": "OPT-IN: boot a designed Godot project headless and require a win marker. Disabled unless the server runs with GAMECRAFT_MCP_ALLOW_GODOT=1, because it launches a local Godot process - the rest of this server is pure Rust and needs no engine. Returns won, the markers found, elapsed ms and the tail of engine output.",
+                    "description": "OPT-IN: boot a designed Godot project headless and require a win marker. Disabled unless the server runs with GAMECRAFT_MCP_ALLOW_GODOT=1, because it launches a local Godot process - the rest of this server is pure Rust and needs no engine. Returns won, the markers found, elapsed ms, timed_out and the tail of engine output. The engine is killed on timeout and when this server exits.",
                     "inputSchema": {
                         "type": "object",
                         "properties": {
                             "game_path": {"type": "string", "description": "Project directory containing project.godot and main.tscn."},
                             "frames": {"type": "integer", "default": 3600, "description": "Frame budget passed to --quit-after (60 fps)."},
-                            "autoplay": {"type": "boolean", "default": true, "description": "Set GAMECRAFT_AUTOPLAY=1 for the child so the built-in driver plays."}
+                            "autoplay": {"type": "boolean", "default": true, "description": "Set GAMECRAFT_AUTOPLAY=1 for the child so the built-in driver plays."},
+                            "timeout_s": {"type": "integer", "description": "Wall-clock limit; the engine is killed after it (default frames/60*2+60). Reported as timed_out."}
                         },
                         "required": ["game_path"],
                     },
@@ -191,8 +194,13 @@ fn scene_verify(args: &serde_json::Value) -> Result<serde_json::Value, (i32, Str
         .get("autoplay")
         .and_then(serde_json::Value::as_bool)
         .unwrap_or(true);
+    // Wall-clock budget: the frame budget at 60 fps, doubled, plus boot time. A hung
+    // engine is killed instead of blocking the server (and leaking) forever.
+    let timeout_s = args
+        .get("timeout_s")
+        .and_then(serde_json::Value::as_u64)
+        .unwrap_or_else(|| (frames / 60) * 2 + 60);
     let binary = std::env::var("GAMECRAFT_GODOT").unwrap_or_else(|_| "godot".to_string());
-    let started = std::time::Instant::now();
     let mut command = std::process::Command::new(binary.as_str());
     command
         .arg("--headless")
@@ -205,11 +213,13 @@ fn scene_verify(args: &serde_json::Value) -> Result<serde_json::Value, (i32, Str
     if autoplay {
         command.env("GAMECRAFT_AUTOPLAY", "1");
     }
-    let output = command
-        .output()
-        .map_err(|err| (-32603_i32, format!("cannot launch {binary}: {err}")))?;
-    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+    let output = gamecraft_mcp::proc_guard::run_with_timeout(
+        &mut command,
+        std::time::Duration::from_secs(timeout_s),
+    )
+    .map_err(|err| (-32603_i32, format!("cannot launch {binary}: {err}")))?;
+    let stdout = output.stdout.clone();
+    let stderr = output.stderr.clone();
     let found: Vec<&str> = WIN_MARKERS
         .iter()
         .copied()
@@ -233,8 +243,10 @@ fn scene_verify(args: &serde_json::Value) -> Result<serde_json::Value, (i32, Str
         "won": !found.is_empty(),
         "markers": found,
         "frames_budget": frames,
-        "elapsed_ms": started.elapsed().as_millis(),
-        "exit_code": output.status.code(),
+        "elapsed_ms": output.elapsed.as_millis(),
+        "exit_code": output.status.and_then(|status| status.code()),
+        "timed_out": output.timed_out,
+        "timeout_s": timeout_s,
         "engine_errors": errors,
         "tail": tail,
     }))

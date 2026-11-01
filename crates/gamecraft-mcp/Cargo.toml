@@ -21,5 +21,8 @@ glam = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
+[target.'cfg(windows)'.dependencies]
+win32job = "2"
+
 [lints]
 workspace = true

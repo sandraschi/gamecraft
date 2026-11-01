@@ -6,6 +6,7 @@
 
 pub mod input;
 pub mod inspect;
+pub mod proc_guard;
 pub mod spec;
 
 use gamecraft_godot::{build_graph, parse_tscn};
