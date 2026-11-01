@@ -17,6 +17,8 @@ mod viewport;
 use state::DesktopState;
 
 fn main() {
+    // Games and the web server this viewer starts die with it (Windows Job Object).
+    let _ = gamecraft_mcp::proc_guard::kill_children_on_exit();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("GameCraft")

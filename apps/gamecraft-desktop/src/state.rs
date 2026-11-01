@@ -85,6 +85,11 @@ pub(crate) struct DesktopState {
     pub(crate) counter: u32,
     /// Last action status for the top bar.
     pub(crate) status: String,
+    /// The Godot game this viewer started last. Starting another game closes it first,
+    /// so repeated Start presses (or a test driver mashing the pad's A button) cannot
+    /// pile up engine windows; all of them also die with the viewer (Job Object, see
+    /// `gamecraft_mcp::proc_guard`).
+    pub(crate) game_child: Option<std::process::Child>,
     /// First `wgpu` adapter label, probed once at startup.
     pub(crate) adapter_label: String,
     /// Scene-root name, used to relativize lint paths.
@@ -297,6 +302,7 @@ impl DesktopState {
             scrub_step: 0,
             counter: 0,
             status: "loaded".to_string(),
+            game_child: None,
             adapter_label: wgpu_adapter_label(),
             root_name,
             scene_uid,
@@ -568,6 +574,7 @@ impl DesktopState {
         } else {
             self.app_cfg.godot_binary.clone()
         };
+        let replaced = self.stop_game();
         let mut command = std::process::Command::new(binary.as_str());
         command.arg("--path").arg(&game.dir);
         if demo {
@@ -576,10 +583,30 @@ impl DesktopState {
         match command.spawn() {
             Ok(child) => {
                 let mode = if demo { "demo" } else { "play" };
-                self.status = format!("started {} [{mode}] (pid {})", game.slug, child.id());
+                let note = if replaced {
+                    ", previous game closed"
+                } else {
+                    ""
+                };
+                self.status = format!("started {} [{mode}] (pid {}{note})", game.slug, child.id());
+                self.game_child = Some(child);
             }
             Err(err) => self.status = format!("cannot start godot ({binary}): {err}"),
         }
+    }
+
+    /// Close the game this viewer started, if it is still running. Returns whether one
+    /// was closed.
+    pub(crate) fn stop_game(&mut self) -> bool {
+        let Some(mut child) = self.game_child.take() else {
+            return false;
+        };
+        if matches!(child.try_wait(), Ok(None)) {
+            let _ = child.kill();
+            let _ = child.wait();
+            return true;
+        }
+        false
     }
 
     /// Re-read the file this scene came from.
