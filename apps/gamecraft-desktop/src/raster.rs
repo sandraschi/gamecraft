@@ -513,11 +513,11 @@ mod tests {
             centre(&render(&view(), &ground(Some(0)), &mats, lighting)).r()
         };
         // R = occlusion, G = roughness, B = metallic
-        let dielectric = shade([255, 255, 0], &light);
-        let metal = shade([255, 255, 255], &light);
+        let dielectric = shade([255, 26, 0], &light);
+        let metal = shade([255, 26, 255], &light);
         assert!(
             metal < dielectric,
-            "rough metal has no diffuse: {metal} vs {dielectric}"
+            "smooth metal has no diffuse: {metal} vs {dielectric}"
         );
         // light that grazes the surface: only ambient is left, and occlusion scales it
         let grazing = Lighting {

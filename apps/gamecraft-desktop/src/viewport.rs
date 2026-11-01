@@ -626,8 +626,8 @@ material_override = SubResource("red")
     #[test]
     fn normal_and_orm_maps_go_through_the_per_pixel_path() {
         // R = occlusion, G = roughness, B = metallic
-        let (dielectric_px, dielectric_peak) = pbr_ground([255, 200, 0]);
-        let (metal_px, metal_peak) = pbr_ground([255, 200, 255]);
+        let (dielectric_px, dielectric_peak) = pbr_ground([255, 26, 0]);
+        let (metal_px, metal_peak) = pbr_ground([255, 26, 255]);
         assert!(
             dielectric_px > 2_000,
             "albedo must show through: {dielectric_px}"

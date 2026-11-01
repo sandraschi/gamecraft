@@ -99,6 +99,36 @@ export function toScreen(v, camera, rect = { left: 0, top: 0, width: innerWidth,
   return { x: rect.left + (p.x + 1) / 2 * rect.width, y: rect.top + (1 - p.y) / 2 * rect.height, front: p.z < 1 && p.z > -1, ndc: p };
 }
 export function std(color, extra = {}) { return new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0, ...extra }); }
+/**
+ * MeshStandardMaterial from a PBR texture set, the same files the Godot side uses
+ * (a TextureCraft "Godot 4 (ORM)" export): albedo, packed ORM and a tangent-space normal
+ * map. ORM packs occlusion in R, roughness in G and metallic in B, which is exactly what
+ * three.js reads from aoMap, roughnessMap and metalnessMap, so one image feeds all three
+ * (with the roughness and metalness factors at 1, as the maps then carry the values).
+ * Only the albedo is sRGB. `repeat` is tiles per UV unit; textures load lazily.
+ */
+export function pbr({ albedo, orm, normal }, { repeat = 1, color = 0xffffff, normalScale = 1 } = {}) {
+  const loader = new THREE.TextureLoader();
+  const tex = (url, srgb) => {
+    const t = loader.load(url);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(repeat, repeat);
+    t.anisotropy = 4;
+    if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  };
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: orm ? 1 : 0.8, metalness: 0 });
+  if (albedo) mat.map = tex(albedo, true);
+  if (orm) {
+    mat.aoMap = mat.roughnessMap = mat.metalnessMap = tex(orm, false);
+    mat.metalness = 1;
+  }
+  if (normal) {
+    mat.normalMap = tex(normal, false);
+    mat.normalScale.set(normalScale, normalScale);
+  }
+  return mat;
+}
 
 // ------------------------------------------------------------------ sound
 // Tiny synth. No AudioContext until the first user gesture, never in verify mode.

@@ -310,8 +310,10 @@ pub struct Surface {
 ///
 /// Lambert diffuse scaled by `(1 - metallic)`, Blinn-Phong specular whose exponent comes
 /// from the roughness and whose colour blends a 4% dielectric reflectance toward the
-/// albedo with the metallic value, and ambient scaled by the occlusion. A preview
-/// approximation, not Godot's PBR.
+/// albedo with the metallic value, a broad `roughness^2` lobe of that same colour (a rough
+/// metal is about as bright as a diffuse surface in three.js, measured headless, so it must
+/// not go black), and ambient scaled by the occlusion. A preview approximation, not
+/// Godot's PBR.
 #[must_use]
 pub fn shade_surface(s: &Surface, lighting: &Lighting) -> Vec3 {
     let diffuse = s.albedo * (1.0 - s.metallic);
@@ -320,6 +322,7 @@ pub fn shade_surface(s: &Surface, lighting: &Lighting) -> Vec3 {
     let alpha = roughness * roughness;
     let shininess = (2.0 / (alpha * alpha + 1e-4) - 2.0).clamp(2.0, 512.0);
     let norm = (shininess + 8.0) / (8.0 * std::f32::consts::PI);
+    let broad = alpha;
     let mut lit = s.albedo * lighting.ambient * s.ao;
     if lighting.lights.is_empty() {
         lit += s.albedo * 0.15 * s.ao;
@@ -331,7 +334,7 @@ pub fn shade_surface(s: &Surface, lighting: &Lighting) -> Vec3 {
         }
         let half = (to_light + s.view).normalize_or_zero();
         let spec = s.normal.dot(half).max(0.0).powf(shininess) * norm;
-        lit += (diffuse + spec_color * spec) * radiance * lambert;
+        lit += (diffuse + spec_color * (spec + broad)) * radiance * lambert;
     };
     if lighting.lights.is_empty() {
         add(FALLBACK_LIGHT.normalize(), Vec3::splat(0.75));
