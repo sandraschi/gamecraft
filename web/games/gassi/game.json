@@ -1,0 +1,11 @@
+{
+  "slug": "gassi",
+  "title": "Gassi",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Route memory with Benny: he walks a route once through a stylized Alsergrund (Strudlhofstiege, Berggasse 19, Votivkirche), you lead it back from memory. Self-test proves routes turn enough that blind guessing is under 3%.",
+  "author": "Claude Opus 5.5, gamecraft session 2026-11-01",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "demo-walk",
+  "step_budget": 20000
+}

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Gassi</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #f2a83a; --bg: #bfd8ea; --panel: rgba(28, 30, 40, 0.84); }
+  #route { position: fixed; top: 12px; left: 12px; padding: 10px 14px; max-width: 320px; font-size: 14px; line-height: 1.45; }
+  #route b { color: var(--accent); font-weight: 600; }
+  #phase { margin-top: 4px; font-size: 16px; }
+  #hud { left: auto; right: 12px; transform: none; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="route" class="panel">
+  <div class="dim" id="lvl"></div>
+  <div>From <b id="from"></b><br>to <b id="to"></b></div>
+  <div id="phase"></div>
+</div>
+<div id="hud" class="panel">
+  <span class="name">Gassi</span>
+  <span class="stat" id="steps"></span>
+  <button id="replay" title="Watch the walk again (before your first step)">Show again</button>
+  <button id="music-btn" title="Music (M)">&#9835;</button>
+  <button id="help-btn" title="How to play">?</button>
+</div>
+<div id="msg" class="panel dim">click the next corner, or use the arrow keys</div>
+
+<div id="help" hidden>
+  <div class="card panel">
+    <h1>Gassi</h1>
+    <p>Benny knows his walks. He shows you the way once, leaving a glowing trail; then the trail fades and it is your turn to lead.</p>
+    <p><b>Click</b> the next corner (the glowing circles) or use the <b>arrow keys</b>. A wrong turn costs nothing: Benny just gives you a look, and after two tries he sniffs in the right direction.</p>
+    <p class="dim">The streets carry Alsergrund names, but the grid is stylized, not a map. Walks get longer as you go.</p>
+    <button id="help-go" class="go">Leash on</button>
+  </div>
+</div>
+<div id="done" class="overlay" hidden>
+  <div class="card panel">
+    <h1>Good walk</h1>
+    <p id="done-text"></p>
+    <button id="next" class="go">A longer walk</button>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
