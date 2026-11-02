@@ -1,6 +1,6 @@
 extends Node3D
 ## GameCraft autoplay: plays the level through synthesized input.
-@export var enabled: bool = true
+@export var enabled: bool = false
 @export var hold_action: String = "ui_right"
 @export var jump_action: String = "ui_accept"
 @export var smart_jump: bool = true
@@ -8,6 +8,8 @@ extends Node3D
 @export var jump_frames: Array[int] = []
 @export var flight: bool = false
 @export var drive: bool = false
+@export var flap: bool = false
+@export var hover: float = 1.9
 @export var ring_prefix: String = "Ring"
 
 var tick: int = 0
@@ -16,9 +18,18 @@ var _gates: Array = []
 var _gate_index: int = 0
 
 func _ready() -> void:
+	# Off by default so Start Game hands the player the controls; the verifier
+	# and the viewer's demo button set GAMECRAFT_AUTOPLAY=1.
+	if OS.get_environment("GAMECRAFT_AUTOPLAY") == "1":
+		enabled = true
 	var root := get_parent()
 	if root != null:
 		_player = root.get_node_or_null("%Player")
+		if _player == null:
+			for child in root.get_children():
+				if child is Node3D and str((child as Node3D).name) == "Player":
+					_player = child
+					break
 		if flight or drive:
 			for child in root.get_children():
 				if child is Node3D and str(child.name).begins_with(ring_prefix):
@@ -71,6 +82,17 @@ func _fly() -> void:
 		Input.action_release("ui_down")
 	if _gate_index < _gates.size() and _player.global_position.x > (_gates[_gate_index] as Node3D).global_position.x + 1.0:
 		_gate_index += 1
+
+func _hover() -> void:
+	if _player == null:
+		return
+	if _player.global_position.y < hover:
+		# is_action_just_pressed only fires on a fresh press; holding the action
+		# down permanently would flap exactly once and then fall forever.
+		Input.action_release(jump_action)
+		Input.action_press(jump_action)
+	else:
+		Input.action_release(jump_action)
 
 func _drive() -> void:
 	if _player == null or _gate_index >= _gates.size():

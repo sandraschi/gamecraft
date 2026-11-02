@@ -32,7 +32,8 @@
       0.6,
       0.95,
       1.0
-    ]
+    ],
+    "surfaces": {}
   },
   "physics": {
     "speed": 5.0,
@@ -81,5 +82,26 @@
       ]
     ],
     "goal_x": 30.0
+  },
+  "maze": {
+    "size": 15,
+    "seed": 9
+  },
+  "flight": {
+    "gates": 5,
+    "spacing": 20.0,
+    "altitude": 4.0
+  },
+  "drive": {
+    "radius": 12.0,
+    "checkpoints": 8
+  },
+  "chess": {
+    "board": 5,
+    "hops": 4,
+    "seed": 12
+  },
+  "talk": {
+    "visits": 3
   }
 }

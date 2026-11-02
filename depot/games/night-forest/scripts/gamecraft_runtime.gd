@@ -7,6 +7,8 @@ extends Node
 @export var bullet_speed: float = 14.0
 @export var checkpoints_to_win: int = 0
 @export var rings_to_win: int = 0
+@export var points_to_win: int = 0
+@export var bricks_to_win: int = 0
 
 var score: int = 0
 var talk_index: int = 0
@@ -23,8 +25,10 @@ var enemies_down: int = 0
 var total_to_win: int = 0
 
 func _ready() -> void:
+    _bind_gamepad()
+    _apply_overlay()
     for child in get_children():
-        if child is Node3D and not (child as Node3D).visible and str(child.name).begins_with("Bullet"):
+        if child is Node3D and str(child.name).begins_with("Bullet"):
             bullets.append(child)
 
 func _process(delta: float) -> void:
@@ -37,8 +41,78 @@ func _process(delta: float) -> void:
             fire_clock = 0.0
             fire_bullet()
 
+func _bind_gamepad() -> void:
+    # Built-in ui_* actions already cover movement on a pad, but ui_accept is
+    # keys-only, so A would do nothing. Add the buttons rather than rewriting
+    # project.godot for every game.
+    _add_joy_button("ui_accept", JOY_BUTTON_A)
+    _add_joy_button("ui_cancel", JOY_BUTTON_B)
+
+func _add_joy_button(action: String, button: int) -> void:
+    for existing in InputMap.action_get_events(action):
+        if existing is InputEventJoypadButton and existing.button_index == button:
+            return
+    var event := InputEventJoypadButton.new()
+    event.button_index = button
+    InputMap.action_add_event(action, event)
+
+func _unhandled_input(event: InputEvent) -> void:
+    if event.is_action_pressed("ui_cancel"):
+        get_tree().quit()
+
+func _apply_overlay() -> void:
+    # Optional per-game tuning written by the viewer (game dir + settings.json).
+    # Multiplicative, so one schema fits every game; absent or unreadable means
+    # defaults, never an error screen.
+    var file := FileAccess.open("res://settings.json", FileAccess.READ)
+    if file == null:
+        return
+    var data: Variant = JSON.parse_string(file.get_as_text())
+    if typeof(data) != TYPE_DICTIONARY:
+        return
+    var player := get_node_or_null("%Player")
+    if player == null:
+        for child in get_children():
+            if child is Node3D and str((child as Node3D).name) == "Player":
+                player = child
+                break
+    if player == null:
+        return
+    if data.has("speed_mult"):
+        _scale_if_present(player, "speed", float(data["speed_mult"]))
+    if data.has("gravity_mult"):
+        _scale_if_present(player, "gravity", float(data["gravity_mult"]))
+    if data.has("jump_mult"):
+        _scale_if_present(player, "jump_velocity", float(data["jump_mult"]))
+    # The verifier and the demo button own autoplay through the environment.
+    if data.has("autoplay") and OS.get_environment("GAMECRAFT_AUTOPLAY") == "":
+        var wanted: bool = bool(data["autoplay"])
+        _set_if_present(player, "autoplay", wanted)
+        var auto := get_node_or_null("Autoplay")
+        if auto != null:
+            _set_if_present(auto, "enabled", wanted)
+
+func _scale_if_present(node: Object, key: String, factor: float) -> void:
+    for prop in node.get_property_list():
+        if prop is Dictionary and str(prop.get("name")) == key:
+            var base: float = float(node.get(key))
+            node.set(key, base * factor)
+            return
+
+func _set_if_present(node: Object, key: String, value: Variant) -> void:
+    for prop in node.get_property_list():
+        if prop is Dictionary and str(prop.get("name")) == key:
+            node.set(key, value)
+            return
+
 func add_score() -> void:
     score += 1
+
+func on_brick_down() -> void:
+    score += 1
+    if bricks_to_win > 0 and score >= bricks_to_win and not won:
+        won = true
+        print("GameCraft: goal reached")
 
 func _on_goal(body: Node3D) -> void:
     if body.has_method("is_player") and not won:
@@ -101,6 +175,10 @@ func on_point(side: String) -> void:
     else:
         points_right += 1
     print("GameCraft: point ", side, " ", points_left, "-", points_right)
+    if points_to_win > 0 and not won:
+        if points_left >= points_to_win or points_right >= points_to_win:
+            won = true
+            print("GameCraft: goal reached")
     var ball := get_node_or_null("Ball")
     if ball != null and ball.has_method("serve"):
         if side == "left":
