@@ -10,9 +10,13 @@ description = "L3 Bevy 0.20 runtime for GameCraft games: logic plugins tested he
 # docs/TARGETS_PLAN.md, step 3.
 [features]
 default = []
-# Window, PBR rendering and keyboard: what the playable binary needs. No audio, UI,
+# Procedural sound: Bevy's audio output and the WAV decoder (the clips are synthesised
+# in `synth.rs` and handed over as WAV bytes). No ogg/mp3/flac, no spatial audio use.
+audio = ["bevy/bevy_audio", "bevy/wav"]
+# Window, PBR rendering, keyboard and sound: what the playable binary needs. No UI,
 # sprites, scenes, picking or gamepad.
 render = [
+    "audio",
     "bevy/3d_bevy_render",
     "bevy/default_app",
     "bevy/multi_threaded",
@@ -31,6 +35,19 @@ gamecraft-sim = { workspace = true }
 name = "gamecraft-bevy-maze"
 path = "src/bin/maze.rs"
 required-features = ["render"]
+
+[[bin]]
+name = "gamecraft-synth-dump"
+path = "src/bin/synth_dump.rs"
+
+[[bin]]
+name = "gamecraft-bevy-murmuration"
+path = "src/bin/murmuration.rs"
+required-features = ["render"]
+
+[dev-dependencies]
+# Parity tests: the real Bevy schedule must land on the same result as a replay.
+gamecraft-replay = { workspace = true }
 
 [lints]
 workspace = true

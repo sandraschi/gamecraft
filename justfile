@@ -102,4 +102,29 @@ gltf-gate:
 # Bevy gate: headless logic tests (autoplay wins on the shortest path), then the real
 # windowed build plays itself to the win marker and saves target/bevy/maze.png
 bevy-gate:
-    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo test -q -p gamecraft-bevy; if ($LASTEXITCODE) { exit 1 }; cargo build -q -p gamecraft-bevy --features render --bin gamecraft-bevy-maze; if ($LASTEXITCODE) { exit 1 }; New-Item -ItemType Directory -Force target/bevy | Out-Null; $out = & ./target/debug/gamecraft-bevy-maze.exe --autoplay --exit-on-win --screenshot target/bevy/maze.png 2>$null | Out-String; Write-Host $out.Trim(); if ($out -notmatch 'goal reached' -or -not (Test-Path target/bevy/maze.png)) { Write-Host 'bevy maze: no win marker or no screenshot'; exit 1 }; Add-Type -AssemblyName System.Drawing; $bmp = [System.Drawing.Bitmap]::FromFile((Resolve-Path target/bevy/maze.png)); $bg = $bmp.GetPixel(0,0); $clip = 0; foreach ($x in 0..($bmp.Width-1)) { foreach ($y in 0,1,($bmp.Height-2),($bmp.Height-1)) { if ($bmp.GetPixel($x,$y) -ne $bg) { $clip++ } } }; foreach ($y in 0..($bmp.Height-1)) { foreach ($x in 0,1,($bmp.Width-2),($bmp.Width-1)) { if ($bmp.GetPixel($x,$y) -ne $bg) { $clip++ } } }; $bmp.Dispose(); if ($clip) { Write-Host "bevy maze: clipped at the screenshot border ($clip px)"; exit 1 }; Write-Host 'bevy maze: PASS'
+    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo test -q -p gamecraft-bevy; if ($LASTEXITCODE) { exit 1 }; cargo build -q -p gamecraft-bevy --features render --bin gamecraft-bevy-maze; if ($LASTEXITCODE) { exit 1 }; New-Item -ItemType Directory -Force target/bevy | Out-Null; $out = & ./target/debug/gamecraft-bevy-maze.exe --autoplay --exit-on-win --screenshot target/bevy/maze.png 2>$null | Out-String; Write-Host $out.Trim(); if ($out -notmatch 'goal reached' -or -not (Test-Path target/bevy/maze.png)) { Write-Host 'bevy maze: no win marker or no screenshot'; exit 1 }; pwsh -NoProfile -File scripts/png-border-clean.ps1 target/bevy/maze.png; if ($LASTEXITCODE) { exit 1 }; $win = (($out -split '\r?\n') | Where-Object { $_ -match 'goal reached' } | Select-Object -First 1); pwsh -NoProfile -File scripts/bevy-record.ps1 maze $win; Write-Host 'bevy maze: PASS'
+
+# Murmuration gate: headless tests (autoplay settles the flock, nobody steering loses), then the real
+# windowed build (profile play: Bevy at opt-level 3) flies 20 000 boids to the roost on autopilot,
+# saves a mid-flight screenshot and checks the flock is actually in frame.
+murmuration-gate:
+    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo test -q -p gamecraft-bevy murmuration; if ($LASTEXITCODE) { exit 1 }; cargo build -q --profile play -p gamecraft-bevy --features render --bin gamecraft-bevy-murmuration; if ($LASTEXITCODE) { exit 1 }; New-Item -ItemType Directory -Force target/bevy | Out-Null; $out = & ./target/play/gamecraft-bevy-murmuration.exe --autoplay --exit-on-win --screenshot target/bevy/murmuration.png --shot-tick 1500 2>$null | Out-String; Write-Host $out.Trim(); if ($out -notmatch 'roost reached' -or -not (Test-Path target/bevy/murmuration.png)) { Write-Host 'murmuration: no win marker or no screenshot'; exit 1 }; pwsh -NoProfile -File scripts/png-flock-visible.ps1 target/bevy/murmuration.png -Min 8000; if ($LASTEXITCODE) { exit 1 }; $win = (($out -split '\r?\n') | Where-Object { $_ -match 'roost reached' } | Select-Object -First 1); pwsh -NoProfile -File scripts/bevy-record.ps1 murmuration $win; Write-Host 'murmuration: PASS'
+
+# Every Bevy game gate.
+bevy-gates: bevy-gate murmuration-gate
+
+# Re-record the committed example replays in docs/replays (after an intended rules change).
+replays:
+    powershell -NoProfile -File scripts/replays.ps1
+
+# Fail if any committed replay no longer matches a fresh simulation.
+replays-check:
+    powershell -NoProfile -File scripts/replays.ps1 -Check
+
+# Re-render every Bevy sound effect to docs/sounds (WAV, spectrogram PNG, REPORT.md).
+sounds:
+    cargo run -q -p gamecraft-bevy --bin gamecraft-synth-dump
+
+# Fail if docs/sounds no longer matches the synth formulas.
+sounds-check:
+    cargo run -q -p gamecraft-bevy --bin gamecraft-synth-dump -- --check

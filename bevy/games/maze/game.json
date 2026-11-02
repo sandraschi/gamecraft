@@ -1,0 +1,8 @@
+{
+  "title": "Bevy Maze",
+  "category": "Puzzles",
+  "experiment": "A 29x29 generated maze on Bevy: walk to the gold goal, rules tick at 60 Hz, a deterministic autopilot proves it is solvable.",
+  "bin": "gamecraft-bevy-maze",
+  "profile": "dev",
+  "win_marker": "goal reached"
+}

@@ -4,7 +4,8 @@
 //! cargo run -p gamecraft-bevy --features render --bin gamecraft-bevy-maze
 //!     --autoplay       let the built-in driver walk the shortest path
 //!                      (or GAMECRAFT_AUTOPLAY=1, as for the Godot games)
-//!     --exit-on-win    close shortly after the goal (for gates and demos)
+//!     --exit-on-win    close shortly after the goal (for gates and demos; also mutes)
+//!     --mute           no sound (or GAMECRAFT_MUTE=1)
 //!     --screenshot F   with --exit-on-win: save the solved board to PNG file F
 //! ```
 //!
@@ -14,6 +15,7 @@
 
 use bevy::prelude::*;
 use bevy::render::view::screenshot::{save_to_disk, Screenshot};
+use gamecraft_bevy::audio::{self, MazeAudioPlugin};
 use gamecraft_bevy::maze::{MazeLevel, MazeLogicPlugin, MazeRun};
 use gamecraft_bevy::render::MazeRenderPlugin;
 
@@ -46,6 +48,9 @@ fn main() {
     .add_plugins(MazeRenderPlugin);
     if let Some(path) = shot {
         app.insert_resource(ShotPath(path));
+    }
+    if !audio::muted(&args) {
+        app.add_plugins(MazeAudioPlugin);
     }
     if exit_on_win {
         app.add_systems(Update, after_win);

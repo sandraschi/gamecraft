@@ -8,7 +8,10 @@ pub mod catalog;
 pub mod input;
 pub mod inspect;
 pub mod proc_guard;
+pub mod registry;
+pub mod replay_cmds;
 pub mod spec;
+pub mod tools;
 
 use gamecraft_godot::{build_graph, parse_tscn};
 

@@ -1,0 +1,8 @@
+{
+  "title": "Murmuration",
+  "category": "Worlds and sims",
+  "experiment": "Steer 20 000 starlings into the roost while hawks hunt them; one lure, one flare, a deterministic flock simulation.",
+  "bin": "gamecraft-bevy-murmuration",
+  "profile": "play",
+  "win_marker": "roost reached"
+}

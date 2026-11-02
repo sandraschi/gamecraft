@@ -19,6 +19,8 @@ pub enum GameKind {
     Godot,
     /// three.js page under `web/games/`.
     Web,
+    /// Native Bevy game under `bevy/games/` (the binaries live in `gamecraft-bevy`).
+    Bevy,
 }
 
 impl GameKind {
@@ -28,7 +30,37 @@ impl GameKind {
         match self {
             Self::Godot => "godot",
             Self::Web => "web",
+            Self::Bevy => "bevy",
         }
+    }
+
+    /// Every runtime, in sidebar order.
+    pub const ALL: [Self; 3] = [Self::Godot, Self::Web, Self::Bevy];
+
+    /// Heading used in the sidebar, the grid and the CLI table.
+    #[must_use]
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Godot => "Godot",
+            Self::Web => "three.js",
+            Self::Bevy => "Bevy",
+        }
+    }
+
+    /// Known groups of this runtime, in display order.
+    #[must_use]
+    pub fn groups(self) -> &'static [&'static str] {
+        match self {
+            Self::Godot => &GODOT_GROUPS,
+            Self::Web => &WEB_GROUPS,
+            Self::Bevy => &BEVY_GROUPS,
+        }
+    }
+
+    /// Parse the lowercase name used in filters and tool arguments.
+    #[must_use]
+    pub fn parse(name: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|k| k.as_str() == name)
     }
 }
 
@@ -36,6 +68,9 @@ impl GameKind {
 pub const GODOT_GROUPS: [&str; 4] = ["Arcade", "Action", "Puzzles", "Worlds"];
 /// Sidebar groups for web games, in display order (from `category` in `game.json`).
 pub const WEB_GROUPS: [&str; 3] = ["Seek and find", "Calm puzzles", "Worlds and sims"];
+
+/// Sidebar groups for Bevy games, in display order (from `category` in `game.json`).
+pub const BEVY_GROUPS: [&str; 2] = ["Puzzles", "Worlds and sims"];
 
 /// Last verification result, as recorded on disk by the gates.
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -89,7 +124,9 @@ pub fn godot_group(slug: &str) -> &'static str {
 #[must_use]
 pub fn find_root(explicit: Option<&str>) -> Option<PathBuf> {
     let has_games = |dir: &Path| {
-        dir.join("depot").join("games").is_dir() || dir.join("web").join("games").is_dir()
+        dir.join("depot").join("games").is_dir()
+            || dir.join("web").join("games").is_dir()
+            || dir.join("bevy").join("games").is_dir()
     };
     if let Some(path) = explicit.filter(|p| !p.trim().is_empty()) {
         let dir = PathBuf::from(path);
@@ -186,6 +223,17 @@ fn web_verify_summary(dir: &Path) -> Option<VerifySummary> {
     })
 }
 
+fn bevy_verify_summary(dir: &Path) -> Option<VerifySummary> {
+    let v = read_json(dir.join("verify.json").as_path())?;
+    Some(VerifySummary {
+        pass: v.get("pass").and_then(Value::as_bool).unwrap_or(false),
+        failed: str_field(&v, "failed"),
+        progress: str_field(&v, "progress").unwrap_or_default(),
+        when: str_field(&v, "date").unwrap_or_default(),
+        self_test: None,
+    })
+}
+
 fn godot_verify_summary(dir: &Path) -> Option<VerifySummary> {
     let trace_path = dir.join("trace.json");
     let trace = read_json(trace_path.as_path())?;
@@ -219,6 +267,7 @@ fn collect(root: &Path, kind: GameKind, out: &mut Vec<GameEntry>) {
     let (base, marker) = match kind {
         GameKind::Godot => (root.join("depot").join("games"), "main.tscn"),
         GameKind::Web => (root.join("web").join("games"), "game.json"),
+        GameKind::Bevy => (root.join("bevy").join("games"), "game.json"),
     };
     let Ok(entries) = std::fs::read_dir(base) else {
         return;
@@ -242,16 +291,21 @@ fn collect(root: &Path, kind: GameKind, out: &mut Vec<GameEntry>) {
                 slug,
                 dir,
             },
-            GameKind::Web => {
+            GameKind::Web | GameKind::Bevy => {
                 let meta = read_json(dir.join("game.json").as_path()).unwrap_or(Value::Null);
+                let (fallback_group, verify) = if kind == GameKind::Web {
+                    ("More three.js", web_verify_summary(dir.as_path()))
+                } else {
+                    ("More Bevy", bevy_verify_summary(dir.as_path()))
+                };
                 GameEntry {
                     kind,
                     title: str_field(&meta, "title").unwrap_or(pretty),
                     group: str_field(&meta, "category")
-                        .unwrap_or_else(|| "More three.js".to_string()),
+                        .unwrap_or_else(|| fallback_group.to_string()),
                     description: str_field(&meta, "experiment")
                         .unwrap_or_else(|| readme_line(dir.as_path())),
-                    verify: web_verify_summary(dir.as_path()),
+                    verify,
                     slug,
                     dir,
                 }
@@ -267,6 +321,7 @@ pub fn discover(root: &Path) -> Vec<GameEntry> {
     let mut games = Vec::new();
     collect(root, GameKind::Godot, &mut games);
     collect(root, GameKind::Web, &mut games);
+    collect(root, GameKind::Bevy, &mut games);
     games.sort_by_key(|g| g.title.to_lowercase());
     games
 }
@@ -328,7 +383,7 @@ pub fn suggest(games: &[GameEntry], slug: &str) -> Vec<String> {
 pub fn report(game: &GameEntry) -> Value {
     let text = |name: &str| std::fs::read_to_string(game.dir.join(name)).ok();
     let gate_record = match game.kind {
-        GameKind::Web => read_json(game.dir.join("verify.json").as_path()),
+        GameKind::Web | GameKind::Bevy => read_json(game.dir.join("verify.json").as_path()),
         GameKind::Godot => Some(json!({
             "trace": read_json(game.dir.join("trace.json").as_path()),
             "lint": read_json(game.dir.join("lint.json").as_path()),
@@ -478,9 +533,221 @@ pub fn web_verify(root: &Path, slug: &str, timeout_s: u64) -> Result<Value, Stri
     )
 }
 
+/// How a Bevy catalog entry is built and played, read from its `game.json`.
+struct BevyRecipe {
+    bin: String,
+    profile: String,
+    win_marker: String,
+    args: Vec<String>,
+}
+
+fn bevy_recipe(dir: &Path) -> Option<BevyRecipe> {
+    let meta = read_json(dir.join("game.json").as_path())?;
+    Some(BevyRecipe {
+        bin: str_field(&meta, "bin")?,
+        profile: str_field(&meta, "profile").unwrap_or_else(|| "dev".to_string()),
+        win_marker: str_field(&meta, "win_marker").unwrap_or_else(|| "win".to_string()),
+        args: meta
+            .get("gate_args")
+            .and_then(Value::as_array)
+            .map(|a| {
+                a.iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_string)
+                    .collect()
+            })
+            .unwrap_or_default(),
+    })
+}
+
+fn bevy_exe(root: &Path, recipe: &BevyRecipe) -> PathBuf {
+    let folder = if recipe.profile == "dev" {
+        "debug"
+    } else {
+        recipe.profile.as_str()
+    };
+    root.join("target")
+        .join(folder)
+        .join(format!("{}{}", recipe.bin, std::env::consts::EXE_SUFFIX))
+}
+
+fn bevy_build_command(root: &Path, recipe: &BevyRecipe) -> std::process::Command {
+    let mut command = std::process::Command::new("cargo");
+    command.current_dir(root).arg("build").arg("-q");
+    if recipe.profile != "dev" {
+        command.arg("--profile").arg(recipe.profile.as_str());
+    }
+    command
+        .args(["-p", "gamecraft-bevy", "--features", "render", "--bin"])
+        .arg(recipe.bin.as_str());
+    command
+}
+
+/// The built binary of a Bevy game, ready to launch.
+///
+/// # Errors
+///
+/// Returns the exact build command when `game.json` is unusable or the binary has
+/// not been built yet.
+pub fn bevy_launch(game: &GameEntry, root: &Path) -> Result<PathBuf, String> {
+    let recipe = bevy_recipe(game.dir.as_path())
+        .ok_or_else(|| format!("{}: game.json has no \"bin\" entry", game.slug))?;
+    let exe = bevy_exe(root, &recipe);
+    if exe.is_file() {
+        return Ok(exe);
+    }
+    let profile = if recipe.profile == "dev" {
+        String::new()
+    } else {
+        format!("--profile {} ", recipe.profile)
+    };
+    Err(format!(
+        "not built yet: cargo build {profile}-p gamecraft-bevy --features render --bin {}",
+        recipe.bin
+    ))
+}
+
+/// ISO date (UTC) of a unix time, without a date library.
+fn iso_date(unix_secs: u64) -> String {
+    let days = i64::try_from(unix_secs / 86_400).unwrap_or(0) + 719_468;
+    let era = days.div_euclid(146_097);
+    let day_of_era = days - era * 146_097;
+    let year_of_era =
+        (day_of_era - day_of_era / 1_460 + day_of_era / 36_524 - day_of_era / 146_096) / 365;
+    let day_of_year = day_of_era - (365 * year_of_era + year_of_era / 4 - year_of_era / 100);
+    let shifted_month = (5 * day_of_year + 2) / 153;
+    let day = day_of_year - (153 * shifted_month + 2) / 5 + 1;
+    let month = if shifted_month < 10 {
+        shifted_month + 3
+    } else {
+        shifted_month - 9
+    };
+    let year = year_of_era + era * 400 + i64::from(month <= 2);
+    format!("{year:04}-{month:02}-{day:02}")
+}
+
+/// Run the gate for one Bevy game: build the binary the way `game.json` says,
+/// let it play itself to the win marker, and record `verify.json` beside it.
+/// The build gets at least 30 minutes because a cold optimised Bevy build is slow.
+///
+/// # Errors
+///
+/// Returns a reason when `game.json` is unusable, a process cannot be launched,
+/// the build times out, or the record cannot be written. A failed build or a
+/// missing win marker is a recorded failure, not an error.
+pub fn bevy_verify(root: &Path, slug: &str, timeout_s: u64) -> Result<Value, String> {
+    let dir = root.join("bevy").join("games").join(slug);
+    let recipe = bevy_recipe(dir.as_path())
+        .ok_or_else(|| format!("{slug}: game.json is missing or has no \"bin\" entry"))?;
+    let started = std::time::Instant::now();
+    let mut compile = bevy_build_command(root, &recipe);
+    let compiled = crate::proc_guard::run_with_timeout(
+        &mut compile,
+        std::time::Duration::from_secs(timeout_s.max(1_800)),
+    )
+    .map_err(|err| format!("cannot launch cargo: {err}"))?;
+    if compiled.timed_out {
+        return Err(format!("the Bevy build for {slug} did not finish in time"));
+    }
+    let (pass, failed, progress) = if compiled.status.is_some_and(|s| s.success()) {
+        let mut play = std::process::Command::new(bevy_exe(root, &recipe));
+        play.current_dir(root)
+            .args(recipe.args.iter())
+            .args(["--autoplay", "--exit-on-win"]);
+        let played = crate::proc_guard::run_with_timeout(
+            &mut play,
+            std::time::Duration::from_secs(timeout_s),
+        )
+        .map_err(|err| format!("cannot launch {}: {err}", recipe.bin))?;
+        let win_line = played
+            .stdout
+            .lines()
+            .find(|l| l.contains(recipe.win_marker.as_str()))
+            .map(|l| l.trim().to_string());
+        match win_line {
+            Some(line) => (true, None, line),
+            None => (
+                false,
+                Some(if played.timed_out {
+                    format!("no '{}' marker within {timeout_s} s", recipe.win_marker)
+                } else {
+                    format!("the game ended without printing '{}'", recipe.win_marker)
+                }),
+                String::new(),
+            ),
+        }
+    } else {
+        let reason = compiled
+            .stderr
+            .lines()
+            .rfind(|l| !l.trim().is_empty())
+            .unwrap_or("cargo build failed");
+        (
+            false,
+            Some(format!("build failed: {reason}")),
+            String::new(),
+        )
+    };
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs());
+    let record = json!({
+        "pass": pass,
+        "failed": failed,
+        "progress": progress,
+        "date": iso_date(now),
+        "self_test": null,
+    });
+    let text = serde_json::to_string_pretty(&record).map_err(|err| err.to_string())?;
+    std::fs::write(dir.join("verify.json"), text)
+        .map_err(|err| format!("cannot write verify.json: {err}"))?;
+    Ok(json!({
+        "slug": slug,
+        "elapsed_ms": started.elapsed().as_millis(),
+        "verify": record,
+        "gate_output": progress,
+    }))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn iso_date_matches_known_days() {
+        assert_eq!(iso_date(0), "1970-01-01");
+        assert_eq!(iso_date(951_782_400), "2000-02-29");
+        assert_eq!(iso_date(1_793_577_600), "2026-11-02");
+    }
+
+    #[test]
+    fn bevy_entries_are_discovered_with_status_and_recipe() {
+        let root = temp_root("bevy");
+        let dir = root.join("bevy").join("games").join("flock");
+        assert!(std::fs::create_dir_all(&dir).is_ok());
+        assert!(std::fs::write(
+            dir.join("game.json"),
+            r#"{"title":"Flock","category":"Worlds and sims","experiment":"Starlings.","bin":"gamecraft-bevy-flock","profile":"play","win_marker":"roost reached"}"#
+        )
+        .is_ok());
+        assert!(std::fs::write(
+            dir.join("verify.json"),
+            r#"{"pass":true,"date":"2026-11-02","progress":"roost reached at tick 9"}"#
+        )
+        .is_ok());
+        let games = discover(root.as_path());
+        let flock = find(&games, "flock", Some(GameKind::Bevy));
+        assert!(flock.is_some_and(|g| g.group == "Worlds and sims"
+            && g.verify
+                .as_ref()
+                .is_some_and(|v| v.pass && v.progress.contains("tick 9"))));
+        assert_eq!(GameKind::parse("bevy"), Some(GameKind::Bevy));
+        let missing = flock.map(|g| bevy_launch(g, root.as_path()));
+        assert!(missing.is_some_and(|r| r.err().is_some_and(|hint| hint
+            .contains("--profile play")
+            && hint.contains("gamecraft-bevy-flock"))));
+        let _ = std::fs::remove_dir_all(&root);
+    }
 
     fn temp_root(name: &str) -> PathBuf {
         let dir =

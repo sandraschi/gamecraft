@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased - 2026-11-02 (Bevy games, sound, replay, command registry)
+
+Reconciliation note: the v0.13.0 commit (1f047fb) swept in workspace manifest and lockfile edits
+from this work (the `gamecraft-replay` member, the `play` profile, audio dependencies) before the
+crates they name were committed, so v0.13.0 does not build from a clean clone. This entry's
+commit adds those crates; use the commit after v0.13.0, not the tag itself.
+
+- **Bevy runtime games** (`gamecraft-bevy`, Bevy 0.20): a 29x29 maze that plays itself and
+  Murmuration (20 000 starlings on the seeded `gamecraft-sim::flock` sim). Catalog kind `bevy`
+  (`bevy/games`) in the library, CLI and MCP; gates `just bevy-gates`.
+- **Procedural sound** for both games, computed from formulas; `gamecraft-synth-dump` writes WAVs,
+  spectrograms and `docs/sounds/REPORT.md`; `just sounds-check` fails on drift.
+- **Desktop**: draggable dividers, Reset layout, eframe persistence, command palette
+  (`Ctrl+Shift+P`) running registry commands on a worker thread.
+- **`gamecraft-replay`**: `.gcraft` documents (config, input log, result), re-simulating `verify`,
+  tamper and hostile-input tests, Bevy parity tests, three committed examples in `docs/replays`
+  and `just replays-check`.
+- **Command registry** (`gamecraft_mcp::registry`): 12 commands, `commands` / `describe` /
+  `run --cmd` on both binaries, MCP `list_commands` / `describe_command` / `run_command` /
+  `replay_*`. Tool bodies moved from the MCP binary into `gamecraft_mcp::tools`.
+  Status against the Craft app contract: `docs/CRAFT_CONTRACT.md`.
+
 ## 0.13.0 - 2026-11-02 (Prompt-to-Depot Visual Parity & Asset Factory)
 
 - **Prompt-to-Depot Visual Parity:** Closed artifact gap in `create_game` (`crates/gamecraft-forge/src/create.rs`). Every game created via `gamecraft-cli new` now automatically renders its middle-frame `thumb.png`, downsampled animation `play.gif`, scene diagnostic `lint.json`, `trace.json`, and `commands.jsonl`.

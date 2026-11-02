@@ -100,6 +100,19 @@ pub(crate) fn menu_bar(state: &mut DesktopState, ui: &mut egui::Ui) {
             menu.separator();
             menu.checkbox(&mut state.recording, "Record trace");
             menu.checkbox(&mut state.follow, "Follow newest frame");
+            if menu
+                .button("Reset layout")
+                .on_hover_text("Forget dragged panel sizes")
+                .clicked()
+            {
+                state.layout_gen = state.layout_gen.wrapping_add(1);
+            }
+        });
+        bar.menu_button("Commands", |menu| {
+            if menu.button("Command palette  Ctrl+Shift+P").clicked() {
+                state.palette.open = true;
+                menu.close();
+            }
         });
         bar.menu_button("Settings", |menu| {
             if menu.button("App settings").clicked() {
@@ -606,18 +619,15 @@ fn depot_row(state: &DesktopState, ui: &mut egui::Ui, index: usize) -> bool {
 fn depot_list(state: &DesktopState, ui: &mut egui::Ui) -> Option<usize> {
     let filter = state.depot_filter.trim().to_lowercase();
     let mut pick: Option<usize> = None;
-    let list_height = (ui.available_height() * 0.5).max(160.0);
     egui::ScrollArea::vertical()
         .id_salt("depot_list")
-        .max_height(list_height)
+        .auto_shrink([false, false])
         .show(ui, |scroll| {
             if state.depot_games.is_empty() {
                 scroll.label("no depot found next to the working directory");
             }
-            for (kind, label, known) in [
-                (GameKind::Godot, "Godot", &crate::state::GODOT_GROUPS[..]),
-                (GameKind::Web, "three.js", &crate::state::WEB_GROUPS[..]),
-            ] {
+            for kind in GameKind::ALL {
+                let (label, known) = (kind.label(), kind.groups());
                 let in_kind: Vec<usize> = (0..state.depot_games.len())
                     .filter(|&i| {
                         state
@@ -678,13 +688,24 @@ fn depot_list(state: &DesktopState, ui: &mut egui::Ui) -> Option<usize> {
     pick
 }
 
+/// The resizable left panel; the app and the tests share this one definition.
+pub(crate) fn left_panel(state: &mut DesktopState, ui: &mut egui::Ui) {
+    egui::containers::Panel::left(("scene_tree", state.layout_gen))
+        .resizable(true)
+        .default_size(240.0)
+        .size_range(160.0..=600.0)
+        .show(ui, |inner| left_tree(state, inner));
+}
+
 /// Left panel: depot quick-select (runtime, then collapsible groups) above the scene tree.
 pub(crate) fn left_tree(state: &mut DesktopState, ui: &mut egui::Ui) {
+    egui::containers::Panel::bottom(("scene_split", state.layout_gen))
+        .resizable(true)
+        .default_size(200.0)
+        .size_range(60.0..=f32::INFINITY)
+        .show(ui, |pane| scene_section(state, pane));
     ui.heading(format!("Depot ({})", state.depot_games.len()));
     crate::library::filter_box(state, ui, 170.0);
-    if let Some(index) = depot_list(state, ui) {
-        state.load_depot(index);
-    }
     let can_start = state.selected_game.is_some();
     ui.horizontal(|ui| {
         if ui
@@ -703,10 +724,18 @@ pub(crate) fn left_tree(state: &mut DesktopState, ui: &mut egui::Ui) {
         }
     });
     ui.separator();
+    if let Some(index) = depot_list(state, ui) {
+        state.load_depot(index);
+    }
+}
+
+/// Scene tree section, shown in the draggable bottom pane of the left panel.
+fn scene_section(state: &mut DesktopState, ui: &mut egui::Ui) {
     ui.heading("Scene");
     ui.separator();
     egui::ScrollArea::both()
         .id_salt("scene_tree")
+        .auto_shrink([false, false])
         .show(ui, |scroll| {
             if let Some(root) = state.graph.root {
                 show_node(state, scroll, root, 0.0);
@@ -740,12 +769,20 @@ fn show_node(state: &mut DesktopState, ui: &mut egui::Ui, id: NodeId, indent: f3
 
 /// Right panel: inspector for the selection plus the live lint list.
 pub(crate) fn right_panels(state: &mut DesktopState, ui: &mut egui::Ui) {
+    egui::containers::Panel::bottom(("findings_split", state.layout_gen))
+        .resizable(true)
+        .default_size(180.0)
+        .size_range(60.0..=f32::INFINITY)
+        .show(ui, |pane| {
+            pane.heading(format!("Findings ({})", state.diags.len()));
+            show_lint_list(state, pane);
+        });
     ui.heading("Inspector");
     ui.separator();
-    show_inspector(state, ui);
-    ui.separator();
-    ui.heading(format!("Findings ({})", state.diags.len()));
-    show_lint_list(state, ui);
+    egui::ScrollArea::vertical()
+        .id_salt("inspector_scroll")
+        .auto_shrink([false, false])
+        .show(ui, |scroll| show_inspector(state, scroll));
 }
 
 /// Position/scale editing (via commands) plus read-only properties.
@@ -833,15 +870,17 @@ fn show_inspector(state: &mut DesktopState, ui: &mut egui::Ui) {
 
 /// Live [`scene_lint`](gamecraft_mcp::scene_lint) output; click selects.
 fn show_lint_list(state: &mut DesktopState, ui: &mut egui::Ui) {
-    egui::ScrollArea::vertical().show(ui, |scroll| {
-        for diag in state.diags.clone() {
-            let label = format!("[{}] {} @ {}", diag.code, diag.message, diag.node);
-            let widget = egui::Button::new(egui::RichText::new(label).monospace());
-            if scroll.add(widget).clicked() {
-                state.select_path(diag.node.as_str());
+    egui::ScrollArea::vertical()
+        .auto_shrink([false, false])
+        .show(ui, |scroll| {
+            for diag in state.diags.clone() {
+                let label = format!("[{}] {} @ {}", diag.code, diag.message, diag.node);
+                let widget = egui::Button::new(egui::RichText::new(label).monospace());
+                if scroll.add(widget).clicked() {
+                    state.select_path(diag.node.as_str());
+                }
             }
-        }
-    });
+        });
 }
 
 /// Bottom panel: 60-frame trace scrubber.
@@ -869,4 +908,57 @@ pub(crate) fn bottom_trace(state: &mut DesktopState, ui: &mut egui::Ui) {
             ));
         }
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use egui_kittest::kittest::Queryable;
+
+    /// Top edge of the "Scene" heading, which sits at the top of the draggable pane.
+    fn scene_top(harness: &egui_kittest::Harness<'_, DesktopState>) -> f32 {
+        harness.get_by_label("Scene").rect().min.y
+    }
+
+    #[test]
+    fn scene_divider_drags_and_reset_restores() {
+        let mut state = DesktopState::from_text(
+            "[gd_scene format=3]\n\n[node name=\"Root\" type=\"Node3D\"]\n",
+            "uid://divider",
+        );
+        state.library = false;
+        let mut harness = egui_kittest::Harness::builder()
+            .with_size(egui::vec2(900.0, 700.0))
+            .build_ui_state(
+                |ui, s: &mut DesktopState| {
+                    left_panel(s, ui);
+                    egui::containers::CentralPanel::default().show(ui, |_| {});
+                },
+                state,
+            );
+        harness.run();
+        let before = scene_top(&harness);
+        let x = harness.get_by_label("Scene").rect().min.x + 20.0;
+        let edge = egui::pos2(x, before - 9.0);
+        harness.hover_at(edge);
+        harness.run();
+        harness.drag_at(edge);
+        harness.run();
+        harness.hover_at(egui::pos2(x, edge.y - 120.0));
+        harness.run();
+        harness.drop_at(egui::pos2(x, edge.y - 120.0));
+        harness.run();
+        let after = scene_top(&harness);
+        assert!(
+            before - after > 80.0,
+            "divider drag should grow the scene pane: before {before}, after {after}"
+        );
+        harness.state_mut().layout_gen += 1;
+        harness.run();
+        let reset = scene_top(&harness);
+        assert!(
+            (reset - before).abs() < 2.0,
+            "reset layout should restore the default: {reset} vs {before}"
+        );
+    }
 }

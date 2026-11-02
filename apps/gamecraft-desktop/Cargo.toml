@@ -12,7 +12,7 @@ gamecraft-godot = { workspace = true }
 gamecraft-gltf = { workspace = true }
 gamecraft-mcp = { path = "../../crates/gamecraft-mcp" }
 glam = { workspace = true }
-eframe = "0.37"
+eframe = { version = "0.37", features = ["persistence"] }
 egui = "0.37"
 wgpu = "30"
 futures = "0.3"

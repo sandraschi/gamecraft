@@ -22,6 +22,14 @@
 // Bevy systems receive `Res<T>` / `Query<..>` by value; that is the API, not a smell.
 #![allow(clippy::needless_pass_by_value)]
 
+pub mod analysis;
+#[cfg(feature = "audio")]
+pub mod audio;
+pub mod cues;
 pub mod maze;
+pub mod murmuration;
 #[cfg(feature = "render")]
 pub mod render;
+#[cfg(feature = "render")]
+pub mod render_murmuration;
+pub mod synth;

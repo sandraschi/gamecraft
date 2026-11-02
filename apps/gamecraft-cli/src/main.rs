@@ -80,7 +80,7 @@ enum Commands {
         #[arg(long)]
         textures: Option<PathBuf>,
     },
-    /// List every game (Godot and three.js) with group and last gate result.
+    /// List every game (Godot, three.js and Bevy) with group and last gate result.
     List {
         /// Free-text filter over title, slug, group and kind.
         #[arg(long, default_value = "")]
@@ -118,6 +118,30 @@ enum Commands {
         /// Export every depot game's `main.tscn` into this folder as `<slug>.glb`.
         #[arg(long)]
         depot_out: Option<PathBuf>,
+    },
+    /// List every command in the registry (the whole API; same list the MCP server serves).
+    #[command(name = "commands")]
+    CommandList {
+        /// Print JSON: id, label, menu, shortcut, params, enabled.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Describe one registry command and its parameters.
+    Describe {
+        /// Command id, for example `replay.verify`.
+        id: String,
+        /// Print JSON.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Run a registry command: `run --cmd 'replay.verify={"path":"maze.gcraft"}'`.
+    Run {
+        /// `id` or `id={json params}`.
+        #[arg(long)]
+        cmd: String,
+        /// Print the result as JSON (failures too, with a non-zero exit code).
+        #[arg(long)]
+        json: bool,
     },
     /// Export a JSON scene spec to engine text (same engine as the MCP tool).
     Export {
@@ -180,6 +204,9 @@ fn main() {
                 std::process::exit(2);
             }
         },
+        Commands::CommandList { json } => emit(&gamecraft_mcp::registry::cli_commands(json)),
+        Commands::Describe { id, json } => emit(&gamecraft_mcp::registry::cli_describe(&id, json)),
+        Commands::Run { cmd, json } => emit(&gamecraft_mcp::registry::cli_run(&cmd, json)),
         Commands::List { filter, json } => cmd_list(filter.as_str(), json),
         Commands::Report { slug, json } => cmd_report(slug.as_str(), json),
         Commands::Verify {
@@ -191,6 +218,19 @@ fn main() {
 }
 
 use gamecraft_mcp::catalog::{self, GameEntry, GameKind};
+
+/// Print a registry result and exit with its code.
+fn emit(out: &gamecraft_mcp::registry::CliOutput) {
+    if !out.stdout.is_empty() {
+        println!("{}", out.stdout.trim_end());
+    }
+    if !out.stderr.is_empty() {
+        eprintln!("{}", out.stderr.trim_end());
+    }
+    if out.code != 0 {
+        std::process::exit(out.code);
+    }
+}
 
 /// Convert one scene file and print what went in.
 fn write_gltf(input: &Path, target: &Path) -> Result<(), String> {
@@ -302,10 +342,8 @@ fn cmd_list(filter: &str, json: bool) {
         );
         return;
     }
-    for (kind, label, groups) in [
-        (GameKind::Godot, "Godot", &catalog::GODOT_GROUPS[..]),
-        (GameKind::Web, "three.js", &catalog::WEB_GROUPS[..]),
-    ] {
+    for kind in GameKind::ALL {
+        let (label, groups) = (kind.label(), kind.groups());
         let mine: Vec<&GameEntry> = games.iter().filter(|g| g.kind == kind).collect();
         if mine.is_empty() {
             continue;
@@ -366,6 +404,7 @@ fn cmd_verify(slug: &str, timeout: u64, json: bool) {
     let run = match game.kind {
         GameKind::Web => catalog::web_verify(root.as_path(), game.slug.as_str(), timeout),
         GameKind::Godot => catalog::godot_verify(game.dir.as_path(), 3600, true, Some(timeout)),
+        GameKind::Bevy => catalog::bevy_verify(root.as_path(), game.slug.as_str(), timeout),
     };
     match run {
         Ok(value) => {

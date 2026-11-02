@@ -18,6 +18,7 @@ gamecraft-core = { workspace = true }
 gamecraft-commands = { workspace = true }
 gamecraft-godot = { workspace = true }
 gamecraft-gltf = { workspace = true }
+gamecraft-replay = { workspace = true }
 gamecraft-forge = { path = "../gamecraft-forge" }
 glam = { workspace = true }
 serde = { workspace = true }

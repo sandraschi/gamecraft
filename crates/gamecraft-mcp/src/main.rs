@@ -26,10 +26,13 @@
 //!   can fix the call instead of guessing. Only malformed requests and unknown
 //!   tools are JSON-RPC errors.
 
-use gamecraft_mcp::catalog::{self, GameKind};
-use gamecraft_mcp::{scene_lint, spatial_query};
+use gamecraft_mcp::registry;
+use gamecraft_mcp::tools::{
+    fail, tool_export_scene, tool_game_create, tool_game_list, tool_game_report, tool_game_verify,
+    tool_scene_inspect, tool_scene_lint, tool_scene_verify, tool_spatial_query, ToolError,
+    ToolOutcome,
+};
 use serde_json::{json, Value};
-use std::fmt::Write as _;
 use std::io::{BufRead, Write};
 
 /// Stateless revisions: version, identity and capabilities ride on every request.
@@ -68,10 +71,26 @@ fn server_info() -> Value {
 const INSTRUCTIONS: &str = "GameCraft: Godot 4 scene tools plus a catalog of playable games (forge-made Godot projects and three.js pages). \
 Start with game_list to see what exists and how each game last verified; game_report gives one game's cheat sheet and gate record. \
 scene_lint / scene_inspect / spatial_query read .tscn text; export_scene and game_create write games from JSON specs. \
-Running engines or browsers is opt-in: scene_verify needs GAMECRAFT_MCP_ALLOW_GODOT=1, game_verify on web games needs GAMECRAFT_MCP_ALLOW_WEB=1. \
+Running engines or browsers is opt-in: scene_verify needs GAMECRAFT_MCP_ALLOW_GODOT=1, game_verify on web games needs GAMECRAFT_MCP_ALLOW_WEB=1, on Bevy games GAMECRAFT_MCP_ALLOW_BEVY=1. \
 Every result starts with a one-line summary; failures carry a suggestion and a remediation.";
 
 fn main() {
+    // One binary, CLI first (Craft contract): `commands`, `describe` and `run` use the command
+    // registry; no arguments or `mcp` speaks MCP over stdio, as every existing client config does.
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().is_some_and(|a| a != "mcp") {
+        let Some(out) = registry::cli_args(&args) else {
+            eprintln!("unknown subcommand '{}'\n{}", args[0], registry::CLI_USAGE);
+            std::process::exit(2);
+        };
+        if !out.stdout.is_empty() {
+            println!("{}", out.stdout.trim_end());
+        }
+        if !out.stderr.is_empty() {
+            eprintln!("{}", out.stderr.trim_end());
+        }
+        std::process::exit(out.code);
+    }
     // Any engine or browser this server launches dies with it, even if the client kills us mid-run.
     let _ = gamecraft_mcp::proc_guard::kill_children_on_exit();
     let stdin = std::io::stdin();
@@ -243,7 +262,7 @@ fn tool_list() -> Value {
         }
         p
     };
-    json!([
+    let mut tools = json!([
         {
             "name": "scene_lint",
             "title": "Lint a Godot scene",
@@ -300,10 +319,10 @@ fn tool_list() -> Value {
         {
             "name": "game_list",
             "title": "List playable games",
-            "description": "Every game in the repo: forge-made Godot projects (depot/games) and three.js pages (web/games), with group, one-line description and the last gate result (pass, what failed, when). Use first to find a slug. Optional filter matches title, slug, group or kind ('web', 'godot'). Returns count and games[{kind, slug, title, group, description, verify}].",
+            "description": "Every game in the repo: forge-made Godot projects (depot/games), three.js pages (web/games) and native Bevy games (bevy/games), with group, one-line description and the last gate result (pass, what failed, when). Use first to find a slug. Optional filter matches title, slug, group or kind ('web', 'godot', 'bevy'). Returns count and games[{kind, slug, title, group, description, verify}].",
             "inputSchema": {"type": "object", "properties": {
                 "filter": {"type": "string", "description": "Free text, e.g. 'calm', 'benny', 'godot'. Empty lists all."},
-                "kind": {"type": "string", "enum": ["godot", "web"], "description": "Only one runtime."},
+                "kind": {"type": "string", "enum": ["godot", "web", "bevy"], "description": "Only one runtime."},
                 "root": {"type": "string", "description": "Repo root; found automatically from GAMECRAFT_ROOT or the working directory when omitted."}
             }},
             "outputSchema": envelope(&json!({"count": {"type": "integer"}, "games": {"type": "array", "items": {"type": "object"}}})),
@@ -315,7 +334,7 @@ fn tool_list() -> Value {
             "description": "Everything known about one game: catalog entry, the player cheat sheet, the README, the full last gate record (web: verify.json with checkpoints and self-test; Godot: trace and lint) and its screenshot names. Use to explain a game or diagnose a failing gate. Returns game, cheatsheet, readme, gate, shots, thumb.",
             "inputSchema": {"type": "object", "properties": {
                 "slug": {"type": "string", "description": "Folder name from game_list, e.g. 'where-is-benny'."},
-                "kind": {"type": "string", "enum": ["godot", "web"], "description": "Only needed if both runtimes have this slug."},
+                "kind": {"type": "string", "enum": ["godot", "web", "bevy"], "description": "Only needed if both runtimes have this slug."},
                 "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
             }, "required": ["slug"]},
             "outputSchema": envelope(&json!({"game": {"type": "object"}, "cheatsheet": {"type": ["string", "null"]}, "gate": {}})),
@@ -327,7 +346,7 @@ fn tool_list() -> Value {
             "description": "OPT-IN: run one game's verification gate now and return the fresh result. Web games run the headless-Chromium self-play gate (needs GAMECRAFT_MCP_ALLOW_WEB=1, node and bun; rewrites verify.json and shots/). Godot games boot headless Godot and look for a win marker (needs GAMECRAFT_MCP_ALLOW_GODOT=1). Takes 10 s to a few minutes. Returns pass plus the gate record.",
             "inputSchema": {"type": "object", "properties": {
                 "slug": {"type": "string", "description": "Folder name from game_list."},
-                "kind": {"type": "string", "enum": ["godot", "web"]},
+                "kind": {"type": "string", "enum": ["godot", "web", "bevy"]},
                 "timeout_s": {"type": "integer", "default": 300, "description": "Wall-clock limit; the run is killed after it."},
                 "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
             }, "required": ["slug"]},
@@ -359,32 +378,104 @@ fn tool_list() -> Value {
             "outputSchema": envelope(&json!({"won": {"type": "boolean"}, "markers": {"type": "array"}, "timed_out": {"type": "boolean"}})),
             "annotations": annotations(false, false),
         },
-    ])
+    ]);
+    registry_tools(&mut tools);
+    tools
+}
+
+/// Tools generated from the command registry: the replay commands, plus the three that
+/// expose the registry itself (list, describe, run), so any command is reachable even
+/// from a client that only reads the tool list once.
+fn registry_tools(tools: &mut Value) {
+    let Some(list) = tools.as_array_mut() else {
+        return;
+    };
+    for c in registry::COMMANDS
+        .iter()
+        .filter(|c| c.id.starts_with("replay."))
+    {
+        let mut props = serde_json::Map::new();
+        let mut required = Vec::new();
+        for a in c.params {
+            let mut schema = json!({"type": a.kind, "description": a.help});
+            if !a.choices.is_empty() {
+                schema["enum"] = json!(a.choices);
+            }
+            props.insert(a.name.to_string(), schema);
+            if a.required {
+                required.push(a.name);
+            }
+        }
+        list.push(json!({
+            "name": registry::tool_name(c.id),
+            "title": c.label,
+            "description": format!("{} Command id {}.", c.summary, c.id),
+            "inputSchema": {"type": "object", "properties": props, "required": required},
+            "outputSchema": envelope(&json!({})),
+            "annotations": annotations(c.readonly, false),
+        }));
+    }
+    list.push(json!({
+        "name": "list_commands",
+        "title": "List commands",
+        "description": "Every command in the GameCraft registry with its id, menu path, shortcut and typed parameters. The same list `gamecraft commands --json` prints.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "outputSchema": envelope(&json!({"count": {"type": "integer"}, "commands": {"type": "array", "items": {"type": "object"}}})),
+        "annotations": annotations(true, false),
+    }));
+    list.push(json!({
+        "name": "describe_command",
+        "title": "Describe a command",
+        "description": "One command: summary, menu, shortcut, whether it is read-only, and its parameters with types and allowed values.",
+        "inputSchema": {"type": "object", "properties": {"id": {"type": "string", "description": "Command id, e.g. replay.verify."}}, "required": ["id"]},
+        "outputSchema": envelope(&json!({})),
+        "annotations": annotations(true, false),
+    }));
+    list.push(json!({
+        "name": "run_command",
+        "title": "Run a command",
+        "description": "Run any registered command by id with a params object. Same code path as the dedicated tools and as `gamecraft run --cmd id={json}`.",
+        "inputSchema": {"type": "object", "properties": {
+            "id": {"type": "string", "description": "Command id, e.g. game.list."},
+            "params": {"type": "object", "description": "The command parameters; see describe_command."}
+        }, "required": ["id"]},
+        "outputSchema": envelope(&json!({})),
+        "annotations": annotations(false, false),
+    }));
+}
+
+/// The meta tools: list, describe and run commands from the registry.
+fn registry_meta(name: &str, args: &Value) -> Option<ToolOutcome> {
+    match name {
+        "list_commands" => Some(Ok((
+            format!("{} commands.", registry::COMMANDS.len()),
+            registry::list_json(),
+        ))),
+        "describe_command" => Some(
+            match args
+                .get("id")
+                .and_then(Value::as_str)
+                .and_then(registry::describe)
+            {
+                Some(d) => Ok((format!("Command {}.", d["id"].as_str().unwrap_or("")), d)),
+                None => Err(fail(
+                    "unknown_command",
+                    "No such command.",
+                    "Call list_commands for the ids.",
+                    "list_commands",
+                )),
+            },
+        ),
+        "run_command" => {
+            let id = args.get("id").and_then(Value::as_str).unwrap_or("");
+            let params = args.get("params").cloned().unwrap_or_else(|| json!({}));
+            Some(registry::run(id, &params))
+        }
+        _ => None,
+    }
 }
 
 // ------------------------------------------------------------------ results
-
-/// A tool failure the model can act on.
-struct ToolError {
-    code: &'static str,
-    message: String,
-    suggestion: String,
-    remediation: String,
-}
-
-fn fail(
-    code: &'static str,
-    message: impl Into<String>,
-    suggestion: impl Into<String>,
-    remediation: impl Into<String>,
-) -> ToolError {
-    ToolError {
-        code,
-        message: message.into(),
-        suggestion: suggestion.into(),
-        remediation: remediation.into(),
-    }
-}
 
 fn ok_result(summary: &str, data: Value) -> Value {
     let mut structured = if data.is_object() {
@@ -420,6 +511,11 @@ fn error_result(err: &ToolError) -> Value {
     })
 }
 
+/// True for the three meta tools that front the registry.
+fn registry_meta_name(name: &str) -> bool {
+    matches!(name, "list_commands" | "describe_command" | "run_command")
+}
+
 /// Run one tool. Unknown tool = protocol error; everything else is a tool result.
 fn call_tool(name: &str, args: &Value) -> Result<Value, (i32, String)> {
     let outcome = match name {
@@ -432,6 +528,10 @@ fn call_tool(name: &str, args: &Value) -> Result<Value, (i32, String)> {
         "game_verify" => tool_game_verify(args),
         "game_create" => tool_game_create(args),
         "scene_verify" => tool_scene_verify(args),
+        _ if registry::id_for_tool(name).is_some() || registry_meta_name(name) => {
+            registry_meta(name, args)
+                .unwrap_or_else(|| registry::run(registry::id_for_tool(name).unwrap_or(name), args))
+        }
         _ => {
             return Err((
                 -32602,
@@ -445,489 +545,52 @@ fn call_tool(name: &str, args: &Value) -> Result<Value, (i32, String)> {
     })
 }
 
-type ToolOutcome = Result<(String, Value), ToolError>;
-
-fn scene_source(args: &Value) -> Result<String, ToolError> {
-    let text = args.get("scene_text").and_then(Value::as_str);
-    let file = args.get("scene_file").and_then(Value::as_str);
-    let root = args.get("root").and_then(Value::as_str);
-    if text.is_none() && file.is_none() {
-        return Err(fail(
-            "missing_scene",
-            "No scene given.",
-            "Pass the .tscn text as scene_text, or a path as scene_file.",
-            "scene_lint {\"scene_file\": \"D:/project/main.tscn\"}",
-        ));
-    }
-    gamecraft_mcp::resolve_scene_text(text, file, root).map_err(|reason| {
-        fail(
-            "scene_unreadable",
-            format!("Could not read the scene: {reason}"),
-            "Check the path; res:// paths need root set to the project folder.",
-            "game_list to find a project, then game_report for its folder",
-        )
-    })
-}
-
-fn plural(n: usize, one: &str, many: &str) -> String {
-    format!("{n} {}", if n == 1 { one } else { many })
-}
-
-fn tool_scene_lint(args: &Value) -> ToolOutcome {
-    let text = scene_source(args)?;
-    let findings = scene_lint(text.as_str());
-    let summary = match findings.first() {
-        None => "No findings: the scene is clean.".to_string(),
-        Some(first) => format!(
-            "{}; first: {} at {} ({}).",
-            plural(findings.len(), "finding", "findings"),
-            first.code,
-            first.node,
-            first.message
-        ),
-    };
-    let data = json!({"count": findings.len(), "findings": findings});
-    Ok((summary, data))
-}
-
-fn tool_spatial_query(args: &Value) -> ToolOutcome {
-    let text = scene_source(args)?;
-    let Some(path) = args.get("node_path").and_then(Value::as_str) else {
-        return Err(fail(
-            "missing_node_path",
-            "node_path is required.",
-            "Use '.' for the whole scene or a path like 'Level/Platform3'.",
-            "scene_inspect {\"operation\": \"tree\"} to see the node paths",
-        ));
-    };
-    let mut value = spatial_query(text.as_str(), path).map_err(|reason| {
-        fail(
-            "node_not_found",
-            format!("Cannot measure '{path}': {reason}"),
-            "Node paths are relative to the scene root, separated by '/'.",
-            format!(
-                "scene_inspect {{\"operation\": \"find\", \"query\": \"{}\"}}",
-                path.rsplit('/').next().unwrap_or(path)
-            ),
-        )
-    })?;
-    let triple = |key: &str| -> Vec<f64> {
-        value
-            .get(key)
-            .and_then(Value::as_array)
-            .map(|a| a.iter().filter_map(Value::as_f64).collect())
-            .unwrap_or_default()
-    };
-    let (min, max) = (triple("min"), triple("max"));
-    let size: Vec<f64> = min
-        .iter()
-        .zip(max.iter())
-        .map(|(a, b)| ((b - a) * 1000.0).round() / 1000.0)
-        .collect();
-    let empty = value.get("empty").and_then(Value::as_bool).unwrap_or(false);
-    let summary = if empty || size.len() != 3 {
-        format!("'{path}' has no geometry, so its box is empty.")
-    } else {
-        format!(
-            "'{path}' spans {:.2} x {:.2} x {:.2} m, from {:?} to {:?}.",
-            size[0],
-            size[1],
-            size[2],
-            round3(&min),
-            round3(&max)
-        )
-    };
-    if let Some(map) = value.as_object_mut() {
-        map.insert("size".to_string(), json!(size));
-    }
-    Ok((summary, value))
-}
-fn round3(v: &[f64]) -> Vec<f64> {
-    v.iter().map(|x| (x * 1000.0).round() / 1000.0).collect()
-}
-
-fn usize_arg(args: &Value, key: &str, fallback: usize) -> usize {
-    args.get(key)
-        .and_then(Value::as_u64)
-        .map_or(fallback, |value| usize::try_from(value).unwrap_or(fallback))
-}
-
-fn tool_scene_inspect(args: &Value) -> ToolOutcome {
-    let text = scene_source(args)?;
-    let operation = args
-        .get("operation")
-        .and_then(Value::as_str)
-        .unwrap_or(gamecraft_mcp::OP_TREE);
-    let options = gamecraft_mcp::InspectOptions {
-        operation,
-        node_path: args.get("node_path").and_then(Value::as_str),
-        query: args.get("query").and_then(Value::as_str),
-        depth: usize_arg(args, "depth", gamecraft_mcp::DEFAULT_DEPTH),
-        limit: usize_arg(args, "limit", gamecraft_mcp::DEFAULT_LIMIT),
-        offset: usize_arg(args, "offset", 0),
-    };
-    let value = gamecraft_mcp::scene_inspect(text.as_str(), &options).map_err(|reason| {
-        fail(
-            "inspect_failed",
-            format!("scene_inspect {operation} failed: {reason}"),
-            "operation 'property' needs node_path, 'find' needs query.",
-            "scene_inspect {\"operation\": \"tree\"}",
-        )
-    })?;
-    let total = value.get("total").and_then(Value::as_u64).unwrap_or(0);
-    let summary = match operation {
-        "signals" => format!(
-            "{} connections, {} unresolved.",
-            total,
-            value.get("unresolved").and_then(Value::as_u64).unwrap_or(0)
-        ),
-        "property" => format!(
-            "Properties of {}.",
-            value
-                .get("path")
-                .and_then(Value::as_str)
-                .unwrap_or("the node")
-        ),
-        "find" => format!("{} nodes match '{}'.", total, options.query.unwrap_or("")),
-        _ => match value.get("next_offset").and_then(Value::as_u64) {
-            Some(next) => {
-                format!("{total} nodes; this page ends before {next}, pass offset={next} for more.")
-            }
-            None => format!("{total} nodes, all on this page."),
-        },
-    };
-    Ok((summary, value))
-}
-
-fn tool_export_scene(args: &Value) -> ToolOutcome {
-    let format = args
-        .get("format")
-        .and_then(Value::as_str)
-        .unwrap_or(gamecraft_mcp::spec::FORMAT_GODOT4);
-    if !gamecraft_mcp::spec::FORMATS.contains(&format) {
-        return Err(fail(
-            "unsupported_format",
-            format!("There is no '{format}' export."),
-            format!(
-                "Use one of: {}. glTF loads in Blender, Unity, three.js and most other engines.",
-                gamecraft_mcp::spec::FORMATS.join(", ")
-            ),
-            "export_scene {\"format\": \"gltf\", \"scene\": <same scene>}",
-        ));
-    }
-    let Some(scene) = args.get("scene") else {
-        return Err(fail(
-            "missing_scene",
-            "scene is required.",
-            "Pass a scene spec object with at least nodes[].",
-            "export_scene {\"scene\": {\"nodes\": [{\"name\": \"World\", \"type\": \"Node3D\"}]}}",
-        ));
-    };
-    let spec: gamecraft_mcp::SceneSpec = serde_json::from_value(scene.clone()).map_err(|err| {
-        fail(
-            "invalid_spec",
-            format!("The scene spec does not parse: {err}"),
-            "Check field names and types against the scene description in tools/list.",
-            "export_scene with a minimal spec, then add nodes",
-        )
-    })?;
-    let outcome = gamecraft_mcp::export_spec(&spec, format).map_err(|reason| {
-        fail(
-            "export_failed",
-            format!("Export failed: {reason}"),
-            "Every parent must name an earlier node; resources must be declared before use.",
-            "scene_lint on the exported text once it exports",
-        )
-    })?;
-    let summary = format!(
-        "Exported {} as {format}: {} bytes, uid {}.",
-        plural(outcome.nodes, "node", "nodes"),
-        outcome.text.len(),
-        outcome.uid
-    );
-    Ok((
-        summary,
-        json!({"format": format, "uid": outcome.uid, "nodes": outcome.nodes, "bytes": outcome.text.len(), "text": outcome.text}),
-    ))
-}
-
-fn repo_root(args: &Value) -> Result<std::path::PathBuf, ToolError> {
-    catalog::find_root(args.get("root").and_then(Value::as_str)).ok_or_else(|| {
-        fail("repo_not_found", "Could not find the GameCraft repo (a folder with depot/games or web/games).", "Pass root, or start the server with GAMECRAFT_ROOT set, or run it from inside the repo.", "game_list {\"root\": \"D:/Dev/repos/gamecraft\"}")
-    })
-}
-fn kind_arg(args: &Value) -> Option<GameKind> {
-    match args.get("kind").and_then(Value::as_str) {
-        Some("godot") => Some(GameKind::Godot),
-        Some("web") => Some(GameKind::Web),
-        _ => None,
-    }
-}
-fn find_game(args: &Value) -> Result<(std::path::PathBuf, catalog::GameEntry), ToolError> {
-    let root = repo_root(args)?;
-    let Some(slug) = args.get("slug").and_then(Value::as_str) else {
-        return Err(fail(
-            "missing_slug",
-            "slug is required.",
-            "Use a folder name from game_list.",
-            "game_list",
-        ));
-    };
-    let games = catalog::discover(root.as_path());
-    if let Some(game) = catalog::find(&games, slug, kind_arg(args)) {
-        return Ok((root, game.clone()));
-    }
-    let close = catalog::suggest(&games, slug);
-    Err(fail(
-        "unknown_game",
-        format!("There is no game '{slug}'."),
-        if close.is_empty() {
-            "List the games and use one of their slugs.".to_string()
-        } else {
-            format!("Did you mean: {}?", close.join(", "))
-        },
-        close.first().map_or_else(
-            || "game_list".to_string(),
-            |s| format!("game_report {{\"slug\": \"{s}\"}}"),
-        ),
-    ))
-}
-
-fn tool_game_list(args: &Value) -> ToolOutcome {
-    let root = repo_root(args)?;
-    let filter = args.get("filter").and_then(Value::as_str).unwrap_or("");
-    let kind = kind_arg(args);
-    let games: Vec<catalog::GameEntry> = catalog::discover(root.as_path())
-        .into_iter()
-        .filter(|g| kind.is_none_or(|k| g.kind == k) && catalog::matches(g, filter))
-        .collect();
-    let failing: Vec<&str> = games
-        .iter()
-        .filter(|g| g.verify.as_ref().is_some_and(|v| !v.pass))
-        .map(|g| g.slug.as_str())
-        .collect();
-    let unverified = games.iter().filter(|g| g.verify.is_none()).count();
-    let godot = games.iter().filter(|g| g.kind == GameKind::Godot).count();
-    let mut summary = format!(
-        "{} ({} Godot, {} web)",
-        plural(games.len(), "game", "games"),
-        godot,
-        games.len() - godot
-    );
-    if failing.is_empty() {
-        summary.push_str(if unverified == 0 {
-            "; all passed their last gate."
-        } else {
-            "; none failing."
-        });
-    } else {
-        let _ = write!(summary, "; failing last gate: {}.", failing.join(", "));
-    }
-    if unverified > 0 {
-        let _ = write!(
-            summary,
-            " {} never verified.",
-            plural(unverified, "game", "games")
-        );
-    }
-    if games.is_empty() && !filter.is_empty() {
-        return Err(fail(
-            "no_match",
-            format!("No game matches '{filter}'."),
-            "Try a shorter filter, or none.",
-            "game_list",
-        ));
-    }
-    Ok((summary, json!({"count": games.len(), "games": games})))
-}
-
-fn tool_game_report(args: &Value) -> ToolOutcome {
-    let (_, game) = find_game(args)?;
-    let status = match &game.verify {
-        Some(v) if v.pass => format!("passed its last gate ({})", v.progress),
-        Some(v) => format!(
-            "FAILED its last gate: {}",
-            v.failed.clone().unwrap_or_default()
-        ),
-        None => "has never been verified".to_string(),
-    };
-    let summary = format!(
-        "{} ({} game, {}) {status}.",
-        game.title,
-        game.kind.as_str(),
-        game.group
-    );
-    Ok((summary, catalog::report(&game)))
-}
-
-fn tool_game_verify(args: &Value) -> ToolOutcome {
-    let (root, game) = find_game(args)?;
-    let timeout = args.get("timeout_s").and_then(Value::as_u64).unwrap_or(300);
-    match game.kind {
-        GameKind::Web => {
-            if std::env::var("GAMECRAFT_MCP_ALLOW_WEB").ok().as_deref() != Some("1") {
-                return Err(fail("web_gate_disabled", "Running the web gate is turned off on this server.", "It launches node, bun and headless Chromium, so it is opt-in. Restart the server with GAMECRAFT_MCP_ALLOW_WEB=1, or read the last result instead.", format!("game_report {{\"slug\": \"{}\"}}", game.slug)));
-            }
-            let run = catalog::web_verify(root.as_path(), game.slug.as_str(), timeout)
-                .map_err(|reason| fail("web_gate_failed_to_run", reason, "Check that node and bun are installed and web/node_modules exists (bun install in web/).", "game_report for the previous result"))?;
-            let pass = run
-                .pointer("/verify/pass")
-                .and_then(Value::as_bool)
-                .unwrap_or(false);
-            let failed = run
-                .pointer("/verify/failed")
-                .and_then(Value::as_str)
-                .unwrap_or("");
-            let summary = if pass {
-                format!("{} passes its gate.", game.title)
-            } else {
-                format!("{} FAILS its gate: {failed}.", game.title)
-            };
-            let mut data = run;
-            if let Some(map) = data.as_object_mut() {
-                map.insert("pass".to_string(), Value::Bool(pass));
-                map.insert("kind".to_string(), json!("web"));
-            }
-            Ok((summary, data))
-        }
-        GameKind::Godot => {
-            if std::env::var("GAMECRAFT_MCP_ALLOW_GODOT").ok().as_deref() != Some("1") {
-                return Err(fail("godot_gate_disabled", "Running Godot is turned off on this server.", "It launches a local Godot process, so it is opt-in. Restart the server with GAMECRAFT_MCP_ALLOW_GODOT=1, or read the last recorded trace instead.", format!("game_report {{\"slug\": \"{}\", \"kind\": \"godot\"}}", game.slug)));
-            }
-            let run = catalog::godot_verify(game.dir.as_path(), 3600, true, Some(timeout))
-                .map_err(|reason| {
-                    fail(
-                        "godot_failed_to_run",
-                        reason,
-                        "Set GAMECRAFT_GODOT to the Godot 4 executable if it is not on PATH.",
-                        "game_report for the recorded trace",
-                    )
-                })?;
-            let won = run.get("won").and_then(Value::as_bool).unwrap_or(false);
-            let summary = if won {
-                format!("{} reached its win marker in headless Godot.", game.title)
-            } else {
-                format!("{} did NOT reach a win marker.", game.title)
-            };
-            let mut data = run;
-            if let Some(map) = data.as_object_mut() {
-                map.insert("pass".to_string(), Value::Bool(won));
-                map.insert("kind".to_string(), json!("godot"));
-            }
-            Ok((summary, data))
-        }
-    }
-}
-
-fn tool_game_create(args: &Value) -> ToolOutcome {
-    if args
-        .get("explain")
-        .and_then(Value::as_bool)
-        .unwrap_or(false)
-        || args.get("spec").is_none()
-    {
-        let guide = gamecraft_forge::llm::spec_prompt("<your idea>");
-        if args.get("spec").is_none()
-            && !args
-                .get("explain")
-                .and_then(Value::as_bool)
-                .unwrap_or(false)
-        {
-            return Err(fail(
-                "missing_spec",
-                "No spec given.",
-                "Read the spec format first, then call again with spec.",
-                "game_create {\"explain\": true}",
-            ));
-        }
-        return Ok(("The GameSpec format and design rules are in guide; design a spec and call game_create with it.".to_string(), json!({"guide": guide})));
-    }
-    let root = repo_root(args)?;
-    let spec: gamecraft_forge::create::GameSpec = serde_json::from_value(
-        args.get("spec").cloned().unwrap_or(Value::Null),
-    )
-    .map_err(|err| {
-        fail(
-            "invalid_spec",
-            format!("The spec does not parse: {err}"),
-            "Field names and types must match the GameSpec format.",
-            "game_create {\"explain\": true}",
-        )
-    })?;
-    if let Err(reason) = gamecraft_forge::create::validate(&spec) {
-        return Err(fail(
-            "spec_rejected",
-            format!("The spec was rejected: {reason}"),
-            "Fix every listed problem; the rules are in the guide.",
-            "game_create {\"explain\": true}",
-        ));
-    }
-    let summary = gamecraft_forge::create::create_game(&spec, root.as_path())
-        .map_err(|reason| fail("not_completable", format!("The game was not written: {reason}"), "Usually a gap too wide to jump or a platform too low; the Rust replay must reach the goal.", "game_create {\"explain\": true} for the physics limits"))?;
-    let dir = root.join("depot").join("games").join(spec.slug.as_str());
-    Ok((
-        format!(
-            "Created '{}' ({}) in {}: {summary}",
-            spec.title,
-            spec.archetype,
-            dir.display()
-        ),
-        json!({"slug": spec.slug, "dir": dir, "summary": summary}),
-    ))
-}
-
-fn tool_scene_verify(args: &Value) -> ToolOutcome {
-    if std::env::var("GAMECRAFT_MCP_ALLOW_GODOT").ok().as_deref() != Some("1") {
-        return Err(fail("godot_gate_disabled", "scene_verify is turned off on this server.", "It launches a local Godot process, so it is opt-in. Restart the server with GAMECRAFT_MCP_ALLOW_GODOT=1.", "scene_lint on the project's main.tscn needs no engine"));
-    }
-    let Some(game) = args.get("game_path").and_then(Value::as_str) else {
-        return Err(fail(
-            "missing_game_path",
-            "game_path is required.",
-            "Pass the folder holding project.godot.",
-            "game_list to find catalog games",
-        ));
-    };
-    let frames = args.get("frames").and_then(Value::as_u64).unwrap_or(3600);
-    let autoplay = args
-        .get("autoplay")
-        .and_then(Value::as_bool)
-        .unwrap_or(true);
-    let run = catalog::godot_verify(
-        std::path::Path::new(game),
-        frames,
-        autoplay,
-        args.get("timeout_s").and_then(Value::as_u64),
-    )
-    .map_err(|reason| {
-        fail(
-            "godot_failed_to_run",
-            reason,
-            "Set GAMECRAFT_GODOT to the Godot 4 executable if it is not on PATH.",
-            "scene_lint on main.tscn",
-        )
-    })?;
-    let won = run.get("won").and_then(Value::as_bool).unwrap_or(false);
-    let timed_out = run
-        .get("timed_out")
-        .and_then(Value::as_bool)
-        .unwrap_or(false);
-    let summary = if won {
-        "Win marker reached.".to_string()
-    } else if timed_out {
-        "No win: the engine hit the time limit.".to_string()
-    } else {
-        "No win marker within the frame budget.".to_string()
-    };
-    Ok((summary, run))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     fn call(name: &str, args: &Value) -> Value {
         call_tool(name, args).unwrap_or_else(|(c, m)| json!({"rpc_error": c, "message": m}))
+    }
+
+    #[test]
+    fn registry_tools_are_listed_and_run_the_same_code_as_run_command() {
+        let names: Vec<String> = tool_list()
+            .as_array()
+            .map(|a| {
+                a.iter()
+                    .filter_map(|t| t["name"].as_str().map(String::from))
+                    .collect()
+            })
+            .unwrap_or_default();
+        for n in [
+            "replay_record",
+            "replay_verify",
+            "replay_info",
+            "list_commands",
+            "describe_command",
+            "run_command",
+        ] {
+            assert!(names.iter().any(|x| x == n), "{n} missing from tools/list");
+        }
+        let listed = call("list_commands", &json!({}));
+        assert_eq!(
+            listed.pointer("/structuredContent/count"),
+            Some(&json!(registry::COMMANDS.len()))
+        );
+        // The dedicated tool and run_command give the identical answer.
+        let direct = call("replay_info", &json!({"path": "nope.txt"}));
+        let via = call(
+            "run_command",
+            &json!({"id": "replay.info", "params": {"path": "nope.txt"}}),
+        );
+        assert_eq!(direct, via);
+        assert_eq!(
+            direct.pointer("/structuredContent/error"),
+            Some(&json!("wrong_extension"))
+        );
+        let unknown = call("run_command", &json!({"id": "replay.rec"}));
+        assert_eq!(unknown["isError"], true);
     }
 
     /// A modern (2026-07-28) request.
@@ -1031,7 +694,7 @@ mod tests {
     fn every_tool_has_title_annotations_and_output_schema() {
         let tools = tool_list();
         let list = tools.as_array().map(Vec::as_slice).unwrap_or_default();
-        assert_eq!(list.len(), 9);
+        assert_eq!(list.len(), 15);
         for t in list {
             assert!(
                 t.get("title").is_some()

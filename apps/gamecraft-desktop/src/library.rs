@@ -158,11 +158,7 @@ pub(crate) fn grid(state: &mut DesktopState, ui: &mut egui::Ui) {
             for (kind, group, members) in &sections {
                 if last_kind != Some(*kind) {
                     scroll.add_space(6.0);
-                    let label = match kind {
-                        GameKind::Godot => "Godot",
-                        GameKind::Web => "three.js",
-                    };
-                    scroll.label(egui::RichText::new(label).size(18.0).strong());
+                    scroll.label(egui::RichText::new(kind.label()).size(18.0).strong());
                     last_kind = Some(*kind);
                 }
                 scroll.label(egui::RichText::new(group.as_str()).color(accent(scroll)));

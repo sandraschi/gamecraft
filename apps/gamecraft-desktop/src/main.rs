@@ -16,6 +16,7 @@
 mod gamepad;
 mod library;
 mod mesh;
+mod palette;
 mod raster;
 mod state;
 mod textures;
@@ -73,20 +74,27 @@ impl DesktopState {
 impl eframe::App for DesktopState {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         view::top_bar(self, ui);
+        let generation = self.layout_gen;
         if self.library {
-            egui::containers::Panel::right("game_detail").show(ui, |ui| {
-                library::detail(self, ui);
-            });
+            egui::containers::Panel::right(("game_detail", generation))
+                .resizable(true)
+                .default_size(300.0)
+                .size_range(200.0..=700.0)
+                .show(ui, |ui| {
+                    library::detail(self, ui);
+                });
             egui::containers::CentralPanel::default().show(ui, |ui| {
                 library::grid(self, ui);
             });
         } else {
-            egui::containers::Panel::left("scene_tree").show(ui, |ui| {
-                view::left_tree(self, ui);
-            });
-            egui::containers::Panel::right("inspector").show(ui, |ui| {
-                view::right_panels(self, ui);
-            });
+            view::left_panel(self, ui);
+            egui::containers::Panel::right(("inspector", generation))
+                .resizable(true)
+                .default_size(280.0)
+                .size_range(180.0..=600.0)
+                .show(ui, |ui| {
+                    view::right_panels(self, ui);
+                });
             egui::containers::Panel::bottom("trace_bar").show(ui, |ui| {
                 view::bottom_trace(self, ui);
             });
@@ -96,6 +104,8 @@ impl eframe::App for DesktopState {
         }
         view::dialogs(self, ui.ctx());
         library::keys(self, ui.ctx());
+        palette::keys(self, ui.ctx());
+        palette::window(self, ui.ctx());
         library::wheel_zoom(ui.ctx());
         self.poll_verify();
         if self.verify_job.is_some() {

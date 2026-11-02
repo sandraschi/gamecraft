@@ -4,6 +4,8 @@
 //! BFS pathfinder. Every verifier is pure and seedable, so traces replay
 //! byte-identically.
 
+pub mod flock;
+
 use std::collections::{HashMap, HashSet, VecDeque};
 
 /// Fixed timestep: 60 Hz, matching Godot physics.

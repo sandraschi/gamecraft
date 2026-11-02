@@ -130,6 +130,10 @@ pub(crate) struct DesktopState {
     pub(crate) depot_filter: String,
     /// Library (card grid plus detail card) instead of the scene editor.
     pub(crate) library: bool,
+    /// Bumped by View > Reset layout; folded into panel ids so dragged sizes are forgotten.
+    pub(crate) layout_gen: u32,
+    /// Command palette (the registry in the GUI).
+    pub(crate) palette: crate::palette::Palette,
     /// Light theme instead of dark.
     pub(crate) light: bool,
     /// Gate running in the background, if any.
@@ -153,7 +157,7 @@ pub(crate) enum Dialog {
     GameOverlay,
 }
 
-pub(crate) use gamecraft_mcp::catalog::{GameKind, GODOT_GROUPS, WEB_GROUPS};
+pub(crate) use gamecraft_mcp::catalog::GameKind;
 
 /// One playable project. This is the shared catalog entry, so the app, the CLI
 /// (`gamecraft-cli list`) and the MCP server (`game_list`) agree on titles,
@@ -365,6 +369,8 @@ impl DesktopState {
             thumbs: HashMap::new(),
             depot_filter: String::new(),
             library: true,
+            layout_gen: 0,
+            palette: crate::palette::Palette::default(),
             light: false,
             verify_job: None,
             sheet: None,
@@ -508,9 +514,14 @@ impl DesktopState {
         let kind = game.kind;
         self.selected_game = Some(index);
         self.overlay = gamecraft_core::config::load_overlay(dir.as_path());
-        if kind == GameKind::Web {
+        if kind != GameKind::Godot {
             // No Godot scene to parse; keep the current viewport and say so.
-            self.status = format!("selected {} (three.js, opens in the browser)", game.slug);
+            let how = if kind == GameKind::Web {
+                "three.js, opens in the browser"
+            } else {
+                "Bevy, runs as its own window"
+            };
+            self.status = format!("selected {} ({how})", game.slug);
             return;
         }
         self.load_from_path(dir.join("main.tscn").as_path());
@@ -618,6 +629,10 @@ impl DesktopState {
             self.open_web(&game, demo);
             return;
         }
+        if game.kind == GameKind::Bevy {
+            self.spawn_bevy(&game, demo);
+            return;
+        }
         let binary = if self.app_cfg.godot_binary.trim().is_empty() {
             std::env::var("GAMECRAFT_GODOT").unwrap_or_else(|_| "godot".to_string())
         } else {
@@ -641,6 +656,41 @@ impl DesktopState {
                 self.game_child = Some(child);
             }
             Err(err) => self.status = format!("cannot start godot ({binary}): {err}"),
+        }
+    }
+
+    /// Start a built Bevy game in its own window; `demo` lets it play itself.
+    /// An unbuilt game reports the exact build command instead of compiling in the UI.
+    fn spawn_bevy(&mut self, game: &DepotGame, demo: bool) {
+        let Some(root) = gamecraft_mcp::catalog::find_root(None) else {
+            self.status = "no GameCraft repo found; set GAMECRAFT_ROOT".to_string();
+            return;
+        };
+        let exe = match gamecraft_mcp::catalog::bevy_launch(game, root.as_path()) {
+            Ok(exe) => exe,
+            Err(hint) => {
+                self.status = format!("{}: {hint}", game.slug);
+                return;
+            }
+        };
+        let replaced = self.stop_game();
+        let mut command = std::process::Command::new(exe);
+        command.current_dir(root);
+        if demo {
+            command.arg("--autoplay");
+        }
+        match command.spawn() {
+            Ok(child) => {
+                let mode = if demo { "demo" } else { "play" };
+                let note = if replaced {
+                    ", previous game closed"
+                } else {
+                    ""
+                };
+                self.status = format!("started {} [{mode}] (pid {}{note})", game.slug, child.id());
+                self.game_child = Some(child);
+            }
+            Err(err) => self.status = format!("cannot start {}: {err}", game.slug),
         }
     }
 
@@ -909,10 +959,8 @@ impl DesktopState {
     pub(crate) fn visible_sections(&self) -> Vec<(GameKind, String, Vec<usize>)> {
         let filter = self.depot_filter.trim().to_lowercase();
         let mut out = Vec::new();
-        for (kind, known) in [
-            (GameKind::Godot, &GODOT_GROUPS[..]),
-            (GameKind::Web, &WEB_GROUPS[..]),
-        ] {
+        for kind in GameKind::ALL {
+            let known = kind.groups();
             let mut groups: Vec<String> = known.iter().map(|g| (*g).to_string()).collect();
             for game in self.depot_games.iter().filter(|g| g.kind == kind) {
                 if !groups.contains(&game.group) {
@@ -1010,6 +1058,9 @@ impl DesktopState {
                 }
                 GameKind::Godot => {
                     gamecraft_mcp::catalog::godot_verify(game.dir.as_path(), 3600, true, Some(300))
+                }
+                GameKind::Bevy => {
+                    gamecraft_mcp::catalog::bevy_verify(root.as_path(), game.slug.as_str(), 300)
                 }
             };
             let _ = tx.send(result);
