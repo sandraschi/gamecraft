@@ -201,6 +201,7 @@ export function injectHead(html: string, slug: string | null): string {
     `<meta name="theme-color" content="${THEME}">`,
     `<meta name="mobile-web-app-capable" content="yes">`,
     `<meta name="apple-mobile-web-app-capable" content="yes">`,
+    `<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">`,
     `<script src="/pwa.js" defer></script>`,
   ].join("\n");
   return html.includes("</head>") ? html.replace("</head>", `${tags}\n</head>`) : `${tags}\n${html}`;
