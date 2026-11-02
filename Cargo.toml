@@ -8,13 +8,14 @@ members = [
     "crates/gamecraft-sim",
     "crates/gamecraft-gltf",
     "crates/gamecraft-bevy",
+    "crates/gamecraft-replay",
     "apps/gamecraft-cli",
     "apps/gamecraft-desktop",
 ]
 resolver = "2"
 
 [workspace.package]
-version = "0.10.2"
+version = "0.13.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 
@@ -35,6 +36,7 @@ gamecraft-core = { path = "crates/gamecraft-core" }
 gamecraft-commands = { path = "crates/gamecraft-commands" }
 gamecraft-godot = { path = "crates/gamecraft-godot" }
 gamecraft-sim = { path = "crates/gamecraft-sim" }
+gamecraft-replay = { path = "crates/gamecraft-replay" }
 gamecraft-gltf = { path = "crates/gamecraft-gltf" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -44,3 +46,18 @@ clap = { version = "4.5", features = ["derive"] }
 thiserror = "2.0"
 image = "0.25"
 gif = "0.13"
+
+# Flock tests push 20 000 boids a step; keep the sim fast even in debug builds.
+[profile.dev.package.gamecraft-sim]
+opt-level = 3
+
+# Playable Bevy binaries: own code at 1, dependencies (Bevy, wgpu) at 3, as Bevy recommends.
+[profile.play]
+inherits = "dev"
+opt-level = 1
+
+[profile.play.package."*"]
+opt-level = 3
+
+[profile.play.package.gamecraft-sim]
+opt-level = 3

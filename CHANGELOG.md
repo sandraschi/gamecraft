@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.0 - 2026-11-02 (Prompt-to-Depot Visual Parity & Asset Factory)
+
+- **Prompt-to-Depot Visual Parity:** Closed artifact gap in `create_game` (`crates/gamecraft-forge/src/create.rs`). Every game created via `gamecraft-cli new` now automatically renders its middle-frame `thumb.png`, downsampled animation `play.gif`, scene diagnostic `lint.json`, `trace.json`, and `commands.jsonl`.
+- **Depot Completion:** 15 of 15 depot games now carry 100% complete visual assets and clean lint verdicts (`night-forest` and `snowy-mountain-pass` regenerated and verified).
+- **Process Leaks Guard:** Integrated `gamecraft_mcp::proc_guard` Windows Job Object to kill all child Godot processes on exit or timeout.
+
 ## Unreleased - 2026-10-31 (no more leaked Godot processes)
 
 - **Cause:** the dev box had 21 Godot game windows open (the viewer's Start Game spawned
