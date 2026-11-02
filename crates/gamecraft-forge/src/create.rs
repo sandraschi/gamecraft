@@ -1061,6 +1061,44 @@ pub fn create_game(spec: &GameSpec, root: &Path) -> Result<String, String> {
     }
     let spec_json = serde_json::to_string_pretty(spec).map_err(|err| err.to_string())?;
     crate::write_text(&dir.join("spec.json"), spec_json.as_str())?;
+
+    // Frames: middle frame thumb, downsampled GIF (<= 150 frames).
+    let statics = parts.statics.clone();
+    let mid = parts.frames.len() / 2;
+    if let Some(shot) = parts.frames.get(mid) {
+        let png = crate::render::render_frame(parts.view, statics.as_slice(), shot.as_slice());
+        crate::render::write_png(
+            dir.join("thumb.png").to_string_lossy().as_ref(),
+            png.as_slice(),
+        )?;
+    }
+    if !parts.frames.is_empty() {
+        let stride = parts.frames.len().div_ceil(150).max(1);
+        let mut gif_frames: Vec<Vec<u8>> = Vec::new();
+        for (index, frame) in parts.frames.iter().enumerate() {
+            if index % stride == 0 {
+                gif_frames.push(crate::render::render_frame(
+                    parts.view,
+                    statics.as_slice(),
+                    frame.as_slice(),
+                ));
+            }
+        }
+        crate::render::write_gif(
+            dir.join("play.gif").to_string_lossy().as_ref(),
+            gif_frames.as_slice(),
+            3,
+        )?;
+    }
+    if !parts.trace_json.is_empty() {
+        crate::write_text(&dir.join("trace.json"), parts.trace_json.as_str())?;
+    }
+    if !parts.commands_json.is_empty() {
+        crate::write_text(&dir.join("commands.jsonl"), parts.commands_json.as_str())?;
+    }
+    let lint_json = serde_json::to_string_pretty(&diags).map_err(|err| err.to_string())?;
+    crate::write_text(&dir.join("lint.json"), lint_json.as_str())?;
+
     Ok(parts.summary)
 }
 
