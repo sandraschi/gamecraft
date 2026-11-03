@@ -7,6 +7,14 @@ set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
 default:
     @just --list
 
+# Naked-PC bootstrap: provision cargo, Godot 4.4, Node, bun, wasm target (idempotent)
+bootstrap:
+    powershell -NoProfile -File scripts/bootstrap.ps1
+
+# Bootstrap dry run: report what would be installed, change nothing
+bootstrap-check:
+    powershell -NoProfile -File scripts/bootstrap.ps1 -Check
+
 # Strict ArtCraft lint gate across all workspace members
 check:
     $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo clippy --workspace --all-targets --all-features -- -D warnings
