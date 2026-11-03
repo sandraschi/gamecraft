@@ -1,0 +1,12 @@
+{
+  "slug": "sudoku-color",
+  "title": "Sudoku Color",
+  "category": "Puzzle",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "9x9 color skin of Sudoku Classic. Numbers 1-9 mapped to colors (same generator/solver, take-back, Hint/AI). From ai-games-collection sudoku-color. Tour: solver fills all.",
+  "author": "ai-games-collection (color) + gamecraft session 2026-11-02",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "solved",
+  "step_budget": 20000
+}

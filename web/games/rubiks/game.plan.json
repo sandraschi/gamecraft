@@ -1,0 +1,12 @@
+{
+  "slug": "rubiks",
+  "title": "Rubik's Cube 2/3/4",
+  "category": "Puzzle",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Rubik's in several sizes from ai-games-collection/games/puzzle-games/rubiks.js: 2x2 pocket, 3x3 classic, 4x4 revenge. Scramble + solver tour (layer method), checkpoints per face. Sizes param ?size=2|3|4, same __gamecraft contract.",
+  "author": "ai-games-collection (cube) + gamecraft session 2026-11-02",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "solved",
+  "step_budget": 40000
+}
