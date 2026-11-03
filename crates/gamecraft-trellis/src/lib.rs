@@ -18,16 +18,18 @@ use std::path::{Path, PathBuf};
 /// TRELLIS.2 upstream repository (pinned by the operator, not by this crate).
 pub const TRELLIS_REPO: &str = "https://github.com/microsoft/TRELLIS.2";
 
-/// Licence truth, repeated everywhere a row is written: research-only.
-/// See `docs/TRELLIS2.md`.
+/// Licence truth, repeated everywhere a row is written: MIT code/model, but the
+/// training data is unlisted public 3D scrapes, so provenance is unclear.
+/// See `docs/TRELLIS2.md`. Human approval before shipping, always.
 pub const LICENSE_NOTE: &str =
-    "TRELLIS.2 is research-only (non-commercial); human approval required before shipping.";
+    "TRELLIS.2: MIT code/model, training-data provenance unclear; human approval required before shipping.";
 
 /// Which sidecar transport to plan for.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Backend {
-    /// `python <repo>/run.py --image <png> --outdir <dir>` (operator-owned env).
+    /// `python <repo>/trellis_driver.py --image <png> --outdir <dir>`
+    /// (operator-owned env; driver source in `docs/TRELLIS2.md`).
     Cli,
     /// `POST <endpoint>/generate` with multipart image (operator-owned server).
     Http,
@@ -173,7 +175,7 @@ pub fn plan(config: &TrellisConfig, request: &TrellisRequest) -> Result<TrellisP
             config.python.to_string_lossy().into_owned(),
             config
                 .repo_dir
-                .join("run.py")
+                .join("trellis_driver.py")
                 .to_string_lossy()
                 .into_owned(),
             "--image".to_string(),
@@ -298,6 +300,137 @@ pub fn write_ledger(out_glb: &Path, ledger: &TrellisLedger) -> Result<PathBuf, S
     Ok(path)
 }
 
+/// One idempotent setup step. The CLI prints every step dry-run, and only
+/// with `--execute` runs the ones whose marker is absent (unless forced).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SetupStep {
+    /// Human label, e.g. `clone TRELLIS.2`.
+    pub label: String,
+    /// Exact argv to run (`argv[0]` is the program).
+    pub argv: Vec<String>,
+    /// Run inside this dir when set.
+    pub cwd: Option<PathBuf>,
+    /// Skip the step when this path exists (idempotence marker).
+    pub skip_if_exists: Option<PathBuf>,
+}
+
+/// Deterministic setup plan: clone, conda env, weights, driver.
+///
+/// Pure path math, no network, no spawning: the CLI decides execution.
+/// `with_weights` off skips the 8 GB download (env-only setup).
+///
+/// # Errors
+///
+/// Currently infallible; returns `Err` only to keep the `plan` signature
+/// family uniform if validation is added later.
+pub fn plan_setup(config: &TrellisConfig, with_weights: bool) -> Result<Vec<SetupStep>, String> {
+    let mut steps = vec![
+        SetupStep {
+            label: "clone TRELLIS.2".to_string(),
+            argv: vec![
+                "git".to_string(),
+                "clone".to_string(),
+                "--recursive".to_string(),
+                TRELLIS_REPO.to_string(),
+                config.repo_dir.to_string_lossy().into_owned(),
+            ],
+            cwd: None,
+            skip_if_exists: Some(config.repo_dir.clone()),
+        },
+        SetupStep {
+            label: "create trellis2 conda env".to_string(),
+            argv: vec![
+                "bash".to_string(),
+                "setup.sh".to_string(),
+                "--new-env".to_string(),
+                "--basic".to_string(),
+                "--flash-attn".to_string(),
+                "--nvdiffrast".to_string(),
+                "--nvdiffrec".to_string(),
+                "--cumesh".to_string(),
+                "--o-voxel".to_string(),
+                "--flexgemm".to_string(),
+            ],
+            cwd: Some(config.repo_dir.clone()),
+            skip_if_exists: Some(config.python.clone()),
+        },
+    ];
+    if with_weights {
+        steps.push(SetupStep {
+            label: "download TRELLIS.2-4B weights (~8 GB)".to_string(),
+            argv: vec![
+                "huggingface-cli".to_string(),
+                "download".to_string(),
+                "microsoft/TRELLIS.2-4B".to_string(),
+            ],
+            cwd: None,
+            skip_if_exists: None,
+        });
+    }
+    steps.push(SetupStep {
+        label: "install trellis_driver.py".to_string(),
+        argv: vec!["write-driver".to_string()],
+        cwd: None,
+        skip_if_exists: None,
+    });
+    Ok(steps)
+}
+
+/// The sidecar driver, adapted from upstream `example.py` (MIT).
+/// `trellis setup --execute` writes this to `<repo>/trellis_driver.py`;
+/// `plan()` targets exactly that path. Game-budget defaults (20K tris,
+/// 1K textures) so the GLB arrives near the import gates.
+pub const DRIVER_SOURCE: &str = r#"""import argparse
+import os
+
+os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
+import o_voxel  # noqa: E402
+from trellis2.pipelines import Trellis2ImageTo3DPipeline  # noqa: E402
+from PIL import Image  # noqa: E402
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--image", required=True)
+ap.add_argument("--outdir", required=True)
+ap.add_argument("--slug", default="asset")
+ap.add_argument("--decimation-target", type=int, default=20000)
+ap.add_argument("--texture-size", type=int, default=1024)
+args = ap.parse_args()
+
+pipe = Trellis2ImageTo3DPipeline.from_pretrained("microsoft/TRELLIS.2-4B")
+pipe.cuda()
+mesh = pipe.run(Image.open(args.image))[0]
+os.makedirs(args.outdir, exist_ok=True)
+out = os.path.join(args.outdir, args.slug + ".glb")
+glb = o_voxel.postprocess.to_glb(
+    vertices=mesh.vertices,
+    faces=mesh.faces,
+    attr_volume=mesh.attrs,
+    coords=mesh.coords,
+    attr_layout=mesh.layout,
+    voxel_size=mesh.voxel_size,
+    aabb=[[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]],
+    decimation_target=args.decimation_target,
+    texture_size=args.texture_size,
+    remesh=True,
+)
+glb.export(out)
+print("wrote " + out)
+"""#;
+
+/// Write [`DRIVER_SOURCE`] to `<repo>/trellis_driver.py`.
+///
+/// # Errors
+///
+/// Returns a message when the repo dir cannot be created or written.
+pub fn write_driver(config: &TrellisConfig) -> Result<PathBuf, String> {
+    std::fs::create_dir_all(&config.repo_dir).map_err(|err| err.to_string())?;
+    let path = config.repo_dir.join("trellis_driver.py");
+    std::fs::write(&path, DRIVER_SOURCE).map_err(|err| err.to_string())?;
+    Ok(path)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -357,6 +490,34 @@ mod tests {
         assert!(check_poly_budget(20_001, 20_000).is_err());
         assert!(check_extent(8.0, 8.0).is_ok());
         assert!(check_extent(8.1, 8.0).is_err());
+    }
+
+    #[test]
+    fn setup_plan_has_four_weighted_steps() {
+        let config = TrellisConfig::default();
+        let steps = plan_setup(&config, true).unwrap_or_else(|_| unreachable!("infallible"));
+        assert_eq!(steps.len(), 4);
+        assert!(steps[0].argv.iter().any(|a| a == "clone"));
+        assert!(steps[1].argv.iter().any(|a| a == "setup.sh"));
+        assert!(steps[2].argv.iter().any(|a| a == "microsoft/TRELLIS.2-4B"));
+        assert_eq!(steps[3].argv, vec!["write-driver".to_string()]);
+    }
+
+    #[test]
+    fn setup_plan_skips_weights_when_asked() {
+        let config = TrellisConfig::default();
+        let steps = plan_setup(&config, false).unwrap_or_else(|_| unreachable!("infallible"));
+        assert_eq!(steps.len(), 3);
+        assert!(steps
+            .iter()
+            .all(|s| !s.argv.iter().any(|a| a.contains("TRELLIS.2-4B"))));
+    }
+
+    #[test]
+    fn driver_source_targets_game_budgets() {
+        assert!(DRIVER_SOURCE.contains("decimation-target"));
+        assert!(DRIVER_SOURCE.contains("20000"));
+        assert!(DRIVER_SOURCE.contains("to_glb"));
     }
 
     #[test]

@@ -140,6 +140,19 @@ enum Commands {
         #[arg(long, default_value = "assets/trellis")]
         out: PathBuf,
     },
+    /// Provision the TRELLIS.2 sidecar (clone, conda env, weights, driver).
+    /// Plan-only by default; `--execute` runs each missing step once.
+    TrellisSetup {
+        /// Really run the setup steps (default is plan-only).
+        #[arg(long)]
+        execute: bool,
+        /// Skip the ~8 GB weight download (env + driver only).
+        #[arg(long)]
+        skip_weights: bool,
+        /// Re-run steps whose markers already exist.
+        #[arg(long)]
+        force: bool,
+    },
     /// List every command in the registry (the whole API; same list the MCP server serves).
     #[command(name = "commands")]
     CommandList {
@@ -240,6 +253,11 @@ fn main() {
             execute,
             out.as_path(),
         ),
+        Commands::TrellisSetup {
+            execute,
+            skip_weights,
+            force,
+        } => cmd_trellis_setup(execute, !skip_weights, force),
         Commands::CommandList { json } => emit(&gamecraft_mcp::registry::cli_commands(json)),
         Commands::Describe { id, json } => emit(&gamecraft_mcp::registry::cli_describe(&id, json)),
         Commands::Run { cmd, json } => emit(&gamecraft_mcp::registry::cli_run(&cmd, json)),
@@ -726,6 +744,105 @@ fn cmd_trellis(
             std::process::exit(1);
         }
     }
+}
+
+/// TRELLIS.2 setup entry: plan-only by default; `--execute` provisions.
+///
+/// Long steps (conda env, weight download) run one at a time with a 30 min
+/// cap each and are killed on expiry. Steps whose marker exists are skipped
+/// unless `--force`. Never leaves a half-cloned repo behind silently: a
+/// failed clone removes the partial dir so the next run retries cleanly.
+fn cmd_trellis_setup(execute: bool, with_weights: bool, force: bool) {
+    let config = gamecraft_trellis::TrellisConfig::from_env();
+    let steps = match gamecraft_trellis::plan_setup(&config, with_weights) {
+        Ok(steps) => steps,
+        Err(reason) => {
+            eprintln!("trellis setup plan failed: {reason}");
+            std::process::exit(1);
+        }
+    };
+    println!("sidecar root: {}", config.repo_dir.display());
+    for step in &steps {
+        let skipped = !force && step.skip_if_exists.as_ref().is_some_and(|m| m.exists());
+        println!(
+            "{} {}: {}",
+            if skipped {
+                "skip "
+            } else if execute {
+                "run  "
+            } else {
+                "plan "
+            },
+            step.label,
+            step.argv.join(" ")
+        );
+    }
+    if !execute {
+        println!("dry run: pass --execute to provision (long steps, 30 min cap each)");
+        return;
+    }
+    for step in &steps {
+        if !force && step.skip_if_exists.as_ref().is_some_and(|m| m.exists()) {
+            continue;
+        }
+        if step.argv == ["write-driver"] {
+            match gamecraft_trellis::write_driver(&config) {
+                Ok(path) => println!("wrote {}", path.display()),
+                Err(reason) => {
+                    eprintln!("could not write driver: {reason}");
+                    std::process::exit(1);
+                }
+            }
+            continue;
+        }
+        let mut child = match std::process::Command::new(&step.argv[0])
+            .args(&step.argv[1..])
+            .current_dir(step.cwd.clone().unwrap_or_else(|| config.repo_dir.clone()))
+            .spawn()
+        {
+            Ok(child) => child,
+            Err(err) => {
+                eprintln!("could not spawn '{}': {err}", step.label);
+                std::process::exit(1);
+            }
+        };
+        let deadline = std::time::Duration::from_secs(30 * 60);
+        let start = std::time::Instant::now();
+        loop {
+            match child.try_wait() {
+                Ok(Some(status)) => {
+                    if !status.success() {
+                        if step.label.starts_with("clone") {
+                            let _ = std::fs::remove_dir_all(&config.repo_dir);
+                        }
+                        eprintln!("step '{}' exited with {status}", step.label);
+                        std::process::exit(1);
+                    }
+                    break;
+                }
+                Ok(None) => {
+                    if start.elapsed() > deadline {
+                        let _ = child.kill();
+                        let _ = child.wait();
+                        eprintln!(
+                            "step '{}' timed out after 30 min and was killed",
+                            step.label
+                        );
+                        std::process::exit(1);
+                    }
+                    std::thread::sleep(std::time::Duration::from_secs(5));
+                }
+                Err(err) => {
+                    eprintln!("step '{}' wait failed: {err}", step.label);
+                    std::process::exit(1);
+                }
+            }
+        }
+    }
+    println!(
+        "trellis setup complete; driver at {}",
+        config.repo_dir.join("trellis_driver.py").display()
+    );
 }
 
 /// Forge entry: builds games, prints one summary line each.
