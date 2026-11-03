@@ -11,6 +11,7 @@ gamecraft-mcp = { path = "../../crates/gamecraft-mcp" }
 gamecraft-godot = { path = "../../crates/gamecraft-godot" }
 gamecraft-forge = { path = "../../crates/gamecraft-forge" }
 gamecraft-gltf = { workspace = true }
+gamecraft-trellis = { path = "../../crates/gamecraft-trellis" }
 clap = { workspace = true }
 serde_json = { workspace = true }
 

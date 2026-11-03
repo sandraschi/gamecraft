@@ -19,6 +19,7 @@ gamecraft-commands = { workspace = true }
 gamecraft-godot = { workspace = true }
 gamecraft-gltf = { workspace = true }
 gamecraft-replay = { workspace = true }
+gamecraft-trellis = { path = "../gamecraft-trellis" }
 gamecraft-forge = { path = "../gamecraft-forge" }
 glam = { workspace = true }
 serde = { workspace = true }

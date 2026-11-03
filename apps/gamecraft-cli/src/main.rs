@@ -119,6 +119,27 @@ enum Commands {
         #[arg(long)]
         depot_out: Option<PathBuf>,
     },
+    /// Plan (default) or run a TRELLIS.2 image-to-3D sidecar request; writes the licence ledger.
+    Trellis {
+        /// Source image the model reconstructs from.
+        #[arg(long)]
+        image: PathBuf,
+        /// Asset slug (ASCII, `-`/`_` ok); GLB lands as `<out>/<slug>.glb`.
+        #[arg(long)]
+        slug: String,
+        /// Style reference for the ledger only (TRELLIS.2 takes an image, not text).
+        #[arg(long, default_value = "")]
+        prompt_ref: String,
+        /// Triangle budget the import gate enforces.
+        #[arg(long, default_value_t = 20_000)]
+        poly_budget: u64,
+        /// Really invoke the sidecar (default is plan-only with a 60 s timeout).
+        #[arg(long)]
+        execute: bool,
+        /// Output root for the GLB + `.ledger.json`.
+        #[arg(long, default_value = "assets/trellis")]
+        out: PathBuf,
+    },
     /// List every command in the registry (the whole API; same list the MCP server serves).
     #[command(name = "commands")]
     CommandList {
@@ -204,6 +225,21 @@ fn main() {
                 std::process::exit(2);
             }
         },
+        Commands::Trellis {
+            image,
+            slug,
+            prompt_ref,
+            poly_budget,
+            execute,
+            out,
+        } => cmd_trellis(
+            image.as_path(),
+            slug.as_str(),
+            prompt_ref.as_str(),
+            poly_budget,
+            execute,
+            out.as_path(),
+        ),
         Commands::CommandList { json } => emit(&gamecraft_mcp::registry::cli_commands(json)),
         Commands::Describe { id, json } => emit(&gamecraft_mcp::registry::cli_describe(&id, json)),
         Commands::Run { cmd, json } => emit(&gamecraft_mcp::registry::cli_run(&cmd, json)),
@@ -592,6 +628,101 @@ fn cmd_new(
         Ok(summary) => println!("{summary}"),
         Err(reason) => {
             eprintln!("generation failed: {reason}");
+            std::process::exit(1);
+        }
+    }
+}
+
+/// TRELLIS.2 entry: plan-only by default; `--execute` runs the sidecar once.
+///
+/// The sidecar is operator-owned (a TRELLIS.2 checkout or HTTP server). This
+/// never bundles weights: it writes the ledger row first, then — only with
+/// `--execute` — spawns one bounded process and kills it on timeout.
+fn cmd_trellis(
+    image: &Path,
+    slug: &str,
+    prompt_ref: &str,
+    poly_budget: u64,
+    execute: bool,
+    out: &Path,
+) {
+    let mut config = gamecraft_trellis::TrellisConfig::from_env();
+    config.out_dir = out.to_path_buf();
+    let request = gamecraft_trellis::TrellisRequest {
+        slug: slug.to_string(),
+        image: image.to_path_buf(),
+        prompt_ref: prompt_ref.to_string(),
+        poly_budget,
+        extent_limit_m: 8.0,
+    };
+    let plan = match gamecraft_trellis::plan(&config, &request) {
+        Ok(plan) => plan,
+        Err(reason) => {
+            eprintln!("trellis plan failed: {reason}");
+            std::process::exit(1);
+        }
+    };
+    match gamecraft_trellis::probe(&config) {
+        Ok(note) => println!("{note}"),
+        Err(reason) => {
+            eprintln!("trellis sidecar missing: {reason}");
+            std::process::exit(1);
+        }
+    }
+    println!(
+        "plan: {} -> {}",
+        plan.argv.join(" "),
+        plan.out_glb.display()
+    );
+    println!("licence: {}", plan.ledger.license);
+    if !execute {
+        println!("dry run: pass --execute to invoke the sidecar (60 s timeout)");
+        return;
+    }
+    if config.backend != gamecraft_trellis::Backend::Cli {
+        eprintln!("--execute currently supports the CLI backend only; HTTP stays plan-only");
+        std::process::exit(2);
+    }
+    let mut child = match std::process::Command::new(&plan.argv[0])
+        .args(&plan.argv[1..])
+        .spawn()
+    {
+        Ok(child) => child,
+        Err(err) => {
+            eprintln!("could not spawn sidecar: {err}");
+            std::process::exit(1);
+        }
+    };
+    let deadline = std::time::Duration::from_secs(60);
+    let start = std::time::Instant::now();
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                if !status.success() {
+                    eprintln!("sidecar exited with {status}");
+                    std::process::exit(1);
+                }
+                break;
+            }
+            Ok(None) => {
+                if start.elapsed() > deadline {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    eprintln!("sidecar timed out after 60 s and was killed");
+                    std::process::exit(1);
+                }
+                std::thread::sleep(std::time::Duration::from_millis(200));
+            }
+            Err(err) => {
+                eprintln!("sidecar wait failed: {err}");
+                std::process::exit(1);
+            }
+        }
+    }
+    match gamecraft_trellis::write_ledger(&plan.out_glb, &plan.ledger) {
+        Ok(path) => println!("ledger: {}", path.display()),
+        Err(reason) => {
+            eprintln!("could not write ledger: {reason}");
             std::process::exit(1);
         }
     }

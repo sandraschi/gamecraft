@@ -11,8 +11,8 @@
 use crate::replay_cmds::{replay_info, replay_record, replay_verify};
 use crate::tools::{
     fail, tool_export_scene, tool_game_create, tool_game_list, tool_game_report, tool_game_verify,
-    tool_scene_inspect, tool_scene_lint, tool_scene_verify, tool_spatial_query, ToolError,
-    ToolOutcome,
+    tool_scene_inspect, tool_scene_lint, tool_scene_verify, tool_spatial_query, tool_trellis_asset,
+    ToolError, ToolOutcome,
 };
 use serde_json::{json, Value};
 use std::fmt::Write as _;
@@ -215,6 +215,30 @@ const GAME_CREATE: [ParamSpec; 2] = [
     ),
 ];
 
+const TRELLIS: [ParamSpec; 6] = [
+    p("slug", "string", true, "Asset slug, e.g. farmhouse-hero."),
+    p(
+        "image",
+        "string",
+        true,
+        "Source image TRELLIS.2 reconstructs from.",
+    ),
+    p(
+        "prompt_ref",
+        "string",
+        false,
+        "Style reference for the ledger only (not a generation input).",
+    ),
+    p(
+        "poly_budget",
+        "integer",
+        false,
+        "Triangle budget; 20000 by default.",
+    ),
+    p("out_dir", "string", false, "GLB output root."),
+    p("endpoint", "string", false, "HTTP sidecar URL (selects the HTTP backend)."),
+];
+
 const SCENE_VERIFY: [ParamSpec; 4] = [
     p("game_path", "string", true, "Folder holding project.godot."),
     p(
@@ -330,6 +354,16 @@ pub const COMMANDS: &[CommandSpec] = &[
         readonly: false,
         params: &GAME_CREATE,
         body: tool_game_create,
+    },
+    CommandSpec {
+        id: "asset.trellis",
+        label: "TRELLIS Asset",
+        menu: "Asset/TRELLIS",
+        shortcut: None,
+        summary: "Plan a TRELLIS.2 image-to-3D sidecar request: deterministic invocation plus licence-ledger row. Plan-only; execution is gamecraft-cli trellis --execute.",
+        readonly: true,
+        params: &TRELLIS,
+        body: tool_trellis_asset,
     },
     CommandSpec {
         id: "replay.record",

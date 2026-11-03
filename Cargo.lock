@@ -3399,6 +3399,7 @@ dependencies = [
  "gamecraft-gltf",
  "gamecraft-godot",
  "gamecraft-mcp",
+ "gamecraft-trellis",
  "serde_json",
 ]
 
@@ -3489,6 +3490,7 @@ dependencies = [
  "gamecraft-gltf",
  "gamecraft-godot",
  "gamecraft-replay",
+ "gamecraft-trellis",
  "glam 0.30.10",
  "serde",
  "serde_json",
@@ -3508,6 +3510,14 @@ dependencies = [
 [[package]]
 name = "gamecraft-sim"
 version = "0.13.0"
+
+[[package]]
+name = "gamecraft-trellis"
+version = "0.13.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "gethostname"

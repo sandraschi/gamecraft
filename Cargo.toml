@@ -9,6 +9,7 @@ members = [
     "crates/gamecraft-gltf",
     "crates/gamecraft-bevy",
     "crates/gamecraft-replay",
+    "crates/gamecraft-trellis",
     "apps/gamecraft-cli",
     "apps/gamecraft-desktop",
 ]

@@ -1,0 +1,13 @@
+[package]
+name = "gamecraft-trellis"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "L1 thin TRELLIS.2 sidecar client: plan-only asset requests, license ledger, import normalize checks. Never bundles the 4B model."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

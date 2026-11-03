@@ -509,6 +509,89 @@ pub fn tool_game_create(args: &Value) -> ToolOutcome {
     ))
 }
 
+/// Shared by the CLI, the MCP server and the command registry: `tool_trellis_asset`.
+///
+/// Plan-only: returns the deterministic sidecar invocation plus the
+/// licence-ledger row. Execution happens in `gamecraft-cli trellis --execute`,
+/// never from this tool (no child processes behind MCP).
+pub fn tool_trellis_asset(args: &Value) -> ToolOutcome {
+    let Some(slug) = args.get("slug").and_then(Value::as_str) else {
+        return Err(fail(
+            "missing_slug",
+            "slug is required.",
+            "Use an asset slug like 'farmhouse-hero'.",
+            "asset.trellis {\"slug\": \"farmhouse-hero\", \"image\": \"shots/farmhouse.png\"}",
+        ));
+    };
+    let Some(image) = args.get("image").and_then(Value::as_str) else {
+        return Err(fail(
+            "missing_image",
+            "image is required: TRELLIS.2 reconstructs from an image.",
+            "Pass the source PNG path; prompt_ref is ledger context only.",
+            "asset.trellis {\"slug\": \"farmhouse-hero\", \"image\": \"shots/farmhouse.png\"}",
+        ));
+    };
+    let mut config = gamecraft_trellis::TrellisConfig::from_env();
+    if let Some(out) = args.get("out_dir").and_then(Value::as_str) {
+        config.out_dir = std::path::PathBuf::from(out);
+    }
+    if let Some(endpoint) = args.get("endpoint").and_then(Value::as_str) {
+        config.backend = gamecraft_trellis::Backend::Http;
+        config.endpoint = endpoint.to_string();
+    }
+    let request = gamecraft_trellis::TrellisRequest {
+        slug: slug.to_string(),
+        image: std::path::PathBuf::from(image),
+        prompt_ref: args
+            .get("prompt_ref")
+            .and_then(Value::as_str)
+            .unwrap_or("")
+            .to_string(),
+        poly_budget: args
+            .get("poly_budget")
+            .and_then(Value::as_u64)
+            .unwrap_or(20_000),
+        extent_limit_m: args
+            .get("extent_limit_m")
+            .and_then(Value::as_f64)
+            .unwrap_or(8.0),
+    };
+    let plan = gamecraft_trellis::plan(&config, &request).map_err(|reason| {
+        fail(
+            "trellis_plan_rejected",
+            format!("The request was rejected: {reason}"),
+            "Fix the slug, image path or budget.",
+            "asset.trellis with a safe slug and an image path",
+        )
+    })?;
+    if let Err(reason) = gamecraft_trellis::ledger_complete(&plan.ledger) {
+        return Err(fail(
+            "trellis_ledger_incomplete",
+            format!("Ledger incomplete: {reason}"),
+            "Fill every ledger field before human approval.",
+            "gamecraft-cli trellis --help",
+        ));
+    }
+    let sidecar = gamecraft_trellis::probe(&config).unwrap_or_else(|reason| reason);
+    Ok((
+        format!(
+            "Plan for '{}': {} -> {}. {}.",
+            plan.ledger.slug,
+            plan.argv.join(" "),
+            plan.out_glb.display(),
+            plan.ledger.license,
+        ),
+        json!({
+            "slug": plan.ledger.slug,
+            "argv": plan.argv,
+            "out_glb": plan.out_glb,
+            "ledger": plan.ledger,
+            "sidecar": sidecar,
+            "execute": "gamecraft-cli trellis --execute",
+        }),
+    ))
+}
+
 /// Shared by the CLI, the MCP server and the command registry: `tool_scene_verify`.
 pub fn tool_scene_verify(args: &Value) -> ToolOutcome {
     if std::env::var("GAMECRAFT_MCP_ALLOW_GODOT").ok().as_deref() != Some("1") {
