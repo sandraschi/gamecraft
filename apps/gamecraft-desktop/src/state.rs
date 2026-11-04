@@ -138,6 +138,12 @@ pub(crate) struct DesktopState {
     pub(crate) light: bool,
     /// Gate running in the background, if any.
     pub(crate) verify_job: Option<VerifyJob>,
+    /// Whether authenticated via Basic Auth.
+    pub(crate) is_authenticated: bool,
+    /// Operator / username for Basic Auth.
+    pub(crate) auth_username: String,
+    /// Working input buffer for Basic Auth password.
+    pub(crate) auth_password_input: String,
     /// Cheat sheet of the selected game: (slug, text), read once per selection.
     pub(crate) sheet: Option<(String, String)>,
     /// Scroll the selected card into view on the next frame (keyboard navigation).
@@ -155,6 +161,8 @@ pub(crate) enum Dialog {
     AppSettings,
     /// Per-game overlay: speed, gravity, jump, autoplay.
     GameOverlay,
+    /// Basic Auth login dialog.
+    BasicAuth,
 }
 
 pub(crate) use gamecraft_mcp::catalog::GameKind;
@@ -373,6 +381,9 @@ impl DesktopState {
             palette: crate::palette::Palette::default(),
             light: false,
             verify_job: None,
+            is_authenticated: false,
+            auth_username: "gamecrafter".to_string(),
+            auth_password_input: String::new(),
             sheet: None,
             scroll_to_selected: false,
         };

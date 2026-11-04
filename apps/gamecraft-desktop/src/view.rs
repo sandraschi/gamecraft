@@ -130,6 +130,19 @@ pub(crate) fn menu_bar(state: &mut DesktopState, ui: &mut egui::Ui) {
                 menu.close();
             }
         });
+        bar.menu_button("Security", |menu| {
+            if state.is_authenticated {
+                menu.label(format!("Operator: {}", state.auth_username));
+                if menu.button("Sign Out").clicked() {
+                    state.is_authenticated = false;
+                    state.status = "Signed out".to_string();
+                    menu.close();
+                }
+            } else if menu.button("Basic Auth Login...").clicked() {
+                state.dialog = Some(Dialog::BasicAuth);
+                menu.close();
+            }
+        });
         bar.menu_button("Help", |menu| {
             if menu.button("About / controls").clicked() {
                 state.dialog = Some(Dialog::About);
@@ -240,6 +253,7 @@ pub(crate) fn dialogs(state: &mut DesktopState, ctx: &egui::Context) {
         Dialog::About => about_window(state, ctx, &mut open),
         Dialog::AppSettings => app_settings_window(state, ctx, &mut open),
         Dialog::GameOverlay => game_overlay_window(state, ctx, &mut open),
+        Dialog::BasicAuth => basic_auth_window(state, ctx, &mut open),
     }
     if !open {
         state.dialog = None;
@@ -265,6 +279,47 @@ fn about_window(state: &mut DesktopState, ctx: &egui::Context, open: &mut bool) 
             ui.label("Click a finding to select its node.");
             ui.label("Ctrl+Z / Ctrl+Y undo and redo. Esc clears the palette.");
         });
+}
+
+/// App settings window: provider, model, keys, binaries.
+fn basic_auth_window(state: &mut DesktopState, ctx: &egui::Context, open: &mut bool) {
+    let mut close = false;
+    egui::Window::new("Security: Basic Authentication")
+        .collapsible(false)
+        .resizable(false)
+        .open(open)
+        .show(ctx, |ui| {
+            ui.label("Log in with your operator credentials:");
+            ui.add_space(6.0);
+            ui.horizontal(|row| {
+                row.label("Username:");
+                row.text_edit_singleline(&mut state.auth_username);
+            });
+            ui.horizontal(|row| {
+                row.label("Password:");
+                row.add(egui::TextEdit::singleline(&mut state.auth_password_input).password(true));
+            });
+            ui.add_space(8.0);
+            ui.horizontal(|row| {
+                if row.button("Login").clicked() {
+                    if !state.auth_username.is_empty() && !state.auth_password_input.is_empty() {
+                        state.is_authenticated = true;
+                        state.status = format!("Authenticated as {}", state.auth_username);
+                        state.auth_password_input.clear();
+                        close = true;
+                    } else {
+                        state.status = "Username and password required".to_string();
+                    }
+                }
+                if row.button("Cancel").clicked() {
+                    state.auth_password_input.clear();
+                    close = true;
+                }
+            });
+        });
+    if close {
+        *open = false;
+    }
 }
 
 /// App settings window: provider, model, keys, binaries.
@@ -602,10 +657,22 @@ fn depot_row(state: &DesktopState, ui: &mut egui::Ui, index: usize) -> bool {
     };
     let selected = state.selected_game == Some(index);
     let mut clicked = false;
-    ui.horizontal(|row| {
+    // horizontal_top + fixed height + thumb placeholder: rows with and without
+    // thumbnails share the same height, so the left list stacks vertically
+    // instead of stairstepping when thumbnails pop in late.
+    ui.horizontal_top(|row| {
+        row.set_min_height(30.0);
         if let Some(thumb) = state.thumbs.get(game.slug.as_str()) {
             row.add(
                 egui::Image::new(&thumb.texture).fit_to_exact_size(egui::Vec2::new(48.0, 27.0)),
+            );
+        } else {
+            // Same footprint as a thumb: keeps every row 30px tall.
+            let (rect, _) = row.allocate_exact_size(egui::Vec2::new(48.0, 27.0), egui::Sense::hover());
+            row.painter().rect_filled(
+                rect,
+                2.0,
+                row.visuals().faint_bg_color,
             );
         }
         clicked = row
