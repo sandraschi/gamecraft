@@ -94,7 +94,15 @@ pub fn depot() -> Vec<TextureFile> {
         ("plaster.png", plaster()),
         ("roof_tile.png", roof_tile()),
         ("grass.png", grass()),
+        ("barn_pbr.png", barn_pbr()),
     ]
+}
+
+/// Barn wood (TextureCraft PBR baseColor, baked from builtin:crate --sample).
+/// Procedural brick stays for church/castle (brick-appropriate); barn gets wood.
+#[must_use]
+pub fn barn_pbr() -> Vec<u8> {
+    include_bytes!("../assets/barn_pbr.png").to_vec()
 }
 
 #[cfg(test)]
@@ -120,6 +128,6 @@ mod tests {
     #[test]
     fn textures_differ_from_each_other() {
         let hashes: HashSet<Vec<u8>> = depot().into_iter().map(|(_, bytes)| bytes).collect();
-        assert_eq!(hashes.len(), 4, "patterns should not collide");
+        assert_eq!(hashes.len(), 5, "patterns should not collide");
     }
 }

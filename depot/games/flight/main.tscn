@@ -1,4 +1,4 @@
-[gd_scene load_steps=153 format=3 uid="uid://2c0fxtjesrn38"]
+[gd_scene load_steps=154 format=3 uid="uid://2c0fxtjesrn38"]
 
 [ext_resource type="Script" path="res://scripts/gamecraft_runtime.gd" id="1_runtime"]
 
@@ -11,6 +11,8 @@
 [ext_resource type="Texture2D" path="res://textures/plaster.png" id="tex_plaster"]
 
 [ext_resource type="Texture2D" path="res://textures/brick.png" id="tex_brick"]
+
+[ext_resource type="Texture2D" path="res://textures/barn_pbr.png" id="tex_barn_pbr"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_material"]
 sky_top_color = Color(0.24, 0.42, 0.75, 1)
@@ -91,7 +93,7 @@ size = Vector3(4.0, 2.2, 3.0)
 [sub_resource type="StandardMaterial3D" id="wall_tex17"]
 shading_mode = 0
 albedo_color = Color(0.55, 0.24, 0.22, 1)
-albedo_texture = ExtResource("tex_brick")
+albedo_texture = ExtResource("tex_barn_pbr")
 uv1_scale = Vector3(2, 2, 1)
 
 [sub_resource type="PrismMesh" id="barn_1_roof_prism18"]

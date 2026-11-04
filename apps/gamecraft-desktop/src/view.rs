@@ -602,10 +602,22 @@ fn depot_row(state: &DesktopState, ui: &mut egui::Ui, index: usize) -> bool {
     };
     let selected = state.selected_game == Some(index);
     let mut clicked = false;
-    ui.horizontal(|row| {
+    // horizontal_top + fixed height + thumb placeholder: rows with and without
+    // thumbnails share the same height, so the left list stacks vertically
+    // instead of stairstepping when thumbnails pop in late.
+    ui.horizontal_top(|row| {
+        row.set_min_height(30.0);
         if let Some(thumb) = state.thumbs.get(game.slug.as_str()) {
             row.add(
                 egui::Image::new(&thumb.texture).fit_to_exact_size(egui::Vec2::new(48.0, 27.0)),
+            );
+        } else {
+            // Same footprint as a thumb: keeps every row 30px tall.
+            let (rect, _) = row.allocate_exact_size(egui::Vec2::new(48.0, 27.0), egui::Sense::hover());
+            row.painter().rect_filled(
+                rect,
+                2.0,
+                row.visuals().faint_bg_color,
             );
         }
         clicked = row
