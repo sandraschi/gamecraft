@@ -1,0 +1,12 @@
+{
+  "slug": "jenga",
+  "title": "Jenga Tower",
+  "category": "Physics",
+  "family": "godot",
+  "entry": "main.tscn",
+  "experiment": "Cannon.js tower from ai-games-collection/games/jenga.html (Three.js r128 + Cannon 0.6.2) → Godot RigidBody3D forge. 54 blocks, pull-and-place, topples physically. Sizes: classic 54, mini 27, giant 72. Godot gives deterministic trace + lint, not just eye candy.",
+  "author": "ai-games-collection (feel) + gamecraft forge (physics sim) 2026-11-02",
+  "win_marker": "GameCraft: goal reached",
+  "thumb_checkpoint": "tower-mid",
+  "step_budget": 60000
+}

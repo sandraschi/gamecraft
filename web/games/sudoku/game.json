@@ -1,0 +1,12 @@
+{
+  "slug": "sudoku",
+  "title": "Sudoku Classic",
+  "category": "Puzzle",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "9x9 classic (easy 51 givens) with take-back (undo stack) + Hint (naked-single solver). Generator (diagonal boxes + backtrack) + solver from ai-games-collection/games/puzzle-games/sudoku.js (MIT). Tour: solver fills all, checkpoints per phase.",
+  "author": "ai-games-collection (generator/solver) + gamecraft session 2026-11-02",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "solved",
+  "step_budget": 20000
+}
