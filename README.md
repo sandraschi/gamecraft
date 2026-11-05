@@ -300,3 +300,7 @@ be finished. It does not prove it is fun. See `web/README.md`.
   game designer, asset generators and libraries, social VR (Overte, Resonite,
   VRChat), licensing, and a human/model division of labour. Based on this repo.
 - `KIBITZ.md` / `KIBITZ_BACKTALK.md` - the review dialogue, kept as an audit trail.
+
+## Lineage — the Storytold craft-app pattern
+
+Storytold ArtCraft ([storytold/artcraft](https://github.com/storytold/artcraft) — "the IDE for artists") was the starting point. The 16 craft apps in the Storytold stable each ship one binary that is both the human CLI and the agent MCP server (stdio), headless-first, with `run.json` + report artifacts. That modus operandi and harness is what this repo implements; the code here is independent, the pattern is shared.
