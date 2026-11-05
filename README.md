@@ -301,6 +301,18 @@ be finished. It does not prove it is fun. See `web/README.md`.
   VRChat), licensing, and a human/model division of labour. Based on this repo.
 - `KIBITZ.md` / `KIBITZ_BACKTALK.md` - the review dialogue, kept as an audit trail.
 
+## Status — does today / next week / non-goals
+
+**Does today:** v0.13.0, 10 crates + CLI + desktop + web player; 225 test
+fns; 14 docs files; depot of real games; sentence → verified playable
+Godot (`new` → `verify` → `report`/`export`).
+
+**Next week:** `serve` decision (persistent session + snapshot polling);
+canonical-engine note (Godot-first?); 3 recipes stay green.
+
+**Non-goals:** not Bevy-and-Godot forever — canonical note pending; no LLM
+in the verify path.
+
 ## Lineage — the Storytold craft-app pattern
 
 Storytold ArtCraft ([storytold/artcraft](https://github.com/storytold/artcraft) — "the IDE for artists") was the starting point. The 16 craft apps in the Storytold stable each ship one binary that is both the human CLI and the agent MCP server (stdio), headless-first, with `run.json` + report artifacts. That modus operandi and harness is what this repo implements; the code here is independent, the pattern is shared.
