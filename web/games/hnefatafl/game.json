@@ -1,0 +1,12 @@
+{
+  "slug": "hnefatafl",
+  "title": "Hnefatafl",
+  "category": "Board classics",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Viking asymmetric siege: king escapes to a corner, attackers capture by sandwich. Skeleton tour proves boot + win marker; full rules (11x11, shield-wall, throne) to port from ai-games-collection/games/board-games/hnefatafl.js (18 KB, MIT).",
+  "author": "gamecraft session 2026-11-02, skeleton from bento/gc.js harness",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "escape",
+  "step_budget": 20000
+}

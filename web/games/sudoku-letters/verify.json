@@ -1,0 +1,41 @@
+{
+  "slug": "sudoku-letters",
+  "title": "Sudoku Letters",
+  "date": "2026-11-02T22:25:13.269Z",
+  "boot_ms": 151,
+  "steps": 30,
+  "sim_seconds": 0.5,
+  "checkpoints": [
+    {
+      "name": "first-fill",
+      "step": 1
+    },
+    {
+      "name": "half",
+      "step": 15
+    },
+    {
+      "name": "solved",
+      "step": 30
+    }
+  ],
+  "shots": [
+    "shots/01-first-fill.png",
+    "shots/02-half.png",
+    "shots/03-solved.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 826,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint first-fill",
+    "GameCraft: checkpoint half",
+    "GameCraft: checkpoint solved",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

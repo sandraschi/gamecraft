@@ -30,6 +30,8 @@ dev = ["bevy/dynamic_linking"]
 # Logic only by default: ECS, app, time. `cargo test -p gamecraft-bevy` never builds a renderer.
 bevy = { version = "0.20.1", default-features = false, features = ["std"] }
 gamecraft-sim = { workspace = true }
+# VRM avatars (Nekomimi-chan): unavi bevy_vrm 0.5.0 matches bevy 0.20. Verified 2026-11-04 via scratch resolve.
+bevy_vrm = { version = "0.5.0" }
 
 [[bin]]
 name = "gamecraft-bevy-maze"
@@ -43,6 +45,11 @@ path = "src/bin/synth_dump.rs"
 [[bin]]
 name = "gamecraft-bevy-murmuration"
 path = "src/bin/murmuration.rs"
+required-features = ["render"]
+
+[[bin]]
+name = "gamecraft-bevy-nekomimi"
+path = "src/bin/nekomimi.rs"
 required-features = ["render"]
 
 [dev-dependencies]

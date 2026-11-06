@@ -1,0 +1,12 @@
+{
+  "slug": "sudoku-letters",
+  "title": "Sudoku Letters",
+  "category": "Puzzle",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "9x9 letters A-I skin of Sudoku Classic. Same generator/solver (numbers 1-9 internally, A-I displayed), same take-back + Hint/AI. From ai-games-collection sudoku-letters (9x9 + 16x16 A-P). Tour: solver fills all.",
+  "author": "ai-games-collection (letters) + gamecraft session 2026-11-02",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "solved",
+  "step_budget": 20000
+}

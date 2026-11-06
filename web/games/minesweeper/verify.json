@@ -1,0 +1,51 @@
+{
+  "slug": "minesweeper",
+  "title": "Minesweeper AI",
+  "date": "2026-11-02T22:43:26.703Z",
+  "boot_ms": 137,
+  "self_test": {
+    "pass": true,
+    "checks": [
+      {
+        "name": "solver-beats-random",
+        "pass": true
+      }
+    ],
+    "summary": "solver 8/10 vs random 0/10"
+  },
+  "steps": 30,
+  "sim_seconds": 0.5,
+  "checkpoints": [
+    {
+      "name": "first-number",
+      "step": 1
+    },
+    {
+      "name": "solver-progress",
+      "step": 4
+    },
+    {
+      "name": "cleared",
+      "step": 30
+    }
+  ],
+  "shots": [
+    "shots/01-first-number.png",
+    "shots/02-solver-progress.png",
+    "shots/03-cleared.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 766,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint first-number",
+    "GameCraft: checkpoint solver-progress",
+    "GameCraft: checkpoint cleared",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}
