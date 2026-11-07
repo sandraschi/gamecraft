@@ -1,0 +1,31 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Sudoku Classic</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #6ab8f2; --bg: #0c0e12; }
+  #wrap { display: flex; gap: 12px; align-items: flex-start; justify-content: center; padding: 12px; }
+  #grid { display: grid; grid-template-columns: repeat(9, 34px); gap: 0; background: #222; padding: 6px; border-radius: 6px; }
+  .cell { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font: 700 16px/1 system-ui; background: #2a2e35; color: #fff; border: 1px solid #1c1f24; cursor: pointer; user-select: none; }
+  .cell:nth-child(3n) { border-right: 2px solid #4a4f58; } .cell:nth-child(9n) { border-right: 1px solid #1c1f24; }
+  .cell.given { background: #1c1f24; color: #9ab8d8; }
+  .cell.sel { outline: 2px solid #6ab8f2; } .cell.hint { outline: 3px solid #00ff00; }
+  #nums { display: grid; grid-template-columns: repeat(9, 34px); gap: 2px; justify-content: center; margin-top: 8px; }
+  #nums button { height: 30px; background: #2a2e35; color: #fff; border: 1px solid #3a3f47; border-radius: 4px; cursor: pointer; }
+</style>
+<script type="importmap">{ "imports": { "three": "/vendor/three/three.module.js" } }</script>
+</head>
+<body>
+<canvas id="view" hidden></canvas>
+<div id="hud" class="panel"><span class="name">Sudoku</span><span class="dim" id="status">easy 51 givens</span><b class="stat" id="fill"></b>
+<button id="undo-btn" title="Take back (U)">↩ Undo</button><button id="hint-btn" title="Hint (H)">💡 Hint</button><button id="ai-btn" title="Solver step (A)">🤖 AI</button><button id="music-btn">♫</button><button id="help-btn">?</button></div>
+<div id="wrap"><div id="grid"></div></div>
+<div id="nums"></div>
+<div id="msg" class="panel dim">Click a cell, then 1-9. U = take back, H = hint, A = solver step.</div>
+<div id="help" hidden><div class="card panel"><h1>Sudoku Classic</h1><p>9×9 easy (51 givens). Generator: diagonal boxes + backtrack (your collection's sudoku.js). Solver: naked-single + backtrack fallback. Take-back stack saves every entry.</p><button id="help-go" class="go">Play</button></div></div>
+<div id="done" class="overlay" hidden><div class="card panel"><h1>Solved</h1><p id="done-text"></p><button id="next" class="go">New puzzle</button></div></div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

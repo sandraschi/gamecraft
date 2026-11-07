@@ -1,0 +1,12 @@
+{
+  "slug": "trichess",
+  "title": "Tri-D Chess",
+  "category": "Board classics",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Star Trek tri-dimensional chess (Bartmess/Roth rules): 3 neutral 4x4 boards + 4 attack 2x2 on pins. Pieces move within board + up/down via pins. Full rules from ai-games-collection/games/board-games/td-chess-logic.js (MIT). Skeleton: pin-attack mate in 3.",
+  "author": "ai-games-collection (logic) + gamecraft session 2026-11-02",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "pin-mate",
+  "step_budget": 30000
+}

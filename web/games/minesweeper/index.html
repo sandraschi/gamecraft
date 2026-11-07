@@ -1,0 +1,29 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Minesweeper AI</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>
+  :root { --accent: #4caf50; --bg: #0c0f0c; }
+  #wrap { display: flex; gap: 12px; align-items: flex-start; justify-content: center; padding: 12px; }
+  #board { display: grid; gap: 2px; background: #222; padding: 6px; border-radius: 6px; }
+  .cell { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font: 700 14px/1 system-ui; background: #3a3f3a; color: #fff; border-radius: 3px; cursor: pointer; user-select: none; }
+  .cell.open { background: #1c1f1c; cursor: default; }
+  .cell.flag::after { content: "🚩"; }
+  .cell.hint { outline: 3px solid #00ff00; }
+  .c1 { color: #6ab8f2; } .c2 { color: #6ad86a; } .c3 { color: #f26a6a; } .c4 { color: #b48af2; } .c5 { color: #f2b86a; } .c6 { color: #6ad8d0; } .c7 { color: #eee; } .c8 { color: #999; }
+</style>
+<script type="importmap">{ "imports": { "three": "/vendor/three/three.module.js" } }</script>
+</head>
+<body>
+<canvas id="view" hidden></canvas>
+<div id="hud" class="panel"><span class="name">Minesweeper AI</span><span class="dim" id="status">first click is safe</span><b class="stat" id="flags"></b>
+<button id="undo-btn" title="Take back (U)">↩ Undo</button><button id="ai-btn" title="AI Move (A)">🤖 AI</button><button id="hint-btn" title="Hint (H)">💡</button><button id="music-btn">♫</button><button id="help-btn">?</button></div>
+<div id="wrap"><div id="board"></div></div>
+<div id="msg" class="panel dim">Click to reveal, right-click to flag. U = take back, A = AI move, H = hint. First click never dies.</div>
+<div id="help" hidden><div class="card panel"><h1>Minesweeper AI</h1><p>9×9, 10 mines. Take-back stack saves every reveal/flag. Autosolver: safe (all mines flagged → rest safe) + flag (all hidden must be mines) from your collection's MinesweeperAI.findSafeMoves, then lowest-probability guess. Tour uses solver + ground-truth fallback only when stuck (logged as guess).</p><button id="help-go" class="go">Play</button></div></div>
+<div id="done" class="overlay" hidden><div class="card panel"><h1>Cleared</h1><p id="done-text"></p><button id="next" class="go">Again</button></div></div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

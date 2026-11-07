@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GameCraft — New game</title>
+<style>
+  body { margin: 0; background: #09090b; color: #e4e4e7; font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px; }
+  h1 { margin: 0 0 4px; } .sub { color: #a1a1aa; margin-bottom: 16px; }
+  label { display: block; margin: 12px 0 4px; font-weight: 600; }
+  textarea, select, input { width: 100%; background: #18181b; color: #e4e4e7; border: 1px solid #27272a; border-radius: 6px; padding: 8px; font: inherit; }
+  textarea { min-height: 120px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+  .presets button { background: #27272a; color: #e4e4e7; border: 1px solid #3f3f46; border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+  .presets button:hover { background: #3f3f46; }
+  #cost { color: #fbbf24; } #log { white-space: pre-wrap; background: #000; border: 1px solid #27272a; border-radius: 6px; padding: 12px; min-height: 120px; margin-top: 12px; }
+  a.btn { display: inline-block; margin-top: 12px; padding: 8px 14px; border-radius: 6px; background: #f59e0b; color: #1c1917; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>New game</h1>
+  <div class="sub">Prompt → verified depot. Godot spec path is cents. Web RPG path (Emberwick 4-prompt) is $5-10 on Opus — capped at $10, 4 rounds, 10 min. <a href="/" style="color:#f59e0b">Back to arcade</a></div>
+  <div class="presets" id="presets"></div>
+  <label>Prompt(s) — one box, blank line = next Emberwick beat</label>
+  <textarea id="prompt"></textarea>
+  <div class="row">
+    <div><label>Family</label><select id="family"><option value="godot">Godot (spec, cheap, verified trace)</option><option value="web-rpg" selected>Web three.js RPG (Emberwick, $$)</option><option value="web-zelda">Web Zelda-like (new)</option><option value="web-sokoban">Web Sokoban (new)</option></select></div>
+    <div><label>Archetype (Godot only)</label><select id="arch"><option>platformer</option><option>runner</option><option>pong</option><option>maze</option><option>flight</option><option>driving</option><option>chess</option><option>talk</option></select></div>
+  </div>
+  <div class="row">
+    <div><label>Provider</label><select id="provider"><option value="anthropic">Opus (Anthropic)</option><option value="openai">Fable (OpenAI-compat / LM Studio)</option><option value="auto" selected>Auto (Ollama 11434 → LM 1234)</option><option value="local">Argon (local Ollama)</option></select></div>
+    <div><label>Budget USD (cap, default 10)</label><input id="budget" type="number" value="10" min="1" max="25"></div>
+  </div>
+  <label>Model / endpoint (optional)</label>
+  <input id="model" placeholder="gpt-4o / claude-opus-4-5 / qwen3.8:27b">
+  <div style="margin-top:12px"><button id="start" style="padding:10px 18px;border-radius:6px;background:#f59e0b;border:0;font-weight:700;cursor:pointer">Forge — baited breath (10 min max)</button>
+  <span id="cost"></span></div>
+  <div id="log">Backend stub: POST /api/new/start not wired yet. This page only fills prompts + live $ estimate. See new-game-page-DOSSIER.md §5.</div>
+  <a class="btn" href="/">Back</a>
+</main>
+<script type="module">
+  const presets = await (await fetch('/api/presets')).json();
+  const box = document.getElementById('presets'), prompt = document.getElementById('prompt');
+  for (const p of presets) {
+    const b = document.createElement('button'); b.textContent = p.name;
+    b.onclick = () => { prompt.value = p.prompts.join("\n\n"); document.getElementById('family').value = p.family; };
+    box.appendChild(b);
+  }
+  prompt.value = presets[0].prompts.join("\n\n");
+  const est = () => {
+    const fam = document.getElementById('family').value;
+    document.getElementById('cost').textContent = fam.startsWith('web') ? 'est. $5-10 Opus (50-100k out, 4 rounds)' : 'est. <$0.10 gpt-4o / <$2 Opus (spec 5k tokens)';
+  };
+  document.getElementById('family').onchange = est; est();
+  document.getElementById('start').onclick = async () => {
+    document.getElementById('log').textContent = 'POST /api/new/start → 501 (stub). Wire job runner per DOSSIER §5, then stream /api/new/stream.';
+  };
+</script>
+</body>
+</html>
