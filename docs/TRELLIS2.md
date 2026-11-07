@@ -6,6 +6,11 @@ image-to-3D model (`github.com/microsoft/TRELLIS.2`, paper
 `huggingface.co/spaces/microsoft/TRELLIS.2`); it cannot live in a
 Pure-Rust workspace and is not vendored here.
 
+Roadmap status 2026-11-07: complete — paper, image-to-3D inference,
+4B checkpoints, Spaces demo, shape-conditioned texture generation
+(`example_texturing.py`, `app_texturing.py`), and training code are
+all released upstream.
+
 ## Is it good for props from photos? Yes — that is the core use case
 
 The upstream minimal example is exactly this pipe: one input photo goes
@@ -13,7 +18,7 @@ into `Trellis2ImageTo3DPipeline`, a mesh comes out, `to_glb(...)` writes a
 PBR-ready `sample.glb`. Photo in, game prop out. This is what
 `gamecraft-cli trellis` wraps.
 
-Honest limits (all from the upstream README, verified 2026-11-03):
+Honest limits (all from the upstream README, re-verified 2026-11-07):
 
 - **Single view in, hallucinated back.** One photo constrains the front;
   the model invents the unseen sides. Front-facing hero props and
@@ -82,7 +87,13 @@ content must also be disclosed where stores require it (Steam asks).
 ## Setup (operator-owned, Linux)
 
 Upstream is **tested on Linux only**: conda env, CUDA 12.4, NVIDIA GPU
-with **24+ GB VRAM**. Goliath's 4090 clears the VRAM bar but runs
+with **24+ GB VRAM**. Env default is Python 3.8+ with torch 2.6.0 /
+CUDA 12.4 and the `flash-attn` backend; GPUs without flash-attn
+support (e.g. V100, not our 4090) fall back via `ATTN_BACKEND=xformers`
+plus a manual xformers install. Upstream also ships `app.py` (image
+to 3D) and `app_texturing.py` (shape-conditioned PBR) web demos —
+handy for eyeballing a prop before wiring the pipe.
+Goliath's 4090 clears the VRAM bar but runs
 Windows 11 — the sidecar belongs in **WSL2** (or a Linux box), with
 `GAMECRAFT_TRELLIS_REPO` / `GAMECRAFT_TRELLIS_PYTHON` pointing at it.
 H100 timings above are upstream's; a 4090 will be slower per step, and
@@ -160,7 +171,12 @@ print("wrote " + out)
 
 Note the driver already applies game-budget defaults (20K tris, 1K
 textures) so the GLB arrives near the import gates instead of at
-upstream's 1M/4K showcase defaults.
+upstream's 1M/4K showcase defaults. Parity notes vs the upstream
+example (checked 2026-11-07, behaviour unchanged): upstream calls
+`mesh.simplify(16777216)` (nvdiffrast cap) for its turntable-render
+path and exports with `extension_webp=True` — the game driver skips
+both (no turntable render; webp left to the importer).
+`remesh_band=1` / `remesh_project=0` match upstream.
 
 ## Use
 
