@@ -20,6 +20,10 @@
   a village with gabled houses, lit windows, street lamps, a church with an onion dome and cars
   on the main street, a vineyard on the hill, patchwork fields. Terrain rules are unit-tested; the
   tour reports 60 fps.
+- **Water and landmarks**: a river from the table edge under a plate-girder railway bridge and the
+  east helix viaduct into a lake ringed by the helix (one water plane, shown only where the land is
+  carved); a castle ruin on the hilltop; a fenced pasture with a barn and Fleckvieh cows inside the
+  west helix. New terrain test: water under the bridge and the lake, land above water elsewhere.
 - Design and limits: `docs/TOY_RAILWAY.md`.
 
 ## Unreleased - 2026-11-02 (Bevy games, sound, replay, command registry)

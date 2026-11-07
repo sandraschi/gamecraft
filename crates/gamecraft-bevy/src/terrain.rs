@@ -15,6 +15,8 @@ pub const TABLE_X: f32 = 200.0;
 pub const TABLE_Z: f32 = 130.0;
 /// Ground sits this far under the rail base on a track bed.
 const BED_DROP: f32 = 0.02;
+/// The lower straight's centre line.
+pub const LINE_Z_LOWER: f32 = gamecraft_sim::rail::LINE_Z;
 /// Inside this distance the track bed rules exactly.
 const BED_CORE: f32 = 4.0;
 /// Over this further distance the bed blends into the natural ground.
@@ -28,6 +30,29 @@ const BED_RUN: usize = 6;
 
 /// A flattened rectangle: (x0, x1, z0, z1, height, falloff).
 type Pad = (f32, f32, f32, f32, f32, f32);
+
+/// Water surface height. Everything else on the table stays above it, so one plane
+/// at this height shows only where the river and the lake are carved.
+pub const WATER_Y: f32 = -1.0;
+/// River bed below the water surface.
+const WATER_DEPTH: f32 = 1.2;
+/// Half width of the river at the water line.
+pub const RIVER_HALF: f32 = 4.5;
+/// River centre line, from the south edge of the table to the lake.
+pub const RIVER: [(f32, f32); 8] = [
+    (118.0, 134.0),
+    (106.0, 110.0),
+    (91.0, 88.0),
+    (80.0, 66.0),
+    (82.0, 50.0),
+    (84.0, 36.0),
+    (92.0, 22.0),
+    (97.0, 10.0),
+];
+/// The lake inside the east helix: centre x, centre z, radius.
+pub const LAKE: (f32, f32, f32) = (100.0, 4.0, 19.0);
+/// Where the river passes under the lower line.
+pub const BRIDGE_X: f32 = 82.0;
 
 /// Village square, the two station buildings.
 pub const VILLAGE: (f32, f32, f32, f32) = (-80.0, 80.0, 70.0, 122.0);
@@ -77,6 +102,21 @@ pub fn roll(x: f32, z: f32) -> f32 {
     0.9 * (x * 0.021 + 0.7).sin() * (z * 0.017 + 1.3).cos()
         + 0.5 * (x * 0.047 + 2.1).sin() * (z * 0.053 + 0.4).sin()
         + 0.25 * (x * 0.11 + z * 0.07).sin()
+}
+
+/// Distance from the water's edge: negative over water, positive on land.
+#[must_use]
+pub fn water_distance(x: f32, z: f32) -> f32 {
+    let mut best = ((x - LAKE.0).powi(2) + (z - LAKE.1).powi(2)).sqrt() - LAKE.2;
+    for seg in RIVER.windows(2) {
+        let ((ax, az), (bx, bz)) = (seg[0], seg[1]);
+        let (dx, dz) = (bx - ax, bz - az);
+        let len2 = (dx * dx + dz * dz).max(1e-6);
+        let along = (((x - ax) * dx + (z - az) * dz) / len2).clamp(0.0, 1.0);
+        let d = ((x - ax - dx * along).powi(2) + (z - az - dz * along).powi(2)).sqrt();
+        best = best.min(d - RIVER_HALF);
+    }
+    best
 }
 
 /// Ground before the track has any say.
@@ -157,6 +197,11 @@ impl Terrain {
             let w = 1.0 - smooth((d - BED_CORE) / BED_BLEND);
             h += (y - BED_DROP - h) * w;
         }
+        // The river and the lake cut through everything, the track bed included: the
+        // line crosses the river on a bridge.
+        let water = water_distance(x, z);
+        let floor = WATER_Y - WATER_DEPTH + water.max(0.0) * 0.55;
+        h = h.min(floor);
         // The nearer track decides: an embankment ends at an abutment where the
         // viaduct begins, instead of both rules pulling at the same ground.
         if let Some((d, y)) = via {
@@ -191,7 +236,8 @@ mod tests {
     #[test]
     fn the_bed_sits_just_under_the_rails() {
         let t = terrain();
-        for p in t.track.iter().filter(|p| !p.viaduct).step_by(7) {
+        let dry = |p: &&TrackPoint| water_distance(p.x, p.z) > 6.0;
+        for p in t.track.iter().filter(|p| !p.viaduct).filter(dry).step_by(7) {
             let h = t.height(p.x, p.z);
             assert!(
                 h <= p.y + 1e-3 && h >= p.y - 0.15,
@@ -199,6 +245,27 @@ mod tests {
                 p.x,
                 p.z,
                 p.y
+            );
+        }
+    }
+
+    #[test]
+    fn the_river_runs_under_the_bridge() {
+        let t = terrain();
+        let h = t.height(BRIDGE_X, crate::terrain::LINE_Z_LOWER);
+        assert!(h < WATER_Y, "no water under the bridge: ground {h}");
+        assert!(t.height(LAKE.0, LAKE.1) < WATER_Y);
+        // Away from the water the land stays above the water plane everywhere.
+        for (x, z) in [
+            (-150.0, -100.0),
+            (0.0, 0.0),
+            (-100.0, 50.0),
+            (150.0, -110.0),
+            (0.0, 100.0),
+        ] {
+            assert!(
+                t.height(x, z) > WATER_Y + 0.2,
+                "land below water at ({x}, {z})"
             );
         }
     }
