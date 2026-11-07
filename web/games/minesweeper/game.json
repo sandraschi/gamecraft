@@ -1,0 +1,12 @@
+{
+  "slug": "minesweeper",
+  "title": "Minesweeper AI",
+  "category": "Puzzle",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Windows-classic 9x9 beginner (10 mines) with take-back (undo stack) + autosolver (safe/flag deduction + probability fallback). First-click-safe + chord. Vendored deduction from ai-games-collection/games/puzzle-games/minesweeper.js MinesweeperAI.findSafeMoves (MIT). Tour: solver clears board, checkpoints per phase.",
+  "author": "ai-games-collection (deduction) + gamecraft session 2026-11-02",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "cleared",
+  "step_budget": 20000
+}

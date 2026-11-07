@@ -1,0 +1,12 @@
+{
+  "slug": "detective-case",
+  "title": "Detective Case - Naschmarkt",
+  "category": "Detective",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Uncracked.city lift: search places, interrogate LLM liars, hold clue vs statement, 3-try report. Case data in wien-naschmarkt-01.json, validator requires solvable chain.",
+  "author": "gamecraft + ai-games-collection 2026-11-04",
+  "win_marker": "GameCraft: report accepted",
+  "thumb_checkpoint": "report",
+  "step_budget": 20000
+}

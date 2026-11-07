@@ -1,0 +1,18 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Hnefatafl</title>
+<link rel="stylesheet" href="../_shared/ui.css">
+<style>:root { --accent: #c8a028; --bg: #141210; }</style>
+<script type="importmap">{ "imports": { "three": "/vendor/three/three.module.js" } }</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="hud" class="panel"><span class="name">Hnefatafl</span><span class="dim" id="turn"></span><b class="stat" id="kpos"></b><button id="music-btn">&#9835;</button><button id="help-btn">?</button></div>
+<div id="msg" class="panel dim">Viking siege: king to a corner. Attackers sandwich. Skeleton tour - full rules from ai-games-collection hnefatafl.js next.</div>
+<div id="help" hidden><div class="card panel"><h1>Hnefatafl</h1><p>Defenders (king + 8) start cross; attackers (16) ring. King wins on a corner; attackers win by surrounding him on 4 sides (3 by throne/edge). Captures by sandwich (custodian). All pieces move rook-wise. TODO: throne, shield-wall, 11x11 from collection.</p><button id="help-go" class="go">Play</button></div></div>
+<div id="done" class="overlay" hidden><div class="card panel"><h1>Escaped</h1><p id="done-text"></p><button id="next" class="go">Again</button></div></div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
