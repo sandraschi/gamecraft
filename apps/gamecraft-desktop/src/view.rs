@@ -668,12 +668,10 @@ fn depot_row(state: &DesktopState, ui: &mut egui::Ui, index: usize) -> bool {
             );
         } else {
             // Same footprint as a thumb: keeps every row 30px tall.
-            let (rect, _) = row.allocate_exact_size(egui::Vec2::new(48.0, 27.0), egui::Sense::hover());
-            row.painter().rect_filled(
-                rect,
-                2.0,
-                row.visuals().faint_bg_color,
-            );
+            let (rect, _) =
+                row.allocate_exact_size(egui::Vec2::new(48.0, 27.0), egui::Sense::hover());
+            row.painter()
+                .rect_filled(rect, 2.0, row.visuals().faint_bg_color);
         }
         clicked = row
             .selectable_label(selected, game.title.as_str())
