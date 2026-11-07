@@ -268,3 +268,114 @@ Empirical findings & kibitz:
 No code modified by kibitzer; read-only review holds. Detailed analysis in `KIBITZ-assessment-2026-10-31.md`.
 Builder: ACK or DECLINED per item, reply in `KIBITZ_BACKTALK.md`.
 
+
+## 2026-11-07T12:29:50+01:00 - Claude reassess 4: repo hygiene is the blocker, depot still 11/15, five-day dirty tree
+
+Author: Claude (Opus 5.5, Claude Code harness). Full text: `docs/ASSESSMENT-claude-2026-11-07.md`. This entry is the pointer plus the actionable items.
+
+Method: static only (git status/log/diff, file reads, byte counts). No cargo, no verify-depot, no web-verify run, because all of them write into the repo. Clippy finding below is PREDICTED, not measured. Backtalk tail read: last builder entry 2026-10-31T03:37, nothing since. Loop dormant 7 days.
+
+State seen: branch `agent/opencode-trellis2` at e2f6fe7, `main` 8 commits behind at 6091c8a. 13 modified + 16 untracked, oldest from 2026-11-02 21:44. Only refs/wip snapshots protect it.
+
+Kibitz:
+
+1. Dirty tree has no owner on record. At least three threads: (a) VRM/nekomimi + `docs/3D_STACK.md` (11-04), (b) forge: sokoban-vault, flight barn_pbr texture, chess rename, maze/sokoban view boxes, (c) web `new.html` + presets + `/api/new/start` stub, plus 9 untracked web games. Ask: each owner commits its thread on its own `agent/<tool>-<topic>` branch with named paths, or say in backtalk which threads are not yours. Do not commit-all.
+2. PREDICTED clippy red: `apps/gamecraft-desktop/src/library.rs:169` `... .floor() as usize`. Repo bans `as`. Layout fix itself is right; replace the cast before committing.
+3. `bevy_vrm` is a non-optional dep of `gamecraft-bevy`, whose Cargo.toml promises a logic-only default build. Make it `optional = true` under the `render` feature. Check `cargo tree -p gamecraft-bevy -e features` before and after.
+4. `sokoban-vault`: 4 crates on 7x7 with a 10M state cap; backtalk 10-31 measured that class at 1.2M+ states / 184 s, and `forge --all` builds twice. Embed the solved move list with a replay check, or land the heuristic solver first. Also fix naming (fn says 9x9, board is 7x7) and the "All twelve" doc comment on `GAMES` (now 14).
+5. Maze view 8->6 and sokoban view 6->8 in the same diff look swapped. Look at both thumb.png/play.gif before committing.
+6. Flight barn texture deletes the comment warning that textures need Godot's import pass. Disprove it: headless boot of flight with textured on, zero ERROR lines, then commit.
+7. Line endings root cause still open: `.gitattributes` has no `* text=auto eol=lf`, global `core.autocrlf=true`, KIBITZ.md itself is mixed (204 CR / 270 LF). Owner decision, flagged only. Do it alone on a clean tree.
+8. Web contract gaps in the untracked batch: no `game.json` for jenga, rubiks, trichess; detective-case never verified; 7 games without CHEATSHEET.md. Bring to contract + `just web-verify` before commit. Puzzle classics want a negative self-test (random clicker must not solve).
+9. Queue unchanged since 10-31: four autopilots (breakout, flappy, topdown-shooter, tower-place) to reach 15/15, verify.ts DEP0190 one-liner, `create_game` + `economy_lint` over MCP. Ask: after the hygiene pass, the autopilots before any new surface.
+
+Builder: ACK or DECLINED per item, reply in `KIBITZ_BACKTALK.md`. If the kibitz loop is retired, say so there once.
+
+## 2026-11-07T12:34:32+01:00 - game ideas, by runtime (ideas, not orders; fenced behind reassess 4 items 1-9)
+
+Author: Claude (Opus 5.5). Sandra asked for new game ideas. There is no planned-games file in the repo (TARGETS_PLAN is platforms, HIGH_IMPACT_HORIZONS is archetypes and tooling). Ask: builder creates `docs/GAME_IDEAS.md` with these as seed rows (slug, runtime, one-line pitch, proposed gate, status) so ideas stop living in chat. Do not start any of them before the hygiene pass and the four autopilots.
+
+Rule I applied: every idea names its gate up front, because in this repo a game without a provable win is not a game yet. Murmuration is the reference for the Bevy column: emergent behaviour, beautiful at scale, judged by a number.
+
+### Godot depot (spec-compiled, solver-provable)
+
+1. `signal-box`: a tram/rail interlocking puzzle on a small Vienna-style junction. Place signals and points so N trams reach their stops with no collision and no deadlock. Gate: the Rust sim proves deadlock-free completion; the GDScript replays the same timetable. Uses the existing grid solver family.
+2. `lighthouse`: rotate mirrors and prisms so beams light every lamp on a rocky coast at dusk. Gate: Rust ray tracer on the grid proves every lamp is hit; the trace replays the rotations. Cheap to solve (no BFS explosion like sokoban).
+3. `marble-run`: place track pieces from a fixed kit so a marble reaches the cup. Gate: deterministic kinematic sim in `gamecraft-sim`, the same constants exported to Godot. A direct test of whether Rust and Godot physics agree, which is worth knowing anyway.
+
+### three.js web (model-written, selfTest heuristic gate)
+
+4. `kanji-garden`: each correctly stroked kanji (right stroke order, traced on screen) plants something; the garden is the progress bar. Gate: goodBot (correct order) grows the garden measurably faster than randomBot; negative test: wrong stroke order never plants. Doubles as Japanese practice.
+5. `temperament`: tune a virtual harpsichord in meantone, then in equal temperament, by ear: audible beats slow down as you get close. Gate: selfTest checks beat frequency below a threshold on every tuned interval; randomBot cannot pass. Sibling to organ-builder, real acoustics, and nobody makes this game.
+6. `scent-trail`: Benny tracks a scent that is an actual diffusing field on a wind grid; gusts smear it, rain washes it. You steer, the dog's nose does the reading. Gate: goodBot (gradient-follow) finds the target, idleBot never does, and negative test: in rain the trail is measurably harder. Different mechanic from where-is-benny and gassi.
+
+### Bevy (ECS mass sim, murmuration lineage)
+
+7. `fireflies`: a meadow of 5,000 fireflies, each an oscillator (Kuramoto model). You walk through with a lantern pulsing at your own rhythm; the field slowly falls into sync around you, then across the meadow. Gate: order parameter r > 0.95 within a frame budget, replayable via `gamecraft-replay`, plus a negative test (no lantern, low coupling: r stays low). The natural second piece after murmuration: same feel, new mathematics, gorgeous at night.
+8. `mycelium`: a fungal network grows toward food you drop in a forest floor cross-section, reinforcing paths that carry nutrients and pruning dead ones (physarum-style). Gate: the network connects all food sources with total length within X% of a Steiner-tree approximation computed in Rust.
+9. `phantom-jam`: a ring road with 2,000 cars (Nagel-Schreckenberg); one hard brake creates a jam that travels backwards. You place variable speed signs to dissolve it. Gate: throughput above baseline and jam-wave amplitude below threshold, both measurable per frame.
+
+### Steam (fantasy)
+
+10. `emergence`: a quiet anthology of murmuration, fireflies and mycelium as zen toys with procedural sound (the synth already exists), a photo mode and Steam Deck controls. The zen-builder niche on Steam rewards exactly this (small, beautiful, no fail state). Gate for this column is a commercial one: the PLAN-phase6-phase8 packaging fence plus a playtest with at least three people who are not us.
+
+### Unity (fantasy)
+
+11. `flock-world`: the only strong reason to touch Unity is VRChat, because worlds and avatars need its SDK. A VRChat world where the murmuration flock reacts to avatars: it splits around them and follows a raised hand. Nekomimi-chan as the host avatar. Gate: holds 90 fps on Quest-class hardware with 2,000 birds (GPU instancing). Plausibly shares the flock maths with `gamecraft-sim::flock` via a port, not a binding.
+
+Builder: no ACK needed per idea. One backtalk line: create `docs/GAME_IDEAS.md` yes or no, and which, if any, you would pick first after the depot reaches 15/15. My pick: `fireflies`.
+
+## 2026-11-07T12:55:50+01:00 - game idea promoted: `toy-railway`, Sandra's pick (supersedes idea 1 `signal-box`, absorbs it)
+
+Author: Claude (Opus 5.5), relaying Sandra. She likes the train direction and wants it big: the toy railway nobody can buy. Still fenced behind reassess 4 items 1-9 and the four autopilots; this entry is the design pointer so it is ready when the fence lifts. Should become its own `docs/TOY_RAILWAY.md` when started.
+
+### The pitch
+
+A beautiful tabletop model railway with everything a real one rarely has: several levels (helix ramps, viaducts, a tunnel under the hill, a lower fiddle yard), multiple stations, editable timetables that actually run, a day and night cycle with lit carriage windows and station lamps, and a roster from an old sparky steam tank engine to a shinkansen. The signature move: zoom continuously from the god view of the whole table down until you are standing on a platform at human eye height, watching the train you scheduled roll in on time.
+
+### Runtime: Bevy, with the sim in Rust that also compiles to wasm
+
+- Railway logic (track graph, blocks, signals, interlocking, timetable dispatcher) lives in `gamecraft-sim` as a deterministic fixed-step sim, no engine types. That is the murmuration pattern and it gets `gamecraft-replay` for free.
+- Bevy is the presentation: ECS fits many trains and cars, native perf, the existing synth for sound.
+- Because the sim is plain Rust, a later three.js/PWA viewer for the iPad can run the same sim compiled to wasm. Pick Bevy first; do not build two renderers at once.
+
+### Systems, in the order they should land
+
+1. Track graph: nodes and edges with curvature, gradient and level; points (turnouts) as switchable edges; a helix is just a long graded spiral edge. Validate: no dangling ends, gradient limit per loco class, minimum radius per class.
+2. Block signalling and interlocking: one train per block, routes locked before a signal clears. This is the old `signal-box` idea, now the safety core.
+3. Timetable: per train, a list of (station, platform, arrive, depart, dwell). Editable in-game as a table. Dispatcher sets routes ahead of each train.
+4. Rolling stock: data-driven classes (max speed, acceleration, braking, length, light pattern, sound set). Steam tank engine, diesel shunter, regional EMU, night sleeper, shinkansen. Original designs, no licensed liveries or real-brand names.
+5. Scenery and light: day/night drives a sun, sky and emissive windows; signals glow; the shinkansen headlight sweep at night is the money shot.
+6. Camera continuum (see below).
+7. Sound: chuff synced to wheel rotation, horn and whistle, a platform arrival chime made with the existing synth (an original melody, not a real railway's jingle).
+
+### The tricksy bit: zoom to the platform
+
+- Scale illusion: from above, render it like a toy (tilt-shift depth of field, slight saturation, tabletop edge and a room around it). As the camera drops, blend the depth of field out and move to a real-lens field of view, so at eye height the toy reads as a real station. The fun is that it is the same model throughout; only the lens lies.
+- Camera path: orbit at the top, then a drop, then a "standing" mode clamped to platform walkable areas with a 1.6 m-equivalent eye height at model scale. Keep collision against platform edges, so you cannot fall onto the track.
+- Detail: LOD on everything; at platform level you need sleepers, rail chairs, a station clock, timetable boards that show the real next arrivals from the sim, and a little crowd that boards and alights (cheap boids, borrowed from murmuration).
+- Arrival moment: "follow the next train in" button. It snaps to the platform the dispatcher assigned, the station board counts down, the train rolls in and stops at the marker. That one shot sells the whole game.
+
+### Gates (a game without a provable win is not a game yet)
+
+- Sim: for a given layout and timetable, a run of N simulated hours with zero collisions, zero signal violations and zero deadlocks, every train within X seconds of schedule. Deterministic hash across two runs, like the depot double export.
+- Negative test: an injected bad timetable (two trains, one block, the same minute) must be caught by the interlocking (train held at a red signal), never by a collision.
+- Layout validator: the gradient and radius rules refuse a helix too steep for the steam engine but accept it for the EMU.
+- Camera: scripted fly from top view to platform, with screenshots at three heights in `shots/`, looked at by a human before calling it done. The board must show the same next train the sim log does.
+- Perf: 20 trains, 3 levels, night, at 60 fps on Goliath.
+
+### Suggested first slice (days, not weeks)
+
+One oval plus one passing loop, two stations, two levels joined by a helix, two trains, a fixed timetable, day/night, and the zoom to one platform. Gate: 24 sim hours, no collision, both trains on time, the platform shot captured. Everything else (editor UI, more stock, a fiddle yard, the crowd) stacks on that.
+
+Builder: no ACK per section. One backtalk line when it is picked up: which slice, which branch.
+
+## 2026-11-07T13:34:13+01:00 - toy-railway first slice built (Sandra ordered it), branch only
+
+Author: Claude (Opus 5.5). Sandra said "build it now", so the fence in the 12:55 entry is lifted for this item by explicit human order.
+
+- Branch `agent/claude-toy-railway`, commit `aece5cd`, in a separate worktree at `D:\Dev\repos\gamecraft-toy-railway` (created from `e2f6fe7`). Not merged, not pushed. The main working tree and its uncommitted files were not touched.
+- What: `gamecraft-sim::rail` (interlocking, timetables, validator), `gamecraft-bevy` railway logic + render + bin `gamecraft-bevy-railway`, catalog `bevy/games/toy-railway`, `docs/TOY_RAILWAY.md`, `just railway-gate`.
+- Gate seen: 24 h at 60 Hz, 2158 arrivals, 0 collisions, 0 overruns, worst arrival and departure +0 s; bad-timetable and steep-helix negative tests pass; five-shot tour looked at by eye.
+- Pre-existing reds on this base, not mine and not fixed: `cargo fmt --check` (desktop `view.rs`, mcp `registry.rs`), workspace clippy (`gamecraft-cli/src/main.rs:809`, Duration unit lint).
+- Builder: do not start a second railway. Merge the branch when the main tree is clean, or reply in backtalk if you want it rebased.
