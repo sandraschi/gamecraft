@@ -11,6 +11,8 @@
 //! platform at eye height with a normal lens. The model never changes, only the lens.
 
 use crate::railway::{Clockwork, RailWorld};
+use crate::scenery;
+use crate::terrain::Terrain;
 use bevy::pbr::{DistanceFog, FogFalloff};
 use bevy::post_process::bloom::Bloom;
 use bevy::post_process::dof::{DepthOfField, DepthOfFieldMode};
@@ -45,6 +47,7 @@ impl Plugin for RailwayRenderPlugin {
             })
             .init_resource::<CamRig>()
             .init_resource::<DayClock>()
+            .init_resource::<scenery::StreetClock>()
             .add_systems(Startup, (build_table, spawn_trains, spawn_camera).chain())
             .add_systems(
                 Update,
@@ -55,6 +58,7 @@ impl Plugin for RailwayRenderPlugin {
                     boards,
                     daylight,
                     camera_rig.after(keyboard),
+                    scenery::drive_cars,
                     hud,
                 ),
             );
@@ -134,6 +138,7 @@ struct Lamps {
     red: Handle<StandardMaterial>,
     green: Handle<StandardMaterial>,
     windows: Handle<StandardMaterial>,
+    street: Handle<StandardMaterial>,
 }
 
 fn v3(p: P3) -> Vec3 {
@@ -238,7 +243,6 @@ fn day_seconds(rail: &Rail, offset: u32) -> f32 {
     fu(secs) + frac
 }
 
-#[allow(clippy::too_many_lines)]
 fn build_table(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -246,18 +250,28 @@ fn build_table(
     world: Res<RailWorld>,
 ) {
     let rail = &world.0;
-    // Room and table.
+    let terrain = Terrain::new(&rail.layout);
+    let lamps = Lamps {
+        red: materials.add(glow(Color::srgb(1.0, 0.08, 0.05), 8.0)),
+        green: materials.add(glow(Color::srgb(0.1, 1.0, 0.35), 8.0)),
+        windows: materials.add(StandardMaterial {
+            base_color: Color::srgb(0.16, 0.18, 0.22),
+            perceptual_roughness: 0.2,
+            emissive: LinearRgba::BLACK,
+            ..default()
+        }),
+        street: materials.add(StandardMaterial {
+            base_color: Color::srgb(0.85, 0.85, 0.80),
+            emissive: LinearRgba::BLACK,
+            ..default()
+        }),
+    };
+    // Room, table frame and legs.
     let wood = materials.add(mat(Color::srgb(0.36, 0.22, 0.12), 0.7));
-    let grass = materials.add(mat(Color::srgb(0.30, 0.47, 0.22), 0.95));
     commands.spawn((
         Mesh3d(meshes.add(Cuboid::new(3000.0, 1.0, 3000.0))),
         MeshMaterial3d(materials.add(mat(Color::srgb(0.25, 0.17, 0.11), 0.8))),
         Transform::from_xyz(0.0, -31.0, 0.0),
-    ));
-    commands.spawn((
-        Mesh3d(meshes.add(Cuboid::new(400.0, 1.0, 260.0))),
-        MeshMaterial3d(grass.clone()),
-        Transform::from_xyz(0.0, -0.52, 0.0),
     ));
     for (x, z, w, d) in [
         (0.0, 131.0, 404.0, 2.0),
@@ -266,9 +280,9 @@ fn build_table(
         (-201.0, 0.0, 2.0, 260.0),
     ] {
         commands.spawn((
-            Mesh3d(meshes.add(Cuboid::new(w, 2.0, d))),
+            Mesh3d(meshes.add(Cuboid::new(w, 2.4, d))),
             MeshMaterial3d(wood.clone()),
-            Transform::from_xyz(x, -0.6, z),
+            Transform::from_xyz(x, -0.4, z),
         ));
     }
     for (x, z) in [
@@ -283,16 +297,22 @@ fn build_table(
             Transform::from_xyz(x, -16.0, z),
         ));
     }
-    // A low hill inside the loop.
+    // The landscape, shaped around the track.
     commands.spawn((
-        Mesh3d(meshes.add(Sphere::new(1.0))),
-        MeshMaterial3d(grass.clone()),
-        Transform::from_xyz(0.0, -4.0, 0.0).with_scale(Vec3::new(55.0, 10.0, 22.0)),
+        Mesh3d(meshes.add(scenery::terrain_mesh(&terrain))),
+        MeshMaterial3d(materials.add(mat(Color::WHITE, 0.95))),
+        Transform::default(),
     ));
-    spawn_track(&mut commands, &mut meshes, &mut materials, rail);
+    spawn_track(&mut commands, &mut meshes, &mut materials, rail, &terrain);
     spawn_stations(&mut commands, &mut meshes, &mut materials, rail);
-    spawn_signals(&mut commands, &mut meshes, &mut materials, rail);
-    spawn_trees(&mut commands, &mut meshes, &mut materials, rail);
+    spawn_signals(&mut commands, &mut meshes, &mut materials, rail, &lamps);
+    let kit = scenery::Kit {
+        windows: lamps.windows.clone(),
+        lamps: lamps.street.clone(),
+        tail: materials.add(glow(Color::srgb(0.9, 0.05, 0.04), 3.0)),
+    };
+    scenery::spawn_scenery(&mut commands, &mut meshes, &mut materials, &terrain, &kit);
+    commands.insert_resource(lamps);
 }
 
 fn spawn_track(
@@ -300,6 +320,7 @@ fn spawn_track(
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<StandardMaterial>,
     rail: &Rail,
+    terrain: &Terrain,
 ) {
     let ballast = materials.add(mat(Color::srgb(0.48, 0.45, 0.42), 1.0));
     let sleeper = materials.add(mat(Color::srgb(0.30, 0.22, 0.16), 0.9));
@@ -347,15 +368,19 @@ fn spawn_track(
                     frame.with_translation(at + Vec3::Y * 0.36),
                 ));
             }
-            // Viaduct piers under raised track, outside the Bergblick deck.
-            let on_deck = mid.x.abs() < 72.0 && mid.z < -44.0;
+            // Viaduct piers wherever the track flies above the ground.
+            let ground = terrain.height(mid.x, mid.z);
+            let rise = mid.y - ground;
             let pier_here = (s / 10.0).fract() < (step / 10.0) * 0.999;
-            if mid.y > 0.8 && !on_deck && pier_here {
+            if rise > 0.5 && pier_here {
                 commands.spawn((
                     Mesh3d(pier_mesh.clone()),
                     MeshMaterial3d(stone.clone()),
-                    Transform::from_xyz(mid.x, mid.y / 2.0, mid.z)
-                        .with_scale(Vec3::new(1.0, mid.y, 1.0)),
+                    Transform::from_xyz(mid.x, ground + rise / 2.0, mid.z).with_scale(Vec3::new(
+                        1.0,
+                        rise + 0.3,
+                        1.0,
+                    )),
                 ));
             }
             s = s1;
@@ -375,7 +400,6 @@ fn spawn_stations(
     let canopy = materials.add(mat(Color::srgb(0.20, 0.32, 0.30), 0.6));
     let walls = materials.add(mat(Color::srgb(0.93, 0.86, 0.70), 0.8));
     let roof = materials.add(mat(Color::srgb(0.62, 0.22, 0.16), 0.7));
-    let deck = materials.add(mat(Color::srgb(0.25, 0.40, 0.19), 0.95));
     let board = materials.add(mat(Color::srgb(0.06, 0.07, 0.10), 0.5));
     let amber = materials.add(glow(Color::srgb(1.0, 0.62, 0.10), 6.0));
     let post = meshes.add(Cylinder::new(0.12, 1.0));
@@ -407,13 +431,6 @@ fn spawn_stations(
                 Mesh3d(meshes.add(Cuboid::new(PLATFORM_HALF * 2.0, 0.02, 0.15))),
                 MeshMaterial3d(edge_line.clone()),
                 Transform::from_xyz(0.0, top + 0.01, edge_z),
-            ));
-        }
-        if level > 0.0 {
-            commands.spawn((
-                Mesh3d(meshes.add(Cuboid::new(146.0, level - 0.02, 28.0))),
-                MeshMaterial3d(deck.clone()),
-                Transform::from_xyz(0.0, (level - 0.02) / 2.0, -59.0),
             ));
         }
         // Canopy on posts.
@@ -572,15 +589,8 @@ fn spawn_signals(
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<StandardMaterial>,
     rail: &Rail,
+    lamps: &Lamps,
 ) {
-    let red = materials.add(glow(Color::srgb(1.0, 0.08, 0.05), 8.0));
-    let green = materials.add(glow(Color::srgb(0.1, 1.0, 0.35), 8.0));
-    let windows = materials.add(StandardMaterial {
-        base_color: Color::srgb(0.16, 0.18, 0.22),
-        perceptual_roughness: 0.2,
-        emissive: LinearRgba::BLACK,
-        ..default()
-    });
     let mast = materials.add(mat(Color::srgb(0.15, 0.15, 0.17), 0.6));
     let mast_mesh = meshes.add(Cylinder::new(0.12, 4.0));
     let head_mesh = meshes.add(Cuboid::new(0.5, 0.9, 0.35));
@@ -616,87 +626,9 @@ fn spawn_signals(
         commands.spawn((
             SignalLamp(id),
             Mesh3d(lamp_mesh.clone()),
-            MeshMaterial3d(red.clone()),
+            MeshMaterial3d(lamps.red.clone()),
             Transform::from_translation(base + Vec3::Y * 4.2 - ahead.normalize_or_zero() * 0.2),
         ));
-    }
-    commands.insert_resource(Lamps {
-        red,
-        green,
-        windows,
-    });
-}
-
-fn spawn_trees(
-    commands: &mut Commands,
-    meshes: &mut Assets<Mesh>,
-    materials: &mut Assets<StandardMaterial>,
-    rail: &Rail,
-) {
-    let mut samples = Vec::new();
-    for e in &rail.layout.edges {
-        let mut s = 0.0;
-        while s < e.length() {
-            samples.push(v3(e.point_at(s)));
-            s += 4.0;
-        }
-    }
-    let trunk = materials.add(mat(Color::srgb(0.32, 0.22, 0.14), 0.9));
-    let leaves = [
-        materials.add(mat(Color::srgb(0.13, 0.33, 0.16), 0.9)),
-        materials.add(mat(Color::srgb(0.20, 0.40, 0.18), 0.9)),
-        materials.add(mat(Color::srgb(0.10, 0.27, 0.20), 0.9)),
-    ];
-    let trunk_mesh = meshes.add(Cylinder::new(0.3, 1.0));
-    let cone = meshes.add(Cone {
-        radius: 1.0,
-        height: 1.0,
-    });
-    let mut rng = Lcg(42);
-    let mut placed = 0_u32;
-    for _ in 0..900 {
-        if placed >= 170 {
-            break;
-        }
-        let x = (rng.next() - 0.5) * 380.0;
-        let z = (rng.next() - 0.5) * 240.0;
-        let near_track = samples
-            .iter()
-            .any(|p| (p.x - x).powi(2) + (p.z - z).powi(2) < 100.0);
-        let in_station = x.abs() < 75.0 && (z.abs() - 55.0).abs() < 22.0;
-        if near_track || in_station {
-            continue;
-        }
-        let hill = 1.0 - (x / 55.0).powi(2) - (z / 22.0).powi(2);
-        let ground = if hill > 0.0 {
-            (-4.0 + 10.0 * hill.sqrt()).max(0.0)
-        } else {
-            0.0
-        };
-        let size = 0.7 + rng.next() * 0.8;
-        let tone = leaves
-            .get(usize::from(placed.is_multiple_of(3)) + usize::from(placed.is_multiple_of(5)));
-        commands.spawn((
-            Mesh3d(trunk_mesh.clone()),
-            MeshMaterial3d(trunk.clone()),
-            Transform::from_xyz(x, ground + 1.0 * size, z).with_scale(Vec3::new(
-                size,
-                2.0 * size,
-                size,
-            )),
-        ));
-        if let Some(t) = tone {
-            commands.spawn((
-                Mesh3d(cone.clone()),
-                MeshMaterial3d(t.clone()),
-                Transform::from_xyz(x, ground + 4.6 * size, z).with_scale(Vec3::new(
-                    2.4 * size,
-                    6.0 * size,
-                    2.4 * size,
-                )),
-            ));
-        }
-        placed += 1;
     }
 }
 
@@ -1189,6 +1121,11 @@ fn daylight(
     if let Some(h) = lamps.as_ref().map(|l| l.windows.clone()) {
         if let Some(mut m) = materials.get_mut(&h) {
             m.emissive = LinearRgba::rgb(2.6 * night, 1.9 * night, 0.9 * night);
+        }
+    }
+    if let Some(h) = lamps.as_ref().map(|l| l.street.clone()) {
+        if let Some(mut m) = materials.get_mut(&h) {
+            m.emissive = LinearRgba::rgb(9.0 * night, 7.0 * night, 3.8 * night);
         }
     }
 }

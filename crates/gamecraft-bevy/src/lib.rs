@@ -35,4 +35,7 @@ pub mod render;
 pub mod render_murmuration;
 #[cfg(feature = "render")]
 pub mod render_railway;
+#[cfg(feature = "render")]
+pub mod scenery;
 pub mod synth;
+pub mod terrain;
