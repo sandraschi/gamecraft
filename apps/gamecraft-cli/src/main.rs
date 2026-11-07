@@ -806,7 +806,7 @@ fn cmd_trellis_setup(execute: bool, with_weights: bool, force: bool) {
                 std::process::exit(1);
             }
         };
-        let deadline = std::time::Duration::from_secs(30 * 60);
+        let deadline = std::time::Duration::from_mins(30);
         let start = std::time::Instant::now();
         loop {
             match child.try_wait() {

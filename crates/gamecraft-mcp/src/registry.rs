@@ -236,7 +236,12 @@ const TRELLIS: [ParamSpec; 6] = [
         "Triangle budget; 20000 by default.",
     ),
     p("out_dir", "string", false, "GLB output root."),
-    p("endpoint", "string", false, "HTTP sidecar URL (selects the HTTP backend)."),
+    p(
+        "endpoint",
+        "string",
+        false,
+        "HTTP sidecar URL (selects the HTTP backend).",
+    ),
 ];
 
 const SCENE_VERIFY: [ParamSpec; 4] = [

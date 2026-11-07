@@ -86,6 +86,11 @@ Open that URL on the phone while the server runs, then Share > Add to Home Scree
 (iOS) or Install app (Android). After one online visit everything is cached, and the
 games keep working with Goliath off.
 
+Coexistence note (Windows): tailscaled binds the served tailnet port, so a
+wildcard bind of the same port fails with EADDRINUSE — that is why the server
+defaults to 127.0.0.1. tailscale serve proxies the tailnet port straight here,
+so remote play is unaffected; do not set `HOST=0.0.0.0` on a tailscale-served port.
+
 ## Games
 
 | Slug | Origin | Status |

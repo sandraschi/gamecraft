@@ -89,6 +89,7 @@ pub fn build_flight_with(
     if textured {
         forge.ext_resource("Texture2D", "res://textures/plaster.png", "tex_plaster");
         forge.ext_resource("Texture2D", "res://textures/brick.png", "tex_brick");
+        forge.ext_resource("Texture2D", "res://textures/barn_pbr.png", "tex_barn_pbr");
     }
 
     terrain(&mut forge, root)?;
@@ -211,11 +212,11 @@ fn village(forge: &mut Forge, root: NodeId, textured: bool) -> Result<(), String
     ];
     for (serial, (kind, x, z, lod)) in plan.iter().enumerate() {
         let mut spec = BuildingSpec::new(*kind, *x, *z, *lod);
-        // Textures need Godot's editor import pass (.import + .ctex), which a
-        // generated game never runs. Flat materials keep it error-free.
+        // Barn gets TextureCraft wood (barn_pbr); church/castle keep procedural brick.
         spec.tex = if textured {
             Some(match kind {
-                BuildingKind::Barn | BuildingKind::Church | BuildingKind::Castle => "tex_brick",
+                BuildingKind::Barn => "tex_barn_pbr",
+                BuildingKind::Church | BuildingKind::Castle => "tex_brick",
                 BuildingKind::Farmhouse
                 | BuildingKind::Igloo
                 | BuildingKind::Windmill

@@ -1,0 +1,35 @@
+{
+  "slug": "hnefatafl",
+  "title": "Hnefatafl",
+  "date": "2026-11-02T21:41:27.916Z",
+  "boot_ms": 169,
+  "steps": 10,
+  "sim_seconds": 0.2,
+  "checkpoints": [
+    {
+      "name": "board-7x7",
+      "step": 1
+    },
+    {
+      "name": "escape",
+      "step": 10
+    }
+  ],
+  "shots": [
+    "shots/01-board-7x7.png",
+    "shots/02-escape.png"
+  ],
+  "won": true,
+  "failed": null,
+  "wall_ms": 636,
+  "console_errors": [],
+  "console_warnings": [],
+  "markers": [
+    "GameCraft: ready",
+    "GameCraft: autoplay start",
+    "GameCraft: checkpoint board-7x7",
+    "GameCraft: checkpoint escape",
+    "GameCraft: tour complete, win"
+  ],
+  "pass": true
+}

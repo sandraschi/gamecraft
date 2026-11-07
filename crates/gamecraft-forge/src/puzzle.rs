@@ -350,7 +350,7 @@ pub fn build_maze_with(
         commands_json: commands_json(&forge),
         statics: vec![],
         frames,
-        view: View { x: -1.0, y: -1.0, w: 8.0, h: 8.0 },
+        view: View { x: -1.0, y: -1.0, w: 6.0, h: 6.0 },
         readme_body: "Discrete maze: BFS proves the exit reachable, trace walks it.\nThe 60s timer is the par; the trace finishes far inside it.\n".to_string(),
         summary: format!("{slug}: exit in {used} frames, lint clean"),
     })
@@ -462,9 +462,117 @@ pub fn build_sokoban() -> Result<GameParts, String> {
         commands_json: commands_json(&forge),
         statics: vec![],
         frames,
-        view: View { x: -1.0, y: -1.0, w: 6.0, h: 6.0 },
+        view: View { x: -1.0, y: -1.0, w: 8.0, h: 8.0 },
         readme_body: "BFS over (player, crates) proves the room solvable; the GIF\nreplays the exact solver trace on the discrete model.\n".to_string(),
         summary: format!("sokoban: solved in {used} frames, lint clean"),
+    })
+}
+
+/// 7x7 vault, four crates, four targets. Keeps the tiny 3-crate tutorial intact.
+/// Denser, not just bigger: same board, one more crate, longer tour.
+const SOKO9_CRATES: [(i32, i32); 4] = [(1, 1), (3, 1), (5, 1), (2, 3)];
+const SOKO9_TARGETS: [(i32, i32); 4] = [(1, 5), (3, 5), (5, 5), (4, 4)];
+
+/// Build the sokoban-9x9 depot game.
+///
+/// # Errors
+///
+/// Returns a message when the trace fails verification or a node is invalid.
+pub fn build_sokoban_9x9() -> Result<GameParts, String> {
+    let moves = sim::solve_sokoban((0, 0), &SOKO9_CRATES, &SOKO9_TARGETS, &[], 7, 7, 10_000_000)
+        .ok_or_else(|| "sokoban-9x9 layout unsolvable".to_string())?;
+    if moves.len() > 600 {
+        let step_count = moves.len();
+        return Err(format!("sokoban-9x9 solution too long: {step_count}"));
+    }
+    let mut forge = Forge::new();
+    let root = forge
+        .add_node("World", "Node3D", None)
+        .map_err(|err| err.to_string())?;
+    forge
+        .set_prop(root, "script", Forge::ext_ref("1_runtime"))
+        .map_err(|err| err.to_string())?;
+    forge.ext_resource("Script", "res://scripts/gamecraft_runtime.gd", "1_runtime");
+    forge.ext_resource("Script", "res://scripts/grid_walker.gd", "2_walker");
+    forge
+        .top_camera("Camera3D", Some(root), [3.0, 3.0], 14.0)
+        .map_err(|err| err.to_string())?;
+    board_base(
+        &mut forge,
+        root,
+        7,
+        7,
+        [0.16, 0.18, 0.24],
+        [0.12, 0.14, 0.2],
+    )?;
+    let soko_walker = walker_node(&mut forge, root, "soko", [0.0, 0.5, 0.0], 7, 7)?;
+    let soko_plan = delta_codes(moves.as_slice());
+    forge
+        .set_prop(
+            soko_walker,
+            "autoplay",
+            gamecraft_core::PropertyValue::Bool(true),
+        )
+        .map_err(|err| err.to_string())?;
+    forge
+        .set_prop(
+            soko_walker,
+            "autoplay_plan",
+            gamecraft_core::PropertyValue::Raw(format!("[{soko_plan}]")),
+        )
+        .map_err(|err| err.to_string())?;
+    for (index, cell) in SOKO9_CRATES.iter().enumerate() {
+        crate_node(
+            &mut forge,
+            root,
+            format!("Crate{index}").as_str(),
+            cell.0,
+            cell.1,
+        )?;
+    }
+    for (index, cell) in SOKO9_TARGETS.iter().enumerate() {
+        target_pad(
+            &mut forge,
+            root,
+            format!("Target{index}").as_str(),
+            cell.0,
+            cell.1,
+        )?;
+    }
+    let mut player = (0_i32, 0_i32);
+    let mut crates: Vec<(i32, i32)> = SOKO9_CRATES.to_vec();
+    let mut frames: Vec<Vec<Glyph>> = vec![soko_frame(player, &crates)];
+    for step in &moves {
+        let dest = (player.0 + step.0, player.1 + step.1);
+        if let Some(slot) = crates.iter().position(|c| *c == dest) {
+            crates[slot] = (dest.0 + step.0, dest.1 + step.1);
+        }
+        player = dest;
+        frames.push(soko_frame(player, &crates));
+    }
+    let used = frames.len();
+    Ok(GameParts {
+        slug: "sokoban-vault",
+        title: "GameCraft Sokoban Vault",
+        controls: "Arrows push one crate at a time. Cover all 4 targets.",
+        win_text: "All crates on targets.",
+        seed: 11,
+        scene_text: export_scene(&forge, "sokoban-vault")?,
+        scripts: vec![
+            ("gamecraft_runtime.gd", crate::scripts::RUNTIME),
+            ("grid_walker.gd", crate::scripts::WALKER),
+        ],
+        trace_json: format!(
+            "{{\"game\":\"sokoban-vault\",\"win\":true,\"frames\":{},\"pushes\":{}}}",
+            used,
+            moves.len()
+        ),
+        commands_json: commands_json(&forge),
+        statics: vec![],
+        frames,
+        view: View { x: -1.0, y: -1.0, w: 6.0, h: 6.0 },
+        readme_body: "BFS over (player, crates) proves the 4-crate vault solvable; the GIF\nreplays the exact solver trace on the discrete model.\n".to_string(),
+        summary: format!("sokoban-vault: solved in {used} frames, lint clean"),
     })
 }
 
@@ -758,7 +866,7 @@ pub fn build_chess() -> Result<GameParts, String> {
         5,
         &[(1, 2), (1, 2), (2, -1), (-1, -2)],
         "chessboard-move",
-        "GameCraft Chess Knight",
+        "Knight Tour",
         12,
     )
 }

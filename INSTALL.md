@@ -54,7 +54,7 @@ each with README + cheat sheet.
 |---|---|
 | `cargo` not recognized right after install | Reopen PowerShell (Rustup updates PATH for new shells) |
 | `godot` not found by gates | Set user `GAMECRAFT_GODOT` to the full exe path; reopen shell |
-| Port 11258 busy | Another `web-serve` running; stop it or pick the port in `web/serve.ts` |
+| Port 11258 busy / server will not start | `tailscale serve` holds that tailnet port (remote play) and a 0.0.0.0 bind then fails with EADDRINUSE. The arcade binds 127.0.0.1 by default, which coexists; do not force `HOST=0.0.0.0` on a tailscale-served port. Another looping `bun run serve.ts` (Play-click spawn storm) also holds nothing but litters processes — check `Get-Process bun`. |
 | TRELLIS wants Linux | By design: sidecar lives in WSL2, see `docs/TRELLIS2.md` |
 | First `run-desktop` takes forever | Normal: Bevy/wgpu compile once (~10 min), then incremental |
 

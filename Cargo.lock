@@ -1793,6 +1793,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_shader_mtoon"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4aaf48930e48ace4b8f7203cb07b02c38e237af48a8a87cdad03ffb66350d37"
+dependencies = [
+ "bevy",
+ "bitflags 2.13.2",
+]
+
+[[package]]
 name = "bevy_shape"
 version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1988,6 +1998,22 @@ dependencies = [
  "disqualified",
  "indexmap",
  "thread_local",
+]
+
+[[package]]
+name = "bevy_vrm"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8131ae43cc1ebc9cd20d10176eaf04a9cb29c238d9fe8cfb31db83884b4181c1"
+dependencies = [
+ "bevy",
+ "bevy_shader_mtoon",
+ "gltf",
+ "paste",
+ "serde",
+ "serde_json",
+ "serde_vrm",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -2546,7 +2572,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
- "windows 0.61.3",
+ "windows 0.62.2",
 ]
 
 [[package]]
@@ -3382,16 +3408,17 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-bevy"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "bevy",
+ "bevy_vrm",
  "gamecraft-replay",
  "gamecraft-sim",
 ]
 
 [[package]]
 name = "gamecraft-cli"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "clap",
  "gamecraft-core",
@@ -3405,7 +3432,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-commands"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-core",
  "glam 0.30.10",
@@ -3416,7 +3443,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-core"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "glam 0.30.10",
  "serde",
@@ -3425,7 +3452,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-desktop"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "eframe",
  "egui",
@@ -3446,7 +3473,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-forge"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-commands",
  "gamecraft-core",
@@ -3461,7 +3488,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-gltf"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-core",
  "gamecraft-godot",
@@ -3471,7 +3498,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-godot"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-core",
  "glam 0.30.10",
@@ -3482,7 +3509,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-mcp"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-commands",
  "gamecraft-core",
@@ -3499,7 +3526,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-replay"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-sim",
  "serde",
@@ -3509,11 +3536,11 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-sim"
-version = "0.13.0"
+version = "0.14.0"
 
 [[package]]
 name = "gamecraft-trellis"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -6262,6 +6289,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e7523beb55eece201a2356bee0bbca0d1ab466c14c07703b2e0ee6d42cb0c2c"
 dependencies = [
  "serde_core",
+]
+
+[[package]]
+name = "serde_vrm"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1384a255548db11b7a5b10b825b8ef5303606cb855e8ed0f9d46e720a7587152"
+dependencies = [
+ "bevy",
+ "serde",
 ]
 
 [[package]]

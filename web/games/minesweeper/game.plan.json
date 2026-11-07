@@ -1,0 +1,12 @@
+{
+  "slug": "minesweeper",
+  "title": "Minesweeper AI",
+  "category": "Puzzle",
+  "family": "threejs",
+  "entry": "index.html",
+  "experiment": "Windows-classic 9x9/16x16/30x16 with take-back (undo) + autosolver: AI Auto plays, AI Hint suggests, AI Move steps. First-click-safe + chord, no-guess option. Vendored logic from ai-games-collection/games/puzzle-games/minesweeper.js (1314 lines, MIT) + __gamecraft tour (solver clears board).",
+  "author": "ai-games-collection (logic) + gamecraft session 2026-11-02 (harness, tour, verify)",
+  "win_marker": "GameCraft: tour complete, win",
+  "thumb_checkpoint": "cleared",
+  "step_budget": 20000
+}

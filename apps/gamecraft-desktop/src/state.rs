@@ -569,6 +569,14 @@ impl DesktopState {
                 .arg("run")
                 .arg("serve.ts")
                 .current_dir(web_root)
+                // Pin loopback: a 0.0.0.0 bind fails with EADDRINUSE while
+                // tailscaled serves this port on the tailnet (remote play);
+                // 127.0.0.1 coexists with it and tailscale serve proxies here.
+                // An explicit HOST in the environment is still honoured.
+                .env(
+                    "HOST",
+                    std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),
+                )
                 .spawn()
             {
                 Ok(_) => {

@@ -15,6 +15,7 @@ dist/
 
 # Per-game play overlays written by the viewer (local tuning, not content)
 depot/games/*/settings.json
+bevy/games/*/settings.json
 
 # Fleet defaults (future-proofing; nothing here yet)
 node_modules/
