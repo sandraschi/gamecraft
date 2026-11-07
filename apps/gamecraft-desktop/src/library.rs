@@ -9,6 +9,14 @@ use crate::state::{DepotGame, DesktopState, GameKind, ACCENT, ACCENT_DARK};
 const CARD_W: f32 = 196.0;
 /// Thumbnail height for [`CARD_W`].
 const THUMB_H: f32 = 110.0;
+/// Fixed card height: thumb 110 + gaps 8 + title ~20 + status ~14 +
+/// frame margins 12, rounded up with slack. Every card must be exactly
+/// this tall: the grid uses `horizontal_wrapped`, which vertically
+/// centers each card in the row — equal heights make that a no-op, so
+/// cards align instead of stairstepping. A fixed height also keeps the
+/// wrap's minimum width at one card, so narrowing the central panel
+/// wraps cards instead of blocking the detail divider.
+const CARD_H: f32 = 176.0;
 
 /// Stable id of the game filter, shared by the library header and the editor sidebar.
 pub(crate) fn filter_id() -> egui::Id {
@@ -118,9 +126,11 @@ fn card(state: &DesktopState, ui: &mut egui::Ui, index: usize) -> (bool, bool) {
         .inner_margin(6.0);
     let response = frame
         .show(ui, |outer| {
-            // Grid rows are top-aligned horizontals; the card itself stacks vertically.
+            // Fixed size: equal heights keep horizontal_wrapped's
+            // vertical centering a no-op (no stairstep), and the wrap
+            // keeps a one-card minimum width so the detail divider travels.
             outer.allocate_ui_with_layout(
-                egui::vec2(CARD_W, 0.0),
+                egui::vec2(CARD_W, CARD_H),
                 egui::Layout::top_down(egui::Align::Min),
                 |inner| card_body(state, inner, game, dark),
             );
@@ -162,32 +172,21 @@ pub(crate) fn grid(state: &mut DesktopState, ui: &mut egui::Ui) {
                     last_kind = Some(*kind);
                 }
                 scroll.label(egui::RichText::new(group.as_str()).color(accent(scroll)));
-                // Top-aligned rows of fixed-width cards. horizontal_wrapped
-                // vertically centers each card in the row height established
-                // so far, so groups with 2+ cards stairstepped down-right.
-                let per = CARD_W + 12.0 + 10.0;
-                // Whole cards that fit, at least one (no float-to-int cast).
-                let avail = scroll.available_width();
-                let mut cols = 1_usize;
-                while f32::from(u16::try_from(cols + 1).unwrap_or(u16::MAX)) * per <= avail {
-                    cols += 1;
-                }
-                for (ri, chunk) in members.chunks(cols).enumerate() {
-                    if ri > 0 {
-                        scroll.add_space(6.0);
-                    }
-                    scroll.horizontal_top(|row| {
-                        row.spacing_mut().item_spacing = egui::vec2(10.0, 10.0);
-                        for &index in chunk {
-                            let (clicked, double) = card(state, row, index);
-                            if double {
-                                pick = Some((index, true));
-                            } else if clicked {
-                                pick = Some((index, false));
-                            }
+                // Wrapped flow: cards have a fixed size (see CARD_H), so the
+                // wrap's vertical centering is a no-op and rows align. The
+                // wrap's minimum width stays one card, so shrinking the
+                // central panel wraps cards instead of blocking the divider.
+                scroll.horizontal_wrapped(|wrap| {
+                    wrap.spacing_mut().item_spacing = egui::vec2(10.0, 10.0);
+                    for &index in members {
+                        let (clicked, double) = card(state, wrap, index);
+                        if double {
+                            pick = Some((index, true));
+                        } else if clicked {
+                            pick = Some((index, false));
                         }
-                    });
-                }
+                    }
+                });
                 scroll.add_space(8.0);
             }
         });
@@ -227,7 +226,11 @@ pub(crate) fn detail(state: &mut DesktopState, ui: &mut egui::Ui) {
     let (text, colour) = status(&game, ui.visuals().dark_mode);
     ui.horizontal(|row| {
         row.label("Last gate:");
-        row.colored_label(colour, text);
+        // Gate lines can be very long (e.g. murmuration's full verify
+        // summary). Truncate so this row never forces the detail panel
+        // wider than its size range; the full text stays on hover.
+        row.add(egui::Label::new(egui::RichText::new(text.clone()).color(colour)).truncate())
+            .on_hover_text(text);
     });
     if let Some(v) = &game.verify {
         if !v.when.is_empty() {
