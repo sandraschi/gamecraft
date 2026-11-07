@@ -6,7 +6,10 @@
 //! depth of field and the light do the rest.
 
 use crate::railway::Clockwork;
-use crate::terrain::{natural, roll, Terrain, TABLE_X, TABLE_Z, VILLAGE};
+use crate::terrain::{
+    natural, roll, water_distance, Terrain, BRIDGE_X, LINE_Z_LOWER, TABLE_X, TABLE_Z, VILLAGE,
+    WATER_Y,
+};
 use bevy::asset::RenderAssetUsages;
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
@@ -36,6 +39,10 @@ impl Lcg {
 
     fn range(&mut self, a: f32, b: f32) -> f32 {
         a + (b - a) * self.unit()
+    }
+
+    fn next_bool(&mut self) -> bool {
+        self.unit() < 0.5
     }
 }
 
@@ -214,6 +221,327 @@ pub fn spawn_scenery(
     spawn_village(commands, meshes, materials, terrain, kit);
     spawn_vineyard(commands, meshes, materials, terrain);
     spawn_cars(commands, meshes, materials, kit);
+    spawn_water(commands, meshes, materials);
+    spawn_bridge(commands, meshes, materials);
+    spawn_castle(commands, meshes, materials, terrain);
+    spawn_pasture(commands, meshes, materials, terrain);
+}
+
+/// The castle ruin on the hilltop.
+const CASTLE: (f32, f32) = (0.0, -6.0);
+/// The cow pasture inside the west helix: x0, x1, z0, z1.
+const PASTURE: (f32, f32, f32, f32) = (-126.0, -80.0, -20.0, 22.0);
+
+fn in_pasture(x: f32, z: f32, margin: f32) -> bool {
+    x > PASTURE.0 - margin
+        && x < PASTURE.1 + margin
+        && z > PASTURE.2 - margin
+        && z < PASTURE.3 + margin
+}
+
+/// One water plane under the whole table: the land hides it except where the river
+/// and the lake are carved.
+fn spawn_water(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+) {
+    commands.spawn((
+        Mesh3d(meshes.add(Cuboid::new(2.0 * TABLE_X, 0.05, 2.0 * TABLE_Z))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgb(0.10, 0.27, 0.30),
+            perceptual_roughness: 0.05,
+            reflectance: 0.9,
+            ..default()
+        })),
+        Transform::from_xyz(0.0, WATER_Y, 0.0),
+    ));
+}
+
+/// Plate-girder bridge where the lower line crosses the river, on stone abutments.
+fn spawn_bridge(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+) {
+    let steel = materials.add(mat(Color::srgb(0.22, 0.28, 0.25), 0.55));
+    let stone = materials.add(mat(Color::srgb(0.55, 0.52, 0.47), 0.95));
+    let span = 15.0;
+    let z = LINE_Z_LOWER;
+    for side in [-1.0_f32, 1.0] {
+        commands.spawn((
+            Mesh3d(meshes.add(Cuboid::new(span, 1.7, 0.35))),
+            MeshMaterial3d(steel.clone()),
+            Transform::from_xyz(BRIDGE_X, 0.25, z + side * 2.05),
+        ));
+        commands.spawn((
+            Mesh3d(meshes.add(Cuboid::new(3.0, 3.6, 7.0))),
+            MeshMaterial3d(stone.clone()),
+            Transform::from_xyz(BRIDGE_X + side * (span / 2.0 + 1.0), -1.6, z),
+        ));
+    }
+    commands.spawn((
+        Mesh3d(meshes.add(Cuboid::new(span, 0.5, 4.4))),
+        MeshMaterial3d(steel.clone()),
+        Transform::from_xyz(BRIDGE_X, -0.25, z),
+    ));
+    // Stiffeners along the girders.
+    let rib = meshes.add(Cuboid::new(0.15, 1.6, 0.5));
+    let mut x = BRIDGE_X - span / 2.0 + 1.0;
+    while x < BRIDGE_X + span / 2.0 {
+        for side in [-1.0_f32, 1.0] {
+            commands.spawn((
+                Mesh3d(rib.clone()),
+                MeshMaterial3d(steel.clone()),
+                Transform::from_xyz(x, 0.25, z + side * 2.3),
+            ));
+        }
+        x += 1.6;
+    }
+}
+
+/// A ruined castle: a keep, broken corner towers, walls with gaps.
+fn spawn_castle(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+    terrain: &Terrain,
+) {
+    let stone = materials.add(mat(Color::srgb(0.62, 0.59, 0.52), 0.95));
+    let dark = materials.add(mat(Color::srgb(0.12, 0.11, 0.10), 0.9));
+    let cube = meshes.add(Cuboid::new(1.0, 1.0, 1.0));
+    let tower = meshes.add(Cylinder::new(1.0, 1.0));
+    let (cx, cz) = CASTLE;
+    let base = terrain.height(cx, cz) - 0.6;
+    let (hw, hd) = (10.0_f32, 7.0_f32);
+    let block = |commands: &mut Commands,
+                 m: &Handle<Mesh>,
+                 mt: &Handle<StandardMaterial>,
+                 at: Vec3,
+                 size: Vec3| {
+        commands.spawn((
+            Mesh3d(m.clone()),
+            MeshMaterial3d(mt.clone()),
+            Transform::from_translation(at).with_scale(size),
+        ));
+    };
+    // Walls, each with a ruined gap: (centre x, centre z, length, along x).
+    for (wx, wz, len, along_x, height) in [
+        (cx - 3.0, cz - hd, 2.0 * hw - 8.0, true, 5.0),
+        (cx + 2.0, cz + hd, 2.0 * hw - 6.0, true, 3.2),
+        (cx - hw, cz, 2.0 * hd, false, 4.4),
+        (cx + hw, cz + 1.5, 2.0 * hd - 5.0, false, 3.6),
+    ] {
+        let size = if along_x {
+            Vec3::new(len, height, 1.2)
+        } else {
+            Vec3::new(1.2, height, len)
+        };
+        block(
+            commands,
+            &cube,
+            &stone,
+            Vec3::new(wx, base + height / 2.0, wz),
+            size,
+        );
+    }
+    for (k, (tx, tz)) in [(-hw, -hd), (hw, -hd), (-hw, hd), (hw, hd)]
+        .iter()
+        .enumerate()
+    {
+        let height = [10.0_f32, 6.5, 8.5, 4.0].get(k).copied().unwrap_or(6.0);
+        block(
+            commands,
+            &tower,
+            &stone,
+            Vec3::new(cx + tx, base + height / 2.0, cz + tz),
+            Vec3::new(2.4, height, 2.4),
+        );
+    }
+    // The keep with crenellations and a dark doorway.
+    let (kx, kz, kh) = (cx - 4.0, cz - 1.0, 14.0);
+    block(
+        commands,
+        &cube,
+        &stone,
+        Vec3::new(kx, base + kh / 2.0, kz),
+        Vec3::new(6.0, kh, 6.0),
+    );
+    for (mx, mz) in [
+        (-2.5, -2.5),
+        (0.0, -2.5),
+        (2.5, -2.5),
+        (-2.5, 2.5),
+        (0.0, 2.5),
+        (2.5, 2.5),
+        (-2.5, 0.0),
+        (2.5, 0.0),
+    ] {
+        block(
+            commands,
+            &cube,
+            &stone,
+            Vec3::new(kx + mx, base + kh + 0.5, kz + mz),
+            Vec3::new(1.0, 1.0, 1.0),
+        );
+    }
+    block(
+        commands,
+        &cube,
+        &dark,
+        Vec3::new(kx, base + 1.9, kz + 3.02),
+        Vec3::new(1.4, 2.4, 0.06),
+    );
+}
+
+/// A fenced pasture with a red barn and a herd of Fleckvieh cows.
+#[allow(clippy::too_many_lines)]
+fn spawn_pasture(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+    terrain: &Terrain,
+) {
+    let wood = materials.add(mat(Color::srgb(0.42, 0.30, 0.20), 0.9));
+    let white = materials.add(mat(Color::srgb(0.95, 0.93, 0.88), 0.85));
+    let brown = materials.add(mat(Color::srgb(0.55, 0.28, 0.14), 0.85));
+    let hoof = materials.add(mat(Color::srgb(0.15, 0.12, 0.10), 0.8));
+    let barn_red = materials.add(mat(Color::srgb(0.55, 0.16, 0.12), 0.85));
+    let roof_grey = materials.add(mat(Color::srgb(0.32, 0.32, 0.34), 0.7));
+    let cube = meshes.add(Cuboid::new(1.0, 1.0, 1.0));
+    let post = meshes.add(Cuboid::new(0.18, 1.4, 0.18));
+    // Fence: posts every 3 m, two rails between neighbours.
+    let (x0, x1, z0, z1) = PASTURE;
+    let mut corners = Vec::new();
+    let mut x = x0;
+    while x < x1 {
+        corners.push((x, z0));
+        x += 3.0;
+    }
+    let mut z = z0;
+    while z < z1 {
+        corners.push((x1, z));
+        z += 3.0;
+    }
+    let mut x = x1;
+    while x > x0 {
+        corners.push((x, z1));
+        x -= 3.0;
+    }
+    let mut z = z1;
+    while z > z0 {
+        corners.push((x0, z));
+        z -= 3.0;
+    }
+    let fence: Vec<Vec3> = corners
+        .iter()
+        .map(|&(px, pz)| Vec3::new(px, terrain.height(px, pz), pz))
+        .collect();
+    for (k, &p) in fence.iter().enumerate() {
+        commands.spawn((
+            Mesh3d(post.clone()),
+            MeshMaterial3d(wood.clone()),
+            Transform::from_translation(p + Vec3::Y * 0.7),
+        ));
+        let Some(&q) = fence.get((k + 1) % fence.len()) else {
+            continue;
+        };
+        let mid = (p + q) / 2.0;
+        let len = p.distance(q);
+        if len < 0.1 || len > 5.0 {
+            continue;
+        }
+        for h in [0.55_f32, 1.1] {
+            commands.spawn((
+                Mesh3d(cube.clone()),
+                MeshMaterial3d(wood.clone()),
+                Transform::from_translation(mid + Vec3::Y * h)
+                    .looking_to(q - p, Vec3::Y)
+                    .with_scale(Vec3::new(0.08, 0.12, len)),
+            ));
+        }
+    }
+    // Barn in the north-west corner.
+    let (bx, bz) = (x0 + 9.0, z1 - 7.0);
+    let bg = terrain.height(bx, bz);
+    commands.spawn((
+        Mesh3d(cube.clone()),
+        MeshMaterial3d(barn_red.clone()),
+        Transform::from_xyz(bx, bg + 2.6, bz).with_scale(Vec3::new(12.0, 5.6, 8.0)),
+    ));
+    commands.spawn((
+        Mesh3d(meshes.add(gable_mesh())),
+        MeshMaterial3d(roof_grey),
+        Transform::from_xyz(bx, bg + 5.4, bz).with_scale(Vec3::new(12.8, 3.6, 9.0)),
+    ));
+    // Cows.
+    let mut rng = Lcg(1907);
+    for _ in 0..16 {
+        let cx = rng.range(x0 + 4.0, x1 - 4.0);
+        let cz = rng.range(z0 + 3.0, z1 - 3.0);
+        if (cx - bx).abs() < 8.0 && (cz - bz).abs() < 6.0 {
+            continue;
+        }
+        let g = terrain.height(cx, cz);
+        let yaw = rng.range(0.0, std::f32::consts::TAU);
+        let parent = commands
+            .spawn((
+                Transform::from_xyz(cx, g, cz).with_rotation(Quat::from_rotation_y(yaw)),
+                Visibility::default(),
+            ))
+            .id();
+        let grazing = rng.next_bool();
+        let parts = [
+            (
+                &white,
+                Vec3::new(0.0, 1.15, 0.0),
+                Vec3::new(0.95, 0.95, 2.1),
+            ),
+            (
+                &brown,
+                Vec3::new(0.0, 1.25, 0.45),
+                Vec3::new(0.98, 0.7, 0.9),
+            ),
+            (
+                &brown,
+                Vec3::new(0.0, 1.35, -0.55),
+                Vec3::new(0.98, 0.5, 0.6),
+            ),
+            (
+                &white,
+                if grazing {
+                    Vec3::new(0.0, 0.75, -1.35)
+                } else {
+                    Vec3::new(0.0, 1.45, -1.3)
+                },
+                Vec3::new(0.5, 0.55, 0.75),
+            ),
+            (
+                &hoof,
+                Vec3::new(0.32, 0.35, -0.75),
+                Vec3::new(0.2, 0.7, 0.2),
+            ),
+            (
+                &hoof,
+                Vec3::new(-0.32, 0.35, -0.75),
+                Vec3::new(0.2, 0.7, 0.2),
+            ),
+            (&hoof, Vec3::new(0.32, 0.35, 0.75), Vec3::new(0.2, 0.7, 0.2)),
+            (
+                &hoof,
+                Vec3::new(-0.32, 0.35, 0.75),
+                Vec3::new(0.2, 0.7, 0.2),
+            ),
+        ];
+        for (m, at, size) in parts {
+            commands.spawn((
+                Mesh3d(cube.clone()),
+                MeshMaterial3d(m.clone()),
+                Transform::from_translation(at).with_scale(size),
+                ChildOf(parent),
+            ));
+        }
+    }
 }
 
 fn forest(x: f32, z: f32) -> bool {
@@ -274,7 +602,16 @@ fn spawn_trees(
         let station = x.abs() < 76.0 && (z.abs() - 56.0).abs() < 20.0;
         let fields = x.abs() > 152.0 || z < -98.0;
         let vineyard = x.abs() < 34.0 && z > 4.0 && z < 23.0;
-        if village || station || vineyard || (fields && rng.unit() > 0.15) {
+        let castle = (x - CASTLE.0).powi(2) + (z - CASTLE.1).powi(2) < 17.0 * 17.0;
+        let wet = water_distance(x, z) < 3.0;
+        if village
+            || station
+            || vineyard
+            || castle
+            || wet
+            || in_pasture(x, z, 3.0)
+            || (fields && rng.unit() > 0.15)
+        {
             continue;
         }
         if terrain.track_distance(x, z) < 9.0 {

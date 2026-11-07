@@ -42,8 +42,17 @@ gabled houses along two streets, windows that light up at night, street lamps, a
 with a green onion dome, seven cars on the main street, a vineyard on the hill, and patchwork
 fields (wheat, plough, meadow, rapeseed) at the far ends.
 
-Terrain gates (`terrain::tests`): the bed sits 0 to 0.15 m under the rails, the ground never
-covers a rail anywhere, viaducts keep 2 m, Bergblick stands on the ridge, the village is flat.
+Slice 3 added water and landmarks. A river runs from the south edge of the table under a
+plate-girder bridge on the lower line (east of Talheim), then under the east helix viaduct into a
+lake that the helix rings. The water is one plane at `WATER_Y` under the whole table; the land
+stays above it everywhere except where the river and the lake are carved, so no water mesh has
+to follow the banks. A castle ruin (keep, broken towers, gapped walls) stands on the hilltop, and
+a fenced pasture inside the west helix has a red barn and a herd of Fleckvieh cows.
+
+Terrain gates (`terrain::tests`): the bed sits 0 to 0.15 m under the rails (away from the
+river), the ground never covers a rail anywhere, viaducts keep 2 m, Bergblick stands on the
+ridge, the village is flat, there is water under the bridge and in the lake, and the land
+elsewhere stays above the water plane.
 The tour prints its frame rate; 60 fps (the vsync cap) with everything on, 2026-11-07.
 
 ## How safety works
@@ -80,8 +89,11 @@ The tour prints its frame rate; 60 fps (the vsync cap) with everything on, 2026-
   not checked for fouling.
 - No crowd simulation (people are static), no sound yet, no gradient effect on speed (grades
   are only validated).
-- Scenery is low-poly by design and has no tunnels, water or animals yet; houses have no
-  chimneys or balconies. Trees are separate entities (about 7500 meshes), fine on Goliath, not
+- Scenery is low-poly by design: no tunnels yet, houses have no chimneys or balconies, cows
+  stand still, the water has no waves or reflections of the scene (only of the sky).
+- TRELLIS.2 is not provisioned on Goliath (no weights, no Python environment as of
+  2026-11-07), so every building here is procedural. Per `docs/TRELLIS2.md`, assets from it stay
+  `pending-human-approval` for licence provenance before they ship. Trees are separate entities (about 7500 meshes), fine on Goliath, not
   tested on weaker GPUs.
 - The tilt-shift look comes from Bevy's depth of field with an exaggerated sensor size at the
   overview; it is tuned by eye, not measured.
@@ -93,5 +105,6 @@ The tour prints its frame rate; 60 fps (the vsync cap) with everything on, 2026-
 2. More stock: diesel shunter, regional EMU, night sleeper; a fiddle yard on the lower level.
 3. Sound from the existing synth: chuff synced to wheel turns, horn, an original arrival chime.
 4. Platform crowd that boards and alights (boids from the murmuration sim).
-5. More scenery: a river under a bridge, a tunnel through the central hill, cows in the
-   meadows, a castle on the ridge, buildings in bulk from TRELLIS or TextureCraft.
+5. More scenery: a tunnel (needs a layout change: the line would have to pass under the
+   ridge), a road bridge over the river, buildings in bulk from TRELLIS.2 once provisioned and
+   the licence is approved.
