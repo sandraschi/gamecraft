@@ -15,6 +15,11 @@
   platform; F follows the next train in. Day and night with lit windows, headlights, station
   lamps; signals show the reservations; seven-segment departure boards count down to the next
   scheduled arrival. `just railway-gate` proves a day at 60 Hz and saves a five-shot tour.
+- **Scenery** (`terrain.rs`, `scenery.rs`): a landscape shaped around the track (embankments,
+  cuttings, abutments, piers only where the line flies), about 1500 procedural trees in forests,
+  a village with gabled houses, lit windows, street lamps, a church with an onion dome and cars
+  on the main street, a vineyard on the hill, patchwork fields. Terrain rules are unit-tested; the
+  tour reports 60 fps.
 - Design and limits: `docs/TOY_RAILWAY.md`.
 
 ## Unreleased - 2026-11-02 (Bevy games, sound, replay, command registry)

@@ -80,6 +80,9 @@ struct Tour {
     dir: String,
     next: usize,
     frames: u32,
+    /// Rendered frames and seconds while holding still for shots, for the fps line.
+    held_frames: u32,
+    held_secs: f32,
 }
 
 fn arg_value(args: &[String], name: &str) -> Option<String> {
@@ -129,6 +132,8 @@ fn main() {
             dir,
             next: 0,
             frames: 0,
+            held_frames: 0,
+            held_secs: 0.0,
         })
         .add_systems(Update, tour);
     }
@@ -139,6 +144,7 @@ fn main() {
 /// post-processing settle, save the picture, move on; close after the last one.
 fn tour(
     mut commands: Commands,
+    time: Res<Time>,
     mut tour: ResMut<Tour>,
     world: Res<RailWorld>,
     mut clock: ResMut<Clockwork>,
@@ -148,6 +154,9 @@ fn tour(
     let Some(shot) = SHOTS.get(tour.next).copied() else {
         tour.frames += 1;
         if tour.frames > 30 {
+            let fps = f32::from(u16::try_from(tour.held_frames).unwrap_or(u16::MAX))
+                / tour.held_secs.max(1e-3);
+            println!("tour: {fps:.0} fps average while holding for shots");
             exit.write(AppExit::Success);
         }
         return;
@@ -166,6 +175,10 @@ fn tour(
     rig.look = 0.0;
     rig.snap = true;
     tour.frames += 1;
+    if tour.frames > 10 {
+        tour.held_frames += 1;
+        tour.held_secs += time.delta_secs();
+    }
     if tour.frames == 40 {
         let path = format!("{}/{}.png", tour.dir, shot.name);
         println!("tour: {path} at railway second {now}");
