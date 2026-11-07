@@ -103,7 +103,12 @@ export function startServer(port: number = DEFAULT_PORT) {
   }
   return Bun.serve({
     port,
-    hostname: process.env.HOST || "0.0.0.0",
+    // Loopback by default, not 0.0.0.0: on Windows a wildcard bind fails
+    // with EADDRINUSE while tailscaled serves this port on the tailnet
+    // (remote play), and the desktop probe + browser both use loopback.
+    // tailscale serve proxies the tailnet port to 127.0.0.1, so remote
+    // play is unaffected. Override with HOST for direct LAN access.
+    hostname: process.env.HOST ?? "127.0.0.1",
     async fetch(req) {
       const { pathname } = new URL(req.url);
       if (pathname === "/" || pathname === "/index.html") return page(join(ROOT, "index.html"), null);
