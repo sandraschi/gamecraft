@@ -5,6 +5,7 @@
 //! byte-identically.
 
 pub mod flock;
+pub mod rail;
 
 use std::collections::{HashMap, HashSet, VecDeque};
 

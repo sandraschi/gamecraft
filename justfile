@@ -119,7 +119,13 @@ murmuration-gate:
     $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo test -q -p gamecraft-bevy murmuration; if ($LASTEXITCODE) { exit 1 }; cargo build -q --profile play -p gamecraft-bevy --features render --bin gamecraft-bevy-murmuration; if ($LASTEXITCODE) { exit 1 }; New-Item -ItemType Directory -Force target/bevy | Out-Null; $out = & ./target/play/gamecraft-bevy-murmuration.exe --autoplay --exit-on-win --screenshot target/bevy/murmuration.png --shot-tick 1500 2>$null | Out-String; Write-Host $out.Trim(); if ($out -notmatch 'roost reached' -or -not (Test-Path target/bevy/murmuration.png)) { Write-Host 'murmuration: no win marker or no screenshot'; exit 1 }; pwsh -NoProfile -File scripts/png-flock-visible.ps1 target/bevy/murmuration.png -Min 8000; if ($LASTEXITCODE) { exit 1 }; $win = (($out -split '\r?\n') | Where-Object { $_ -match 'roost reached' } | Select-Object -First 1); pwsh -NoProfile -File scripts/bevy-record.ps1 murmuration $win; Write-Host 'murmuration: PASS'
 
 # Every Bevy game gate.
-bevy-gates: bevy-gate murmuration-gate
+# Toy railway gate: sim tests (a day safe and on time, bad timetable held at red, steep helix refused),
+# Bevy logic tests, then the real windowed build proves a whole day at 60 Hz, tours the table from the
+# tilt-shift overview down to the platform (day and night) and saves the shots in target/bevy/railway.
+railway-gate:
+    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo test -q -p gamecraft-sim rail; if ($LASTEXITCODE) { exit 1 }; cargo test -q -p gamecraft-bevy railway; if ($LASTEXITCODE) { exit 1 }; cargo build -q --profile play -p gamecraft-bevy --features render --bin gamecraft-bevy-railway; if ($LASTEXITCODE) { exit 1 }; New-Item -ItemType Directory -Force target/bevy/railway | Out-Null; $out = & ./target/play/gamecraft-bevy-railway.exe --gate --tour target/bevy/railway 2>$null | Out-String; Write-Host $out.Trim(); if ($out -notmatch 'safe and on time' -or -not (Test-Path target/bevy/railway/3-platform-day.png)) { Write-Host 'railway: no win marker or no screenshots'; exit 1 }; $win = [regex]::Match($out, 'GameCraft: railway ran safe and on time[^\r\n]*').Value; pwsh -NoProfile -File scripts/bevy-record.ps1 toy-railway $win; Write-Host 'railway: PASS'
+
+bevy-gates: bevy-gate murmuration-gate railway-gate
 
 # Re-record the committed example replays in docs/replays (after an intended rules change).
 replays:
