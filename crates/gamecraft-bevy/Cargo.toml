@@ -55,6 +55,11 @@ name = "gamecraft-bevy-nekomimi"
 path = "src/bin/nekomimi.rs"
 required-features = ["render"]
 
+[[bin]]
+name = "gamecraft-bevy-railway"
+path = "src/bin/railway.rs"
+required-features = ["render"]
+
 [dev-dependencies]
 # Parity tests: the real Bevy schedule must land on the same result as a replay.
 gamecraft-replay = { workspace = true }

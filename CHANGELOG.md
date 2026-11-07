@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased - 2026-11-07 (Toy railway)
+
+- **Toy railway** (`gamecraft-bevy-railway`, Bevy): a two-level model railway. Talheim below,
+  Bergblick 8 m up, two 1.5-turn helices, passing loops in both stations. Sparky (steam tank)
+  and the bullet run a cyclic timetable; the bullet overtakes in the loops.
+- **Rail sim** (`gamecraft-sim::rail`): block signalling with an interlocking (reserve ahead to
+  the braking distance, one owner per block, release once the whole train has passed, authority
+  ends 3 m before a red signal), timetables in whole seconds, integer ticks, state hash, layout
+  validator (dead ends, gaps, platform length, grade per train class). Gates: 24 h with no
+  collision, overrun or deadlock and everything within 30 s; a bad timetable is held at red and
+  fails the punctuality gate; a 5.1 percent helix is refused for steam, accepted for the Regio.
+- **Viewer**: one camera zoom from a tilt-shift overview (depth of field) to eye height on a
+  platform; F follows the next train in. Day and night with lit windows, headlights, station
+  lamps; signals show the reservations; seven-segment departure boards count down to the next
+  scheduled arrival. `just railway-gate` proves a day at 60 Hz and saves a five-shot tour.
+- Design and limits: `docs/TOY_RAILWAY.md`.
+
 ## Unreleased - 2026-11-02 (Bevy games, sound, replay, command registry)
 
 Reconciliation note: the v0.13.0 commit (1f047fb) swept in workspace manifest and lockfile edits

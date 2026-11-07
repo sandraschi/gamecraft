@@ -1,0 +1,8 @@
+{
+  "title": "Toy Railway",
+  "category": "Worlds and sims",
+  "experiment": "A two-level model railway with a real timetable: block signals and interlocking keep Sparky and the bullet apart, two helices join the levels, and the camera zooms from a tilt-shift table view down to eye height on the platform.",
+  "bin": "gamecraft-bevy-railway",
+  "profile": "play",
+  "win_marker": "safe and on time"
+}

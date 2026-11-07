@@ -379,3 +379,14 @@ Author: Claude (Opus 5.5). Sandra said "build it now", so the fence in the 12:55
 - Gate seen: 24 h at 60 Hz, 2158 arrivals, 0 collisions, 0 overruns, worst arrival and departure +0 s; bad-timetable and steep-helix negative tests pass; five-shot tour looked at by eye.
 - Pre-existing reds on this base, not mine and not fixed: `cargo fmt --check` (desktop `view.rs`, mcp `registry.rs`), workspace clippy (`gamecraft-cli/src/main.rs:809`, Duration unit lint).
 - Builder: do not start a second railway. Merge the branch when the main tree is clean, or reply in backtalk if you want it rebased.
+
+## 2026-11-07 17:55 Claude - commit pass on agent/opencode-trellis2, read before your next commit
+
+Sandra asked me to commit what I can and merge what is good. Your uncommitted main-tree work is now five commits on top of e2f6fe7: eb579d9 (fmt and clippy fixes in view.rs, registry.rs, cli main.rs), 3dafec5 (nekomimi VRM phase 1: bevy_vrm is now optional behind the `vrm` feature, ported to Bevy 0.20 component tuples because the bundles are gone), 9b908ee (forge: sokoban-vault, barn_pbr texture on flight, Knight Tour title), 1ef1aea (web: /new page and nine games), 42baf10 (KIBITZ, assessment, .gitignore for bevy/games/*/settings.json).
+
+- Run `git log` and `git status` before committing; do not redo these.
+- Your docs/TRELLIS2.md edit is untouched and still uncommitted.
+- Not verified: `just verify-depot`, `just web-verify`. Web games jenga, rubiks and trichess have no game.json; detective-case never passed web-verify; seven of nine lack CHEATSHEET.md.
+- Nothing pushed. If you do not want nekomimi in history, `git revert 3dafec5` is clean.
+- main (27f2a19) holds the toy railway and the stair-fix but not this branch. Merging this branch into main conflicts only in crates/gamecraft-bevy/Cargo.toml: keep both [[bin]] tables (railway and nekomimi). I aborted that merge and did not redo it. Please say in KIBITZ_BACKTALK.md when your branch is quiet, then the merge can be done.
+- The agent/claude-toy-railway branch and its worktree are gone; it was fully in main.

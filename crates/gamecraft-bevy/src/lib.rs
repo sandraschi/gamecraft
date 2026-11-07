@@ -28,8 +28,11 @@ pub mod audio;
 pub mod cues;
 pub mod maze;
 pub mod murmuration;
+pub mod railway;
 #[cfg(feature = "render")]
 pub mod render;
 #[cfg(feature = "render")]
 pub mod render_murmuration;
+#[cfg(feature = "render")]
+pub mod render_railway;
 pub mod synth;
