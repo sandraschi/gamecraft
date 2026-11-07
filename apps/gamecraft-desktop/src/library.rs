@@ -118,7 +118,7 @@ fn card(state: &DesktopState, ui: &mut egui::Ui, index: usize) -> (bool, bool) {
         .inner_margin(6.0);
     let response = frame
         .show(ui, |outer| {
-            // The grid row is horizontal-wrapped; the card itself stacks vertically.
+            // Grid rows are top-aligned horizontals; the card itself stacks vertically.
             outer.allocate_ui_with_layout(
                 egui::vec2(CARD_W, 0.0),
                 egui::Layout::top_down(egui::Align::Min),
@@ -162,17 +162,32 @@ pub(crate) fn grid(state: &mut DesktopState, ui: &mut egui::Ui) {
                     last_kind = Some(*kind);
                 }
                 scroll.label(egui::RichText::new(group.as_str()).color(accent(scroll)));
-                scroll.horizontal_wrapped(|wrap| {
-                    wrap.spacing_mut().item_spacing = egui::vec2(10.0, 10.0);
-                    for &index in members {
-                        let (clicked, double) = card(state, wrap, index);
-                        if double {
-                            pick = Some((index, true));
-                        } else if clicked {
-                            pick = Some((index, false));
-                        }
+                // Top-aligned rows of fixed-width cards. horizontal_wrapped
+                // vertically centers each card in the row height established
+                // so far, so groups with 2+ cards stairstepped down-right.
+                let per = CARD_W + 12.0 + 10.0;
+                // Whole cards that fit, at least one (no float-to-int cast).
+                let avail = scroll.available_width();
+                let mut cols = 1_usize;
+                while f32::from(u16::try_from(cols + 1).unwrap_or(u16::MAX)) * per <= avail {
+                    cols += 1;
+                }
+                for (ri, chunk) in members.chunks(cols).enumerate() {
+                    if ri > 0 {
+                        scroll.add_space(6.0);
                     }
-                });
+                    scroll.horizontal_top(|row| {
+                        row.spacing_mut().item_spacing = egui::vec2(10.0, 10.0);
+                        for &index in chunk {
+                            let (clicked, double) = card(state, row, index);
+                            if double {
+                                pick = Some((index, true));
+                            } else if clicked {
+                                pick = Some((index, false));
+                            }
+                        }
+                    });
+                }
                 scroll.add_space(8.0);
             }
         });
