@@ -35,7 +35,7 @@ pub struct GameDef {
 }
 
 /// All twelve depot games in plan order.
-pub const GAMES: [GameDef; 13] = [
+pub const GAMES: [GameDef; 14] = [
     GameDef {
         slug: "platformer",
         build: platformer::build_platformer,
@@ -71,6 +71,10 @@ pub const GAMES: [GameDef; 13] = [
     GameDef {
         slug: "sokoban",
         build: puzzle::build_sokoban,
+    },
+    GameDef {
+        slug: "sokoban-vault",
+        build: puzzle::build_sokoban_9x9,
     },
     GameDef {
         slug: "maze",
