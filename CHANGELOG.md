@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased - 2026-11-07 (Toy railway)
+## 0.14.0 - 2026-11-07 (Toy railway, Bevy wave, arcade fixes)
 
 - **Toy railway** (`gamecraft-bevy-railway`, Bevy): a two-level model railway. Talheim below,
   Bergblick 8 m up, two 1.5-turn helices, passing loops in both stations. Sparky (steam tank)
@@ -25,13 +25,27 @@
   carved); a castle ruin on the hilltop; a fenced pasture with a barn and Fleckvieh cows inside the
   west helix. New terrain test: water under the bridge and the lake, land above water elsewhere.
 - Design and limits: `docs/TOY_RAILWAY.md`.
+- **Nekomimi VRM viewer, phase 1** (`gamecraft-bevy-nekomimi`, behind the
+  `vrm` feature, ported to Bevy 0.20 components): orbit, ground, path
+  plumbing.
+- **Web arcade wave**: `/new` preset page (Emberwick, Space Station,
+  Pirate Ship, Zelda-like, Sokoban 9x9) plus nine more browser games;
+  iPad PWA standalone mode and `tailscale serve` remote play.
+- **Forged content**: sokoban-vault, TextureCraft barn wood on flight,
+  Knight Tour title.
+- **Desktop fixes**: library cards no longer stairstep (fixed-height
+  cards in a wrapping grid); the detail divider travels again (the
+  wrapping grid keeps a one-card minimum width); long gate lines
+  truncate with the full text on hover.
+- **Arcade server binds loopback** (`127.0.0.1`, `HOST` override kept):
+  a `0.0.0.0` bind fails with EADDRINUSE while tailscaled serves that
+  tailnet port, which left every Play click spawning a dead server while
+  the browser fell through to the service worker cache (new games showed
+  "offline, and this page was never cached").
+- **TRELLIS.2 docs** re-verified against upstream 2026-11-07 (roadmap
+  complete: training code + shape-conditioned texturing released).
 
-## Unreleased - 2026-11-02 (Bevy games, sound, replay, command registry)
-
-Reconciliation note: the v0.13.0 commit (1f047fb) swept in workspace manifest and lockfile edits
-from this work (the `gamecraft-replay` member, the `play` profile, audio dependencies) before the
-crates they name were committed, so v0.13.0 does not build from a clean clone. This entry's
-commit adds those crates; use the commit after v0.13.0, not the tag itself.
+### Bevy games, sound, replay, command registry (unreleased since 0.13.0, shipped here)
 
 - **Bevy runtime games** (`gamecraft-bevy`, Bevy 0.20): a 29x29 maze that plays itself and
   Murmuration (20 000 starlings on the seeded `gamecraft-sim::flock` sim). Catalog kind `bevy`

@@ -3408,7 +3408,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-bevy"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "bevy",
  "bevy_vrm",
@@ -3418,7 +3418,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-cli"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "clap",
  "gamecraft-core",
@@ -3432,7 +3432,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-commands"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-core",
  "glam 0.30.10",
@@ -3443,7 +3443,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-core"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "glam 0.30.10",
  "serde",
@@ -3452,7 +3452,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-desktop"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "eframe",
  "egui",
@@ -3473,7 +3473,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-forge"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-commands",
  "gamecraft-core",
@@ -3488,7 +3488,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-gltf"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-core",
  "gamecraft-godot",
@@ -3498,7 +3498,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-godot"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-core",
  "glam 0.30.10",
@@ -3509,7 +3509,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-mcp"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-commands",
  "gamecraft-core",
@@ -3526,7 +3526,7 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-replay"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "gamecraft-sim",
  "serde",
@@ -3536,11 +3536,11 @@ dependencies = [
 
 [[package]]
 name = "gamecraft-sim"
-version = "0.13.0"
+version = "0.14.0"
 
 [[package]]
 name = "gamecraft-trellis"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "serde",
  "serde_json",
