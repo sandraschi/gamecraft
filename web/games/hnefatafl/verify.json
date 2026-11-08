@@ -1,34 +1,171 @@
 {
   "slug": "hnefatafl",
   "title": "Hnefatafl",
-  "date": "2026-11-02T21:41:27.916Z",
-  "boot_ms": 169,
-  "steps": 10,
-  "sim_seconds": 0.2,
+  "date": "2026-11-08T18:29:14.753Z",
+  "boot_ms": 606,
+  "self_test": {
+    "pass": true,
+    "checks": [
+      {
+        "name": "setup-24-12-king-centre",
+        "pass": true
+      },
+      {
+        "name": "setup-symmetric",
+        "pass": true
+      },
+      {
+        "name": "rook-moves-do-not-jump",
+        "pass": true
+      },
+      {
+        "name": "only-the-king-stops-on-a-corner",
+        "pass": true
+      },
+      {
+        "name": "empty-throne-can-be-crossed-not-entered",
+        "pass": true
+      },
+      {
+        "name": "occupied-throne-blocks-the-line",
+        "pass": true
+      },
+      {
+        "name": "custodian-capture-horizontal",
+        "pass": true
+      },
+      {
+        "name": "custodian-capture-vertical",
+        "pass": true
+      },
+      {
+        "name": "moving-between-two-enemies-is-safe",
+        "pass": true
+      },
+      {
+        "name": "corner-is-hostile-to-both-sides",
+        "pass": true
+      },
+      {
+        "name": "empty-throne-is-hostile-to-both-sides",
+        "pass": true
+      },
+      {
+        "name": "occupied-throne-is-not-hostile-to-defenders",
+        "pass": true
+      },
+      {
+        "name": "the-edge-is-not-hostile",
+        "pass": true
+      },
+      {
+        "name": "king-is-armed-as-hammer",
+        "pass": true
+      },
+      {
+        "name": "king-is-armed-as-anvil",
+        "pass": true
+      },
+      {
+        "name": "a-mover-never-captures-its-own-pieces",
+        "pass": true
+      },
+      {
+        "name": "king-is-not-taken-by-a-sandwich",
+        "pass": true
+      },
+      {
+        "name": "king-taken-on-four-sides",
+        "pass": true
+      },
+      {
+        "name": "king-taken-by-three-and-the-empty-throne",
+        "pass": true
+      },
+      {
+        "name": "king-on-the-throne-needs-four",
+        "pass": true
+      },
+      {
+        "name": "king-on-the-edge-cannot-be-captured",
+        "pass": true
+      },
+      {
+        "name": "corner-escape-wins-for-the-defenders",
+        "pass": true
+      },
+      {
+        "name": "capturing-the-king-wins-for-the-attackers",
+        "pass": true
+      },
+      {
+        "name": "a-side-with-no-legal-move-loses",
+        "pass": true
+      },
+      {
+        "name": "threefold-repetition-is-a-draw",
+        "pass": true
+      },
+      {
+        "name": "illegal-moves-are-refused",
+        "pass": true
+      },
+      {
+        "name": "undo-restores-the-position",
+        "pass": true
+      },
+      {
+        "name": "every-opening-move-agrees-with-an-independent-rook-test",
+        "pass": true
+      },
+      {
+        "name": "ai-takes-the-corner-when-it-is-open",
+        "pass": true
+      },
+      {
+        "name": "ai-captures-the-king-when-it-can",
+        "pass": true
+      },
+      {
+        "name": "ai-blocks-a-single-open-line",
+        "pass": true
+      }
+    ],
+    "summary": "31/31 rule checks"
+  },
+  "steps": 64,
+  "sim_seconds": 1.1,
   "checkpoints": [
     {
-      "name": "board-7x7",
+      "name": "rule-battery",
       "step": 1
     },
     {
-      "name": "escape",
-      "step": 10
+      "name": "material-ledger",
+      "step": 8
+    },
+    {
+      "name": "game-decided",
+      "step": 64
     }
   ],
   "shots": [
-    "shots/01-board-7x7.png",
-    "shots/02-escape.png"
+    "shots/01-rule-battery.png",
+    "shots/02-material-ledger.png",
+    "shots/03-game-decided.png"
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 636,
+  "wall_ms": 7020,
   "console_errors": [],
   "console_warnings": [],
   "markers": [
     "GameCraft: ready",
     "GameCraft: autoplay start",
-    "GameCraft: checkpoint board-7x7",
-    "GameCraft: checkpoint escape",
+    "GameCraft: checkpoint rule-battery",
+    "GameCraft: checkpoint material-ledger",
+    "GameCraft: checkpoint game-decided",
+    "GameCraft: Defenders won by escape after 64 moves",
     "GameCraft: tour complete, win"
   ],
   "pass": true

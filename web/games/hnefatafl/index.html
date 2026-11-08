@@ -1,18 +1,55 @@
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Hnefatafl</title>
 <link rel="stylesheet" href="../_shared/ui.css">
-<style>:root { --accent: #c8a028; --bg: #141210; }</style>
+<style>
+  :root { --accent: #c8a028; --bg: #141210; }
+  #hud button, #help .row button { background: #2a251c; color: #e8dcc0; border: 1px solid #4a4030; border-radius: 6px; padding: 4px 10px; cursor: pointer; font: inherit; }
+  #hud button:hover { border-color: var(--accent); }
+  #hud .name { margin-right: 4px; }
+  #moves { position: fixed; right: 12px; top: 64px; width: 150px; max-height: calc(100vh - 140px); overflow: auto; padding: 8px 10px; font: 13px/1.5 ui-monospace, Consolas, monospace; }
+  #moves div { white-space: nowrap; }
+  #moves .att { color: #d98a7a; } #moves .def { color: #f0e6c8; }
+  #caps { position: fixed; left: 12px; top: 64px; padding: 8px 12px; font-size: 14px; line-height: 1.6; }
+  #help ul { margin: 6px 0 6px 18px; padding: 0; line-height: 1.5; }
+  #help .small { font-size: 13px; }
+  @media (max-width: 760px) { #moves, #caps { display: none; } #hud { flex-wrap: wrap; white-space: normal; justify-content: center; } }
+</style>
 <script type="importmap">{ "imports": { "three": "/vendor/three/three.module.js" } }</script>
 </head>
 <body>
 <canvas id="view"></canvas>
-<div id="hud" class="panel"><span class="name">Hnefatafl</span><span class="dim" id="turn"></span><b class="stat" id="kpos"></b><button id="music-btn">&#9835;</button><button id="help-btn">?</button></div>
-<div id="msg" class="panel dim">Viking siege: king to a corner. Attackers sandwich. Skeleton tour - full rules from ai-games-collection hnefatafl.js next.</div>
-<div id="help" hidden><div class="card panel"><h1>Hnefatafl</h1><p>Defenders (king + 8) start cross; attackers (16) ring. King wins on a corner; attackers win by surrounding him on 4 sides (3 by throne/edge). Captures by sandwich (custodian). All pieces move rook-wise. TODO: throne, shield-wall, 11x11 from collection.</p><button id="help-go" class="go">Play</button></div></div>
-<div id="done" class="overlay" hidden><div class="card panel"><h1>Escaped</h1><p id="done-text"></p><button id="next" class="go">Again</button></div></div>
+<div id="hud" class="panel">
+  <span class="name">Hnefatafl</span>
+  <span class="dim" id="turn"></span>
+  <button id="new-btn" title="New game (N)">New</button>
+  <button id="side-btn" title="Swap sides and restart (S)"></button>
+  <button id="level-btn" title="AI strength (L)"></button>
+  <button id="undo-btn" title="Take back your last move (U)">Undo</button>
+  <button id="hint-btn" title="Show a suggested move (H)">Hint</button>
+  <button id="help-btn" title="Rules (?)">?</button>
+</div>
+<div id="caps" class="panel dim"></div>
+<div id="moves" class="panel"></div>
+<div id="msg" class="panel dim"></div>
+<div id="help" hidden><div class="card panel">
+  <h1>Hnefatafl</h1>
+  <p>Copenhagen rules on 11x11. The defenders (ivory, with the king) win when the king reaches a <b>corner</b>. The attackers (red) win by <b>capturing the king</b>. Attackers move first.</p>
+  <ul>
+    <li>Every piece moves like a rook: any distance in a line, no jumping.</li>
+    <li>Only the king may stop on the throne (centre) or a corner. Other pieces may pass over the empty throne.</li>
+    <li>Capture a piece by closing a line around it: your piece, the enemy, your piece. Moving between two enemies is safe. Corners, and the throne while empty, count as hostile to everyone. The king fights too.</li>
+    <li>The king is taken by attackers on all four sides, or on three sides when he stands next to the empty throne. On the board edge he cannot be taken.</li>
+    <li>A side with no legal move loses. Three repetitions of a position is a draw.</li>
+  </ul>
+  <p class="dim small">Not implemented: shieldwall captures, the edge-fort win and the encirclement win. The opponent is a small fixed-depth alpha-beta search; "easy" sometimes plays a random move.</p>
+  <p class="dim small">Click a piece, then a highlighted square. Drag to turn the board, wheel to zoom. N new, S swap side, L strength, U undo, H hint.</p>
+  <button id="help-go" class="go">Play</button>
+</div></div>
+<div id="done" class="overlay" hidden><div class="card panel"><h1 id="done-title"></h1><p id="done-text"></p><button id="next" class="go">Again</button></div></div>
 <script type="module" src="./main.js"></script>
 </body>
 </html>

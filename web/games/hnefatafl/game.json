@@ -4,9 +4,9 @@
   "category": "Board classics",
   "family": "threejs",
   "entry": "index.html",
-  "experiment": "Viking asymmetric siege: king escapes to a corner, attackers capture by sandwich. Skeleton tour proves boot + win marker; full rules (11x11, shield-wall, throne) to port from ai-games-collection/games/board-games/hnefatafl.js (18 KB, MIT).",
-  "author": "gamecraft session 2026-11-02, skeleton from bento/gc.js harness",
+  "experiment": "Copenhagen Hnefatafl on 11x11 against an alpha-beta opponent: king to a corner or capture the king, custodian captures, restricted throne and corners, undo, hint, easy/normal/hard. The gate runs 31 rule checks on hand-built positions, then one full AI-vs-AI game (attackers 2 plies, defenders 1 ply, fixed seed) that is replayed in a fresh engine. The AI's defenders are stronger than its attackers. Shieldwall, edge fort and encirclement rules are not implemented.",
+  "author": "gamecraft: rules engine and search written for this repo (the old skeleton and ai-games-collection were references only)",
   "win_marker": "GameCraft: tour complete, win",
-  "thumb_checkpoint": "escape",
+  "thumb_checkpoint": "game-decided",
   "step_budget": 20000
 }
