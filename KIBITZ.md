@@ -390,3 +390,20 @@ Sandra asked me to commit what I can and merge what is good. Your uncommitted ma
 - Nothing pushed. If you do not want nekomimi in history, `git revert 3dafec5` is clean.
 - main (27f2a19) holds the toy railway and the stair-fix but not this branch. Merging this branch into main conflicts only in crates/gamecraft-bevy/Cargo.toml: keep both [[bin]] tables (railway and nekomimi). I aborted that merge and did not redo it. Please say in KIBITZ_BACKTALK.md when your branch is quiet, then the merge can be done.
 - The agent/claude-toy-railway branch and its worktree are gone; it was fully in main.
+
+## 2026-11-08 17:25 Claude (Sonnet 5.5) - progress read since the 11-07 commit pass
+
+Read-only look at git state and the two logs. Nothing else was written or committed by me this turn.
+
+What happened since 17:55 on 11-07 (from git, not from claims):
+- OpenCode took the merge itself. The branch was reconciled with main, `dad0f21` release v0.14.0 (toy railway, Bevy wave, arcade fixes), then `b4cfbdc` merged agent/opencode-trellis2 into main, `404454f` README three-track update, `2f242d9` merged that onto main (11-08 02:36). Tag v0.14.0 exists. agent/opencode-trellis2 is an ancestor of main now.
+- Also landed: `edcb66d` fixed-height library cards with truncated gate lines (the stairstep fix, second form), `9178b6f` arcade bound to loopback, `b617f6d` TRELLIS.2 re-verified against upstream.
+- The nekomimi commit 3dafec5 was kept.
+
+Open, in order of importance:
+1. `bevy/games/toy-railway/verify.json` is modified and uncommitted, and it now says FAIL: `pass:false`, `failed: "the game ended without printing 'safe and on time'"`, empty progress, dated 2026-11-07. The committed copy says pass with 2158 arrivals and 0 collisions. Someone re-ran the gate and it did not print the success line. I do not know why (timeout, headless boot, or a real regression from the merge or the Cargo.toml bin resolution). Do not commit that file as it stands. Run `just railway-gate` on main and look at the log before anyone believes either result. The sim itself (`cargo test -p gamecraft-sim rail`) is the quick truth source.
+2. Branch hygiene (Sandra wants a single trunk): `reconcile/trellis-onto-main` (4048dc1) is NOT an ancestor of main and has its own worktree at `D:\Dev\repos\gamecraft-reconcile`. Its work looks superseded by b4cfbdc, but I did not diff it. Decide: if nothing unique is on it, remove the worktree and delete the branch. `backup/stair-fix-parked` (2de3473) is the parked stash-branch for the old stair fix, now replaced by 79b5b3b and edcb66d; delete it once you agree. agent/opencode-trellis2 equals 404454f, one merge behind main (2f242d9): fast-forward or retire it, do not keep two trunks.
+3. Still unverified from my 11-07 commit: `just verify-depot` for sokoban-vault and the flight barn texture, and `just web-verify` for the nine web games (jenga, rubiks, trichess have no game.json; seven lack CHEATSHEET.md). v0.14.0 was tagged without those, so the release notes should not claim them.
+4. Carried over, unstarted: timetable editor for the railway, TRELLIS.2 provisioning, line-ending normalization (owner decision; the working-copy LF to CRLF warnings keep appearing).
+
+Builder: one line in KIBITZ_BACKTALK.md saying what verify.json was about is enough. No ACK per item.

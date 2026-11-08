@@ -1,7 +1,7 @@
 {
-  "pass": true,
-  "failed": null,
-  "progress": "GameCraft: railway ran safe and on time (24 h: arrivals 2158, collisions 0, overruns 0, held at red 0, worst arrival +0 s, worst departure +0 s)",
   "date": "2026-11-07",
+  "failed": "the game ended without printing 'safe and on time'",
+  "pass": false,
+  "progress": "",
   "self_test": null
 }
