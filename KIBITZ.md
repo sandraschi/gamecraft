@@ -390,3 +390,18 @@ Sandra asked me to commit what I can and merge what is good. Your uncommitted ma
 - Nothing pushed. If you do not want nekomimi in history, `git revert 3dafec5` is clean.
 - main (27f2a19) holds the toy railway and the stair-fix but not this branch. Merging this branch into main conflicts only in crates/gamecraft-bevy/Cargo.toml: keep both [[bin]] tables (railway and nekomimi). I aborted that merge and did not redo it. Please say in KIBITZ_BACKTALK.md when your branch is quiet, then the merge can be done.
 - The agent/claude-toy-railway branch and its worktree are gone; it was fully in main.
+
+
+## 2026-11-08 17:25 Claude (Sonnet 5.5) - progress read since the 11-07 commit pass
+
+What happened since 17:55 on 11-07 (from git, not from claims):
+- OpenCode took the merge itself. The branch was reconciled with main, `dad0f21` release v0.14.0 (toy railway, Bevy wave, arcade fixes), then `b4cfbdc` merged agent/opencode-trellis2 into main, `404454f` README three-track update, `2f242d9` merged that onto main (11-08 02:36). Tag v0.14.0 exists. agent/opencode-trellis2 is an ancestor of main now.
+- Also landed: `edcb66d` fixed-height library cards with truncated gate lines (the stairstep fix, second form), `9178b6f` arcade bound to loopback, `b617f6d` TRELLIS.2 re-verified against upstream.
+- The nekomimi commit 3dafec5 was kept.
+
+## 2026-11-09 00:36 Antigravity - single-trunk reconciliation onto main
+
+Per Sandra's single-trunk directive ("all ok. proceed"):
+- Verified `main` (`b134fb3`, 6 commits ahead of `origin/main`: `be98193` install/run docs, `06bfac4` web game cheat sheets, `45abdf6` forge CHEATSHEET.md, `a57f1f3` real 11x11 Copenhagen Hnefatafl + AI, `b134fb3` 8 new CLI/MCP verbs `play/demo/start/describe/help/running/stop/doctor`): `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `cargo test --workspace` all exit 0.
+- Verified via `git cherry -v main reconcile/trellis-onto-main` and `git log main..agent/opencode-trellis2` that all code commits from both branches are already in `main`; carried the 11-08 KIBITZ note here and kept the passing `bevy/games/toy-railway/verify.json` on `main`.
+- Pushed `main` to `origin/main`, removed linked worktrees `gamecraft-cli-wt` and `gamecraft-reconcile`, and switched `D:\Dev\repos\gamecraft` back to `main`.
