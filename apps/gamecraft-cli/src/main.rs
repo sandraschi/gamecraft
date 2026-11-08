@@ -952,8 +952,8 @@ fn cmd_new(
 /// TRELLIS.2 entry: plan-only by default; `--execute` runs the sidecar once.
 ///
 /// The sidecar is operator-owned (a TRELLIS.2 checkout or HTTP server). This
-/// never bundles weights: it writes the ledger row first, then — only with
-/// `--execute` — spawns one bounded process and kills it on timeout.
+/// never bundles weights: it writes the ledger row first, then - only with
+/// `--execute` - spawns one bounded process and kills it on timeout.
 fn cmd_trellis(
     image: &Path,
     slug: &str,
