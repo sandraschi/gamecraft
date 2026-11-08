@@ -5,8 +5,10 @@
 //! are re-exported here unchanged.
 
 pub mod catalog;
+pub mod guide;
 pub mod input;
 pub mod inspect;
+pub mod launch;
 pub mod proc_guard;
 pub mod registry;
 pub mod replay_cmds;

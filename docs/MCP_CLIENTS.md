@@ -84,7 +84,9 @@ at startup; opencode re-reads on new session).
 | `GAMECRAFT_ROOT` | Repo root for the catalog tools. Default: walk up from the working directory and the executable looking for `depot/games` or `web/games`. |
 | `GAMECRAFT_MCP_ALLOW_WEB=1` | Lets `game_verify` run the three.js gate (headless browser, up to minutes). Off by default. |
 | `GAMECRAFT_MCP_ALLOW_GODOT=1` | Lets `game_verify` and `scene_verify` boot Godot. Off by default. |
+| `GAMECRAFT_MCP_ALLOW_LAUNCH=1` | Lets `game_start`, `game_play`, `game_demo` and `game_stop` start and stop games on this machine (and open a browser). Off by default. |
 | `GAMECRAFT_GODOT` | Godot binary (default `godot`). |
+| `GAMECRAFT_BUN` | bun binary used to start the web arcade (default: `~/.bun/bin/bun`, then PATH). |
 
 ## Tools
 
@@ -103,9 +105,23 @@ Catalog tools (the same catalog `gamecraft-cli list` and the desktop library rea
 |---|---|---|
 | `game_list` | `filter?`, `kind?` (`godot`/`web`), `root?` | Every game with kind, group, title, description, last gate result. |
 | `game_report` | `slug`, `kind?`, `root?` | One game: gate record, cheat sheet, README, screenshot paths. Unknown slugs get suggestions. |
+| `game_describe` | `slug`, `kind?`, `root?` | What a game is, generated from its files: description, whether it is playable at all (some entries are data or plans), goal and controls from the cheat sheet, last gate, the commands to start it. |
+| `game_help` | `topic?`, `root?` | The overview, a topic (`games`, `start`, `play`, `demo`, `running`, `stop`, `doctor`, `mcp`) or a game slug (description plus the full cheat sheet). |
+| `game_start` | `slug`, `mode?` (`play`/`demo`), `open_browser?`, `kind?`, `root?` | Opt-in. Web: starts the arcade server if needed and returns the URL (no browser unless `open_browser`). Godot, Bevy: opens the game in its own window; an unbuilt Bevy game returns the cargo command. Refuses when the arcade on port 11258 was started from another checkout. |
+| `game_play` / `game_demo` | `slug`, `kind?`, `root?` | Opt-in. Like `game_start` with the browser opened; `game_demo` lets the game play itself (`?autoplay=1`, `GAMECRAFT_AUTOPLAY=1`, `--autoplay`). |
+| `game_running` | `root?` | Native games started from this machine that are alive, and whether the arcade answers. Web games run in a browser tab and are not listed. |
+| `game_stop` | `slug?`, `server?`, `root?` | Opt-in. Stops one native game or all of them; `server` also stops an arcade this tool started. Games started by the MCP server end when the server exits. |
+| `game_doctor` | `root?` | Report only: unstartable entries, failing or never-verified games, missing cheat sheets, plans with no game, and which of bun, node, cargo and godot are installed. |
 | `game_verify` | `slug`, `kind?`, `timeout_s?` (300), `root?` | Runs the gate now (web: headless self-play with checkpoints; Godot: headless boot to a win marker). Opt-in, see Environment. |
 | `game_create` | `spec?`, `explain?`, `root?` | `explain: true` returns the GameSpec guide; with a `spec` it validates and writes a new Godot game. The only tool that writes. |
 | `scene_verify` | `game_path`, `frames?`, `autoplay?`, `timeout_s?` | Boots a Godot project headless and reports the trace. Opt-in. |
+
+Every `CHEATSHEET.md` is also a resource: `resources/list` returns one entry per game and
+`resources/read` takes `gamecraft://games/<kind>/<slug>/cheatsheet`.
+
+The CLI mirrors these: `gamecraft-cli list | search | random | describe | help | start | play | demo |
+running | stop | doctor | verify`. `gamecraft-cli help` explains them and `help <slug>` prints a
+game's cheat sheet; both are generated from the games' own files.
 
 `export_scene` takes format as a parameter on purpose: a second target (Overte,
 glTF, another engine) is a new enum value, not a new tool in the client's

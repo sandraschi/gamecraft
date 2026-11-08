@@ -26,11 +26,14 @@
 //!   can fix the call instead of guessing. Only malformed requests and unknown
 //!   tools are JSON-RPC errors.
 
+use gamecraft_mcp::catalog;
+use gamecraft_mcp::launch::Mode;
 use gamecraft_mcp::registry;
 use gamecraft_mcp::tools::{
-    fail, tool_export_scene, tool_game_create, tool_game_list, tool_game_report, tool_game_verify,
-    tool_scene_inspect, tool_scene_lint, tool_scene_verify, tool_spatial_query, ToolError,
-    ToolOutcome,
+    fail, tool_export_scene, tool_game_create, tool_game_describe, tool_game_doctor,
+    tool_game_help, tool_game_list, tool_game_report, tool_game_running, tool_game_start,
+    tool_game_stop, tool_game_verify, tool_scene_inspect, tool_scene_lint, tool_scene_verify,
+    tool_spatial_query, ToolError, ToolOutcome,
 };
 use serde_json::{json, Value};
 use std::io::{BufRead, Write};
@@ -69,7 +72,8 @@ fn server_info() -> Value {
 
 /// Usage notes sent to the client at `initialize`.
 const INSTRUCTIONS: &str = "GameCraft: Godot 4 scene tools plus a catalog of playable games (forge-made Godot projects and three.js pages). \
-Start with game_list to see what exists and how each game last verified; game_report gives one game's cheat sheet and gate record. \
+Start with game_list to see what exists and how each game last verified; game_describe says what one game is, its goal and controls and how to start it; game_help gives the overview or a full cheat sheet; game_report adds the gate record. \
+To show someone a game: game_play opens it (web games in the browser, others in their own window), game_demo lets it play itself, game_running and game_stop manage what was started; starting and stopping need GAMECRAFT_MCP_ALLOW_LAUNCH=1. Cheat sheets are also resources. \
 scene_lint / scene_inspect / spatial_query read .tscn text; export_scene and game_create write games from JSON specs. \
 Running engines or browsers is opt-in: scene_verify needs GAMECRAFT_MCP_ALLOW_GODOT=1, game_verify on web games needs GAMECRAFT_MCP_ALLOW_WEB=1, on Bevy games GAMECRAFT_MCP_ALLOW_BEVY=1. \
 Every result starts with a one-line summary; failures carry a suggestion and a remediation.";
@@ -187,13 +191,13 @@ fn dispatch(method: &str, msg: &Value, modern: bool) -> Result<Value, (i32, Stri
     match method {
         "initialize" => Ok(json!({
             "protocolVersion": negotiate(msg),
-            "capabilities": {"tools": {"listChanged": false}},
+            "capabilities": {"tools": {"listChanged": false}, "resources": {"listChanged": false}},
             "serverInfo": server_info(),
             "instructions": INSTRUCTIONS,
         })),
         "server/discover" => Ok(json!({
             "supportedVersions": all_versions(),
-            "capabilities": {"tools": {"listChanged": false}},
+            "capabilities": {"tools": {"listChanged": false}, "resources": {"listChanged": false}},
             "instructions": INSTRUCTIONS,
             "ttlMs": TTL_MS,
             "cacheScope": "public",
@@ -215,6 +219,14 @@ fn dispatch(method: &str, msg: &Value, modern: bool) -> Result<Value, (i32, Stri
             let empty = json!({});
             let args = params.get("arguments").unwrap_or(&empty);
             call_tool(name, args)
+        }
+        "resources/list" => Ok(resource_list()),
+        "resources/read" => {
+            let uri = msg
+                .pointer("/params/uri")
+                .and_then(Value::as_str)
+                .ok_or_else(|| (-32602_i32, "missing uri".to_string()))?;
+            resource_read(uri)
         }
         "ping" => Ok(json!({})),
         _ => Err((-32601, format!("method not found: {method}"))),
@@ -338,6 +350,99 @@ fn tool_list() -> Value {
                 "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
             }, "required": ["slug"]},
             "outputSchema": envelope(&json!({"game": {"type": "object"}, "cheatsheet": {"type": ["string", "null"]}, "gate": {}})),
+            "annotations": annotations(true, false),
+        },
+        {
+            "name": "game_describe",
+            "title": "What a game is and how to start it",
+            "description": "One game in plain terms, generated from its files: title, runtime, group, description, whether it is playable at all (some entries are data or plans), goal and controls from its cheat sheet, the last gate result and the exact commands to start it. Use before game_play to tell the user what they are about to see. Returns slug, title, kind, group, description, playable, not_playable_reason, goal[], controls[], gate, run{}.",
+            "inputSchema": {"type": "object", "properties": {
+                "slug": {"type": "string", "description": "Folder name from game_list."},
+                "kind": {"type": "string", "enum": ["godot", "web", "bevy"], "description": "Only needed if both runtimes have this slug."},
+                "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
+            }, "required": ["slug"]},
+            "outputSchema": envelope(&json!({"slug": {"type": "string"}, "playable": {"type": "boolean"}, "goal": {"type": "array"}, "controls": {"type": "array"}, "run": {"type": "object"}})),
+            "annotations": annotations(true, false),
+        },
+        {
+            "name": "game_help",
+            "title": "GameCraft help and cheat sheets",
+            "description": "Help text generated from the repo. No topic: the overview of every command. topic = overview, games (every game with a one-line description), start, play, demo, running, stop, doctor, mcp, or a game slug (description plus the full cheat sheet). Returns topic and text.",
+            "inputSchema": {"type": "object", "properties": {
+                "topic": {"type": "string", "description": "A help topic or a game slug. Empty gives the overview."},
+                "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
+            }},
+            "outputSchema": envelope(&json!({"topic": {"type": ["string", "null"]}, "text": {"type": "string"}})),
+            "annotations": annotations(true, false),
+        },
+        {
+            "name": "game_start",
+            "title": "Start a game",
+            "description": "OPT-IN (GAMECRAFT_MCP_ALLOW_LAUNCH=1). Bring a game up. Web games: starts the local arcade server if needed and returns the URL, without opening a browser unless open_browser is true. Godot and Bevy games: opens the game in its own window (a Bevy game must be built first; the error gives the cargo command). mode 'demo' lets the game play itself. A game started here ends when this server exits. Prefer game_play or game_demo to actually show someone a game.",
+            "inputSchema": {"type": "object", "properties": {
+                "slug": {"type": "string", "description": "Folder name from game_list."},
+                "kind": {"type": "string", "enum": ["godot", "web", "bevy"]},
+                "mode": {"type": "string", "enum": ["play", "demo"], "default": "play"},
+                "open_browser": {"type": "boolean", "default": false, "description": "Web games only: also open the URL in the default browser."},
+                "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
+            }, "required": ["slug"]},
+            "outputSchema": envelope(&json!({"slug": {"type": "string"}, "kind": {"type": "string"}, "mode": {"type": "string"}, "pid": {"type": ["integer", "null"]}, "url": {"type": ["string", "null"]}, "opened": {"type": "boolean"}})),
+            "annotations": annotations(false, false),
+        },
+        {
+            "name": "game_play",
+            "title": "Play a game",
+            "description": "OPT-IN (GAMECRAFT_MCP_ALLOW_LAUNCH=1). Open a game for the user to play: web games in their default browser, Godot and Bevy games in their own window. Starts the arcade server first when needed. Same results as game_start with the browser opened.",
+            "inputSchema": {"type": "object", "properties": {
+                "slug": {"type": "string", "description": "Folder name from game_list."},
+                "kind": {"type": "string", "enum": ["godot", "web", "bevy"]},
+                "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
+            }, "required": ["slug"]},
+            "outputSchema": envelope(&json!({"slug": {"type": "string"}, "pid": {"type": ["integer", "null"]}, "url": {"type": ["string", "null"]}, "opened": {"type": "boolean"}})),
+            "annotations": annotations(false, false),
+        },
+        {
+            "name": "game_demo",
+            "title": "Watch a game play itself",
+            "description": "OPT-IN (GAMECRAFT_MCP_ALLOW_LAUNCH=1). Like game_play, but the game plays itself: web games get ?autoplay=1, Godot games GAMECRAFT_AUTOPLAY=1, Bevy games --autoplay. Use to show what a game is without asking the user to play it.",
+            "inputSchema": {"type": "object", "properties": {
+                "slug": {"type": "string", "description": "Folder name from game_list."},
+                "kind": {"type": "string", "enum": ["godot", "web", "bevy"]},
+                "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
+            }, "required": ["slug"]},
+            "outputSchema": envelope(&json!({"slug": {"type": "string"}, "pid": {"type": ["integer", "null"]}, "url": {"type": ["string", "null"]}, "opened": {"type": "boolean"}})),
+            "annotations": annotations(false, false),
+        },
+        {
+            "name": "game_running",
+            "title": "What is running",
+            "description": "Native games (Godot, Bevy) started from this machine that are still alive, with pid, mode and start time, and whether the web arcade answers on its port. Web games run in a browser tab and are not listed. Read-only.",
+            "inputSchema": {"type": "object", "properties": {
+                "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
+            }},
+            "outputSchema": envelope(&json!({"games": {"type": "array"}, "arcade_up": {"type": "boolean"}, "arcade_pid": {"type": ["integer", "null"]}})),
+            "annotations": annotations(true, false),
+        },
+        {
+            "name": "game_stop",
+            "title": "Stop games",
+            "description": "OPT-IN (GAMECRAFT_MCP_ALLOW_LAUNCH=1). Stop the native game named by slug, or all of them, that this tool started. server=true also stops the web arcade server if this tool started it. Web games cannot be stopped from here: the user closes the tab.",
+            "inputSchema": {"type": "object", "properties": {
+                "slug": {"type": "string", "description": "Game to stop; omit to stop every native game started from here."},
+                "server": {"type": "boolean", "default": false, "description": "Also stop the arcade server this tool started."},
+                "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
+            }},
+            "outputSchema": envelope(&json!({"stopped": {"type": "array"}})),
+            "annotations": annotations(false, true),
+        },
+        {
+            "name": "game_doctor",
+            "title": "Catalog and tool health check",
+            "description": "Report-only: games that cannot be started (data or plans without code), games that never passed or now fail their gate, missing cheat sheets, descriptions or thumbnails, plans with no game yet, and whether bun, node, cargo and godot are installed. Changes nothing. Returns failing, warnings, planned and findings[{slug, level, issue}].",
+            "inputSchema": {"type": "object", "properties": {
+                "root": {"type": "string", "description": "Repo root; found automatically when omitted."}
+            }},
+            "outputSchema": envelope(&json!({"failing": {"type": "integer"}, "warnings": {"type": "integer"}, "planned": {"type": "integer"}, "findings": {"type": "array"}})),
             "annotations": annotations(true, false),
         },
         {
@@ -516,6 +621,52 @@ fn registry_meta_name(name: &str) -> bool {
     matches!(name, "list_commands" | "describe_command" | "run_command")
 }
 
+// ------------------------------------------------------------------ resources
+
+/// Resource URI of a game's cheat sheet.
+fn sheet_uri(kind: &str, slug: &str) -> String {
+    format!("gamecraft://games/{kind}/{slug}/cheatsheet")
+}
+
+/// Every cheat sheet in the catalog, as `gamecraft://games/<kind>/<slug>/cheatsheet`.
+fn resource_list() -> Value {
+    let games = catalog::find_root(None)
+        .map(|root| catalog::discover(root.as_path()))
+        .unwrap_or_default();
+    let resources: Vec<Value> = games
+        .iter()
+        .filter(|g| g.dir.join("CHEATSHEET.md").is_file())
+        .map(|g| {
+            json!({
+                "uri": sheet_uri(g.kind.as_str(), g.slug.as_str()),
+                "name": format!("{} cheat sheet", g.title),
+                "description": format!("Goal, controls and gate for the {} game {}.", g.kind.as_str(), g.slug),
+                "mimeType": "text/markdown",
+            })
+        })
+        .collect();
+    json!({ "resources": resources })
+}
+
+/// Read one cheat sheet by URI.
+fn resource_read(uri: &str) -> Result<Value, (i32, String)> {
+    let not_found = || (-32002_i32, format!("no such resource: {uri}"));
+    let rest = uri
+        .strip_prefix("gamecraft://games/")
+        .ok_or_else(not_found)?;
+    let mut parts = rest.split('/');
+    let (Some(kind), Some(slug), Some("cheatsheet"), None) =
+        (parts.next(), parts.next(), parts.next(), parts.next())
+    else {
+        return Err(not_found());
+    };
+    let root = catalog::find_root(None).ok_or_else(not_found)?;
+    let games = catalog::discover(root.as_path());
+    let game = catalog::find(&games, slug, catalog::GameKind::parse(kind)).ok_or_else(not_found)?;
+    let text = std::fs::read_to_string(game.dir.join("CHEATSHEET.md")).map_err(|_| not_found())?;
+    Ok(json!({ "contents": [{ "uri": uri, "mimeType": "text/markdown", "text": text }] }))
+}
+
 /// Run one tool. Unknown tool = protocol error; everything else is a tool result.
 fn call_tool(name: &str, args: &Value) -> Result<Value, (i32, String)> {
     let outcome = match name {
@@ -528,6 +679,14 @@ fn call_tool(name: &str, args: &Value) -> Result<Value, (i32, String)> {
         "game_verify" => tool_game_verify(args),
         "game_create" => tool_game_create(args),
         "scene_verify" => tool_scene_verify(args),
+        "game_describe" => tool_game_describe(args),
+        "game_help" => tool_game_help(args),
+        "game_start" => tool_game_start(args, None),
+        "game_play" => tool_game_start(args, Some(Mode::Play)),
+        "game_demo" => tool_game_start(args, Some(Mode::Demo)),
+        "game_running" => tool_game_running(args),
+        "game_stop" => tool_game_stop(args),
+        "game_doctor" => tool_game_doctor(args),
         _ if registry::id_for_tool(name).is_some() || registry_meta_name(name) => {
             registry_meta(name, args)
                 .unwrap_or_else(|| registry::run(registry::id_for_tool(name).unwrap_or(name), args))
@@ -694,7 +853,7 @@ mod tests {
     fn every_tool_has_title_annotations_and_output_schema() {
         let tools = tool_list();
         let list = tools.as_array().map(Vec::as_slice).unwrap_or_default();
-        assert_eq!(list.len(), 15);
+        assert_eq!(list.len(), 23);
         for t in list {
             assert!(
                 t.get("title").is_some()

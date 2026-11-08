@@ -6,7 +6,8 @@
 #![allow(clippy::missing_errors_doc)]
 
 use crate::catalog::{self, GameKind};
-use crate::{scene_lint, spatial_query};
+use crate::launch::{self, Mode};
+use crate::{guide, scene_lint, spatial_query};
 use serde_json::{json, Value};
 use std::fmt::Write as _;
 
@@ -253,6 +254,141 @@ pub fn tool_game_report(args: &Value) -> ToolOutcome {
         game.group
     );
     Ok((summary, catalog::report(&game)))
+}
+
+/// `game_describe`: what a game is, its goal and controls, how it last verified, how to start it.
+pub fn tool_game_describe(args: &Value) -> ToolOutcome {
+    let (_, game) = find_game(args)?;
+    let playable = catalog::playable(&game);
+    let summary = format!(
+        "{} ({} game, {}): {}.",
+        game.title,
+        game.kind.as_str(),
+        game.group,
+        playable.map_or_else(
+            |why| format!("not playable, {why}"),
+            |()| "playable".to_string()
+        )
+    );
+    Ok((summary, guide::describe(&game)))
+}
+
+/// `game_help`: the overview, a topic, or one game's description plus its cheat sheet.
+pub fn tool_game_help(args: &Value) -> ToolOutcome {
+    let root = repo_root(args)?;
+    let games = catalog::discover(root.as_path());
+    let topic = args
+        .get("topic")
+        .or_else(|| args.get("slug"))
+        .and_then(Value::as_str);
+    match guide::help_text(&games, topic) {
+        Ok(text) => {
+            let head = text.lines().next().unwrap_or("").to_string();
+            Ok((head, json!({"topic": topic, "text": text})))
+        }
+        Err(message) => Err(fail(
+            "unknown_topic",
+            message,
+            "Call game_help with no topic for the overview, or game_list for slugs.",
+            "game_help",
+        )),
+    }
+}
+
+fn launch_allowed(slug: &str) -> Result<(), ToolError> {
+    if std::env::var("GAMECRAFT_MCP_ALLOW_LAUNCH").ok().as_deref() == Some("1") {
+        return Ok(());
+    }
+    Err(fail(
+        "launch_disabled",
+        "Starting and stopping games is turned off on this server.",
+        "It starts processes and can open a browser on this machine, so it is opt-in. Restart the server with GAMECRAFT_MCP_ALLOW_LAUNCH=1, or tell the user the command to run.",
+        format!("game_describe {{\"slug\": \"{slug}\"}} for the command line (gamecraft-cli play {slug})"),
+    ))
+}
+
+/// `game_start`, `game_play` and `game_demo`. `forced` fixes the mode (play or demo) and
+/// opens the browser for web games; without it the `mode` argument decides (default
+/// play) and a web game is only brought up, not opened, unless `open_browser` is true.
+pub fn tool_game_start(args: &Value, forced: Option<Mode>) -> ToolOutcome {
+    let (root, game) = find_game(args)?;
+    launch_allowed(game.slug.as_str())?;
+    let mode = forced
+        .or_else(|| {
+            args.get("mode")
+                .and_then(Value::as_str)
+                .and_then(Mode::parse)
+        })
+        .unwrap_or(Mode::Play);
+    let open = args
+        .get("open_browser")
+        .and_then(Value::as_bool)
+        .unwrap_or(forced.is_some());
+    match launch::launch(&game, root.as_path(), mode, open, None) {
+        Ok(done) => {
+            let summary = format!("{}: {} [{}].", game.title, done.note, done.mode);
+            Ok((summary, json!(done)))
+        }
+        Err(reason) => Err(fail(
+            "launch_failed",
+            reason,
+            "game_describe says whether the game is playable; Bevy games must be built first, Godot needs GAMECRAFT_GODOT or godot on PATH, web games need bun and web/node_modules.",
+            format!("game_describe {{\"slug\": \"{}\"}}", game.slug),
+        )),
+    }
+}
+
+/// `game_running`: native games started from this machine that are alive, and the arcade state.
+pub fn tool_game_running(args: &Value) -> ToolOutcome {
+    let root = repo_root(args)?;
+    let now = launch::running(root.as_path());
+    let summary = format!(
+        "{} running; web arcade {}.",
+        plural(now.games.len(), "native game", "native games"),
+        if now.arcade_up { "is up" } else { "is down" }
+    );
+    Ok((summary, json!(now)))
+}
+
+/// `game_stop`: stop one native game (or all), optionally the arcade server we started.
+pub fn tool_game_stop(args: &Value) -> ToolOutcome {
+    launch_allowed("")?;
+    let root = repo_root(args)?;
+    let slug = args.get("slug").and_then(Value::as_str);
+    let server = args.get("server").and_then(Value::as_bool).unwrap_or(false);
+    let stopped = launch::stop(root.as_path(), slug, server);
+    if stopped.is_empty() {
+        return Err(fail(
+            "nothing_to_stop",
+            slug.map_or_else(
+                || "No native game started from here is running.".to_string(),
+                |s| format!("'{s}' was not started from here, or has already ended."),
+            ),
+            "Web games run in a browser tab: close the tab. game_running shows what can be stopped.",
+            "game_running",
+        ));
+    }
+    let list: Vec<&str> = stopped.iter().map(|s| s.what.as_str()).collect();
+    Ok((
+        format!("Stopped {}.", list.join(", ")),
+        json!({"stopped": stopped}),
+    ))
+}
+
+/// `game_doctor`: report-only health check of the catalog and the tools.
+pub fn tool_game_doctor(args: &Value) -> ToolOutcome {
+    let root = repo_root(args)?;
+    let games = catalog::discover(root.as_path());
+    let findings = guide::doctor(root.as_path(), &games);
+    let (fail_n, warn_n, plan_n) = guide::doctor_counts(&findings);
+    let summary = format!(
+        "{}: {fail_n} failing, {warn_n} warnings, {plan_n} planned only.",
+        plural(games.len(), "game", "games")
+    );
+    Ok((
+        summary,
+        json!({"failing": fail_n, "warnings": warn_n, "planned": plan_n, "findings": findings}),
+    ))
 }
 
 /// Shared by the CLI, the MCP server and the command registry: `tool_spatial_query`.

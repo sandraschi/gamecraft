@@ -10,7 +10,9 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "gamecraft-cli",
     version,
-    about = "Make, list, verify and inspect GameCraft games (Godot 4 and three.js)"
+    about = "Find, play, demo, verify and make GameCraft games (Godot 4, three.js, Bevy)",
+    disable_help_subcommand = true,
+    after_help = "`gamecraft-cli help` explains the game commands; `gamecraft-cli help <slug>` shows one game's cheat sheet."
 )]
 struct Cli {
     /// Subcommand to run.
@@ -62,7 +64,7 @@ enum Commands {
         /// Skip the model: compile this `GameSpec` JSON file directly.
         #[arg(long = "from-spec")]
         from_spec: Option<PathBuf>,
-        /// Provider: auto | local | openai | anthropic. uto probes local servers.
+        /// Provider: auto | local | openai | anthropic. auto probes local servers.
         #[arg(long, default_value = "auto")]
         provider: String,
         /// Model id (provider default when omitted).
@@ -160,10 +162,93 @@ enum Commands {
         #[arg(long)]
         json: bool,
     },
-    /// Describe one registry command and its parameters.
+    /// Describe a game (goal, controls, how to start it) or, for an id like
+    /// `replay.verify`, one registry command and its parameters.
     Describe {
-        /// Command id, for example `replay.verify`.
+        /// Game slug, or a registry command id.
         id: String,
+        /// Print JSON.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Help for the game commands; `help <slug>` is one game's description and cheat sheet.
+    Help {
+        /// A topic (overview, games, start, play, demo, running, stop, doctor, mcp) or a game slug.
+        topic: Option<String>,
+    },
+    /// Search games by words in the title, slug, group or kind.
+    Search {
+        /// Words to look for.
+        #[arg(required = true)]
+        words: Vec<String>,
+        /// Print JSON instead of a table.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Pick a playable game at random.
+    Random {
+        /// Free-text filter, as for `list`.
+        #[arg(long, default_value = "")]
+        filter: String,
+        /// Start it as well (play mode).
+        #[arg(long)]
+        play: bool,
+    },
+    /// Bring a game up and say where it is (web: the arcade server and the URL, no browser).
+    Start {
+        /// Game slug.
+        slug: String,
+        /// Let the game play itself.
+        #[arg(long)]
+        demo: bool,
+        /// Bevy only: build the game first when it is not built.
+        #[arg(long)]
+        build: bool,
+        /// Print JSON.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Play a game: web games open in your browser, others in their own window.
+    Play {
+        /// Game slug.
+        slug: String,
+        /// Bevy only: build the game first when it is not built.
+        #[arg(long)]
+        build: bool,
+        /// Print JSON.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Watch a game play itself (autoplay).
+    Demo {
+        /// Game slug.
+        slug: String,
+        /// Bevy only: build the game first when it is not built.
+        #[arg(long)]
+        build: bool,
+        /// Print JSON.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Native games started from here that are still running, and the web arcade state.
+    Running {
+        /// Print JSON.
+        #[arg(long)]
+        json: bool,
+    },
+    /// Stop native games started from here (one slug, or all).
+    Stop {
+        /// Game to stop; omit for all.
+        slug: Option<String>,
+        /// Also stop the web arcade server when this tool started it.
+        #[arg(long)]
+        server: bool,
+    },
+    /// Check the catalog and the tools (report only). Exit 1 with `--strict` on any failure or warning.
+    Doctor {
+        /// Exit non-zero when anything is failing or warned about.
+        #[arg(long)]
+        strict: bool,
         /// Print JSON.
         #[arg(long)]
         json: bool,
@@ -259,7 +344,25 @@ fn main() {
             force,
         } => cmd_trellis_setup(execute, !skip_weights, force),
         Commands::CommandList { json } => emit(&gamecraft_mcp::registry::cli_commands(json)),
-        Commands::Describe { id, json } => emit(&gamecraft_mcp::registry::cli_describe(&id, json)),
+        Commands::Describe { id, json } => cmd_describe(id.as_str(), json),
+        Commands::Help { topic } => cmd_help(topic.as_deref()),
+        Commands::Search { words, json } => cmd_list(words.join(" ").as_str(), json),
+        Commands::Random { filter, play } => cmd_random(filter.as_str(), play),
+        Commands::Start {
+            slug,
+            demo,
+            build,
+            json,
+        } => cmd_start(slug.as_str(), demo, build, json),
+        Commands::Play { slug, build, json } => {
+            cmd_launch(slug.as_str(), Mode::Play, true, build, json);
+        }
+        Commands::Demo { slug, build, json } => {
+            cmd_launch(slug.as_str(), Mode::Demo, true, build, json);
+        }
+        Commands::Running { json } => cmd_running(json),
+        Commands::Stop { slug, server } => cmd_stop(slug.as_deref(), server),
+        Commands::Doctor { strict, json } => cmd_doctor(strict, json),
         Commands::Run { cmd, json } => emit(&gamecraft_mcp::registry::cli_run(&cmd, json)),
         Commands::List { filter, json } => cmd_list(filter.as_str(), json),
         Commands::Report { slug, json } => cmd_report(slug.as_str(), json),
@@ -272,6 +375,201 @@ fn main() {
 }
 
 use gamecraft_mcp::catalog::{self, GameEntry, GameKind};
+use gamecraft_mcp::launch::{self, Mode};
+
+/// `describe <slug>` describes a game; anything else is looked up as a registry command id.
+fn cmd_describe(id: &str, json: bool) {
+    let games = catalog::find_root(None)
+        .map(|root| catalog::discover(root.as_path()))
+        .unwrap_or_default();
+    if let Some(game) = catalog::find(&games, id, None) {
+        if json {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&gamecraft_mcp::guide::describe(game))
+                    .unwrap_or_default()
+            );
+        } else {
+            print!("{}", gamecraft_mcp::guide::describe_text(game));
+        }
+        return;
+    }
+    emit(&gamecraft_mcp::registry::cli_describe(id, json));
+}
+
+/// `help [topic]`: generated from the repo; works without a repo for the overview.
+fn cmd_help(topic: Option<&str>) {
+    let games = catalog::find_root(None)
+        .map(|root| catalog::discover(root.as_path()))
+        .unwrap_or_default();
+    match gamecraft_mcp::guide::help_text(&games, topic) {
+        Ok(text) => println!("{}", text.trim_end()),
+        Err(message) => {
+            eprintln!("{message}");
+            std::process::exit(1);
+        }
+    }
+}
+
+/// A playable game picked by the clock (no random-number crate needed for this).
+fn cmd_random(filter: &str, play: bool) {
+    let root = root_or_exit();
+    let pool: Vec<GameEntry> = catalog::discover(root.as_path())
+        .into_iter()
+        .filter(|g| catalog::matches(g, filter) && catalog::playable(g).is_ok())
+        .collect();
+    if pool.is_empty() {
+        eprintln!("no playable game matches '{filter}'");
+        std::process::exit(1);
+    }
+    let tick = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.subsec_nanos() as usize);
+    let game = &pool[tick % pool.len()];
+    print!("{}", gamecraft_mcp::guide::describe_text(game));
+    if play {
+        println!();
+        cmd_launch(game.slug.as_str(), Mode::Play, true, false, false);
+    }
+}
+
+/// start: bring the game up without opening a browser.
+fn cmd_start(slug: &str, demo: bool, build: bool, json: bool) {
+    let mode = if demo { Mode::Demo } else { Mode::Play };
+    cmd_launch(slug, mode, false, build, json);
+}
+
+/// start / play / demo.
+fn cmd_launch(slug: &str, mode: Mode, open: bool, build: bool, json: bool) {
+    let (root, game) = game_or_exit(slug);
+    if build && game.kind == GameKind::Bevy && catalog::bevy_launch(&game, root.as_path()).is_err()
+    {
+        eprintln!(
+            "building {} (a cold optimised build can take 15 minutes)...",
+            game.slug
+        );
+        if let Err(reason) = catalog::bevy_build(&game, root.as_path()) {
+            eprintln!("{}: {reason}", game.slug);
+            std::process::exit(1);
+        }
+    }
+    let godot = gamecraft_core::config::AppConfig::load().godot_binary;
+    let godot = (!godot.trim().is_empty()).then_some(godot);
+    match launch::launch(&game, root.as_path(), mode, open, godot.as_deref()) {
+        Ok(done) => {
+            if json {
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&done).unwrap_or_default()
+                );
+            } else {
+                println!("{}: {}", game.slug, done.note);
+                if done.server_started.is_some() {
+                    println!("(started the web arcade; `gamecraft-cli stop --server` stops it)");
+                }
+            }
+        }
+        Err(reason) => {
+            eprintln!("{}: {reason}", game.slug);
+            std::process::exit(1);
+        }
+    }
+}
+
+/// running: native games started from here, and whether the arcade answers.
+fn cmd_running(json: bool) {
+    let root = root_or_exit();
+    let now = launch::running(root.as_path());
+    if json {
+        println!("{}", serde_json::to_string_pretty(&now).unwrap_or_default());
+        return;
+    }
+    if now.games.is_empty() {
+        println!("no native game started from here is running");
+    }
+    for p in &now.games {
+        println!("{:<22} {:<6} {:<5} pid {}", p.slug, p.kind, p.mode, p.pid);
+    }
+    println!(
+        "web arcade: {}{}",
+        if now.arcade_up {
+            "up on port 11258"
+        } else {
+            "not running"
+        },
+        now.arcade_pid.map_or_else(String::new, |pid| format!(
+            " (started from here, pid {pid})"
+        ))
+    );
+}
+
+/// stop: one native game, or all.
+fn cmd_stop(slug: Option<&str>, server: bool) {
+    let root = root_or_exit();
+    let stopped = launch::stop(root.as_path(), slug, server);
+    if stopped.is_empty() {
+        eprintln!(
+            "{}",
+            slug.map_or_else(
+                || "nothing to stop: no native game started from here is running".to_string(),
+                |s| format!("'{s}' was not started from here, or has already ended (web games: close the browser tab)"),
+            )
+        );
+        std::process::exit(1);
+    }
+    let mut failed = false;
+    for s in stopped {
+        println!(
+            "{} {}",
+            if s.ok { "stopped" } else { "could not stop" },
+            s.what
+        );
+        failed |= !s.ok;
+    }
+    if failed {
+        std::process::exit(1);
+    }
+}
+
+/// doctor: report only; `--strict` turns failures and warnings into exit code 1.
+fn cmd_doctor(strict: bool, json: bool) {
+    let root = root_or_exit();
+    let games = catalog::discover(root.as_path());
+    let findings = gamecraft_mcp::guide::doctor(root.as_path(), &games);
+    let (fail, warn, plan) = gamecraft_mcp::guide::doctor_counts(&findings);
+    if json {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({
+                "games": games.len(), "failing": fail, "warnings": warn, "planned": plan, "findings": findings
+            }))
+            .unwrap_or_default()
+        );
+    } else {
+        for (level, title) in [
+            ("fail", "FAILING"),
+            ("warn", "WARNINGS"),
+            ("plan", "PLANNED, NOT BUILT"),
+            ("info", "TOOLS"),
+        ] {
+            let mine: Vec<_> = findings.iter().filter(|f| f.level == level).collect();
+            if mine.is_empty() {
+                continue;
+            }
+            println!("{title}");
+            for f in mine {
+                println!("  {:<22} {}", f.slug, f.issue);
+            }
+        }
+        println!(
+            "\n{} games: {fail} failing, {warn} warnings, {plan} planned only",
+            games.len()
+        );
+    }
+    if strict && fail + warn > 0 {
+        std::process::exit(1);
+    }
+}
 
 /// Print a registry result and exit with its code.
 fn emit(out: &gamecraft_mcp::registry::CliOutput) {

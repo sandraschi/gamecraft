@@ -533,6 +533,56 @@ pub fn web_verify(root: &Path, slug: &str, timeout_s: u64) -> Result<Value, Stri
     )
 }
 
+/// Can this entry be started? A web entry needs its `entry` page (default `index.html`):
+/// some catalog entries are case files or data with a `game.json` and no code.
+///
+/// # Errors
+///
+/// Returns the reason the entry cannot be started.
+pub fn playable(game: &GameEntry) -> Result<(), String> {
+    match game.kind {
+        GameKind::Web => {
+            let meta = read_json(game.dir.join("game.json").as_path()).unwrap_or(Value::Null);
+            let page = str_field(&meta, "entry").unwrap_or_else(|| "index.html".to_string());
+            if game.dir.join(page.as_str()).is_file() {
+                Ok(())
+            } else {
+                Err(format!(
+                    "{} has no {page}: it is data or a plan, not a playable game",
+                    game.slug
+                ))
+            }
+        }
+        GameKind::Godot => {
+            if game.dir.join("main.tscn").is_file() {
+                Ok(())
+            } else {
+                Err(format!("{} has no main.tscn", game.slug))
+            }
+        }
+        GameKind::Bevy => bevy_recipe(game.dir.as_path())
+            .map(|_| ())
+            .ok_or_else(|| format!("{}: game.json has no \"bin\" entry", game.slug)),
+    }
+}
+
+/// Slugs under `web/games/` that hold only a plan (`game.plan.json`, no `game.json`):
+/// designed, not built, and therefore not in the catalog.
+#[must_use]
+pub fn plan_only(root: &Path) -> Vec<String> {
+    let Ok(entries) = std::fs::read_dir(root.join("web").join("games")) else {
+        return Vec::new();
+    };
+    let mut slugs: Vec<String> = entries
+        .flatten()
+        .map(|e| e.path())
+        .filter(|dir| dir.join("game.plan.json").is_file() && !dir.join("game.json").is_file())
+        .filter_map(|dir| dir.file_name().and_then(|n| n.to_str()).map(str::to_string))
+        .collect();
+    slugs.sort();
+    slugs
+}
+
 /// How a Bevy catalog entry is built and played, read from its `game.json`.
 struct BevyRecipe {
     bin: String,
@@ -605,6 +655,37 @@ pub fn bevy_launch(game: &GameEntry, root: &Path) -> Result<PathBuf, String> {
         "not built yet: cargo build {profile}-p gamecraft-bevy --features render --bin {}",
         recipe.bin
     ))
+}
+
+/// Build a Bevy game's binary the way `game.json` says (30 minute cap; a cold optimised
+/// build is slow). Returns the path of the binary.
+///
+/// # Errors
+///
+/// Returns a reason when `game.json` is unusable, cargo cannot run, the build times out
+/// or fails (with the last line of cargo's error output).
+pub fn bevy_build(game: &GameEntry, root: &Path) -> Result<PathBuf, String> {
+    let recipe = bevy_recipe(game.dir.as_path())
+        .ok_or_else(|| format!("{}: game.json has no \"bin\" entry", game.slug))?;
+    let mut command = bevy_build_command(root, &recipe);
+    let built =
+        crate::proc_guard::run_with_timeout(&mut command, std::time::Duration::from_mins(30))
+            .map_err(|err| format!("cannot launch cargo: {err}"))?;
+    if built.timed_out {
+        return Err(format!(
+            "the Bevy build for {} did not finish in 30 minutes",
+            game.slug
+        ));
+    }
+    if !built.status.is_some_and(|s| s.success()) {
+        let reason = built
+            .stderr
+            .lines()
+            .rfind(|l| !l.trim().is_empty())
+            .unwrap_or("cargo build failed");
+        return Err(format!("build failed: {reason}"));
+    }
+    Ok(bevy_exe(root, &recipe))
 }
 
 /// ISO date (UTC) of a unix time, without a date library.
