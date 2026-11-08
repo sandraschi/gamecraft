@@ -34,8 +34,16 @@ just run-desktop      # desktop viewer (builds once, then launches)
 ```
 
 Godot depot games: open `depot/games/<slug>/project.godot` in the Godot
-editor from `.tools/godot` and press Play. Fifteen standalone projects,
+editor from `.tools/godot` and press Play. Sixteen standalone projects,
 each with README + cheat sheet.
+
+Prebuilt Windows x64 binaries ride on the GitHub release
+(`gamecraft-desktop`, `gamecraft-cli`, `gamecraft-mcp`, plus the three
+Bevy game exes). They are built from the tagged source and expect the
+repo around them: drop them into `target/release/` (trio) and
+`target/play/` (Bevy exes) of your clone and launch from there, so the
+viewer finds `depot/`, `web/` and `bevy/games/` by walking up. Godot,
+bun and Node still come from `just bootstrap`.
 
 ## Manual steps (when bootstrap itself fails)
 
