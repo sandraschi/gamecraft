@@ -15,6 +15,12 @@ finished. If it can't, you get a failure, not a broken level.
 The output is a normal Godot project folder. Open `project.godot` in the editor,
 press F5, or hit Start Game in the desktop viewer.
 
+Godot is one of three tracks in the same library: **Godot** (`depot/games/`,
+compiled from specs and booted headless), **three.js browser games**
+(`web/games/`, served locally and verified headless), and **Bevy sims**
+(`bevy/games/`, native executables). 16 + 19 + 3 and counting. The prompt
+path (`new`) targets Godot only.
+
 ## What you get
 
 `new` writes a minimal but complete Godot project:
@@ -60,9 +66,9 @@ Straight answers, because this is the part that matters:
   count, spacing and altitude; `driving` gets loop radius and checkpoint count;
   `chess` gets board size, hop count and seed; `talk` gets how many conversations the
   door requires.
-- **The other five genres exist but are hand-built.** The 15 demo games span
+- **The other genres exist but are hand-built.** The 16 depot games span
   platformer, runner, flight, driving, pong, breakout, flappy, maze, sokoban,
-  chessboard, dialogue, shooter and tower defence. Only the eight above are wired to
+  sokoban-vault, chessboard, dialogue, shooter and tower defence. Only the eight above are wired to
   the prompt path. Flappy stays unwired on purpose: it is one of the four that never
   proved an in-engine win, so generating it would ship games I cannot verify.
 - **Local model quality varies.** `gemma4:12b` works. `qwen3.8:27b` crashes Ollama
@@ -89,23 +95,25 @@ broken scene, because the compiler is the only thing that writes scenes.
 
 ## Is the output actually any good?
 
-Checked, not assumed. `just verify-depot` boots every depot game in Godot and
-requires its win line:
+Checked, not assumed. `just verify-depot` boots every Godot depot game in Godot
+and requires its win line:
 
 ```
-11 of 15 games win
+11 of the long-standing 15 games win
 4 unproven: breakout, flappy, topdown-shooter, tower-place
+sokoban-vault (added 2026-11-07): not gated yet
 ```
 
 All 15 boot with zero engine errors. The four that do not win are documented with
 their specific cause in the Depot section - they are broken designs, not unverified
 guesses, and the gate stays red to say so.
 
-## The 15 demo games
+## The demo games
 
-`depot/games/` is the proof, not the product - examples of what the compiler emits,
-each with a trace recording and a playable Godot project. The interesting use is
-generating your own.
+`depot/games/` (16 Godot projects), `web/games/` (19 browser games) and
+`bevy/games/` (maze, murmuration, toy-railway) are the proof, not the product -
+examples of what the pipelines emit, each with a trace recording or a verify
+proof and something playable. The interesting use is generating your own.
 
 ## Quickstart
 
@@ -131,6 +139,9 @@ just verify-depot
 # viewer
 cargo run -p gamecraft-desktop
 
+# web arcade (three.js family: serve, then open http://127.0.0.1:11258/)
+cd web; bun install; bun run serve
+
 # MCP server over stdio
 cargo run -p gamecraft-mcp
 ```
@@ -143,7 +154,9 @@ a model pulled for `--provider local`. `--provider auto` probes local servers fi
 
 ## Controls
 
-**In the games**: arrow keys or WASD to move, Space/Enter to jump.
+**In the Godot games**: arrow keys or WASD to move, Space/Enter to jump.
+**Browser games** have per-game keys - see the game's `CHEATSHEET.md`
+(linked from its detail card).
 
 **Gamepad.** Godot's built-in `ui_*` actions carry joypad bindings for movement
 (D-pad and left stick) but `ui_accept` ships keys-only, so a pad could walk and
@@ -188,7 +201,7 @@ Save & play launches immediately. The shared runtime reads it at startup:
 {"speed_mult": 1.2, "gravity_mult": 1.0, "jump_mult": 1.1, "autoplay": null}
 ```
 
-Multipliers scale the baked-in base values, so one schema fits all fifteen games.
+Multipliers scale the baked-in base values, so one schema fits all sixteen games.
 `autoplay: null` means "whatever the environment says" - the verifier and the demo
 button win over the file. Backgrounds and level geometry are baked in and still
 need regeneration.
@@ -237,7 +250,9 @@ The four that do not are unproven, not broken - all boot with zero errors:
 | `gamecraft-replay` | `.gcraft` replay documents: game, config (seed and level), input log, recorded result. `verify` re-simulates from scratch and compares status, ticks and a state hash, so edited inputs, a swapped seed or changed rules are caught. Maze and murmuration. Examples in `docs/replays`, gate `just replays-check`. |
 | `gamecraft-forge` | Game builders, `GameSpec` validation and compilation, the LLM front end, thumbnail rasterizer, economy and Steam asset generators. |
 | `gamecraft-gltf` | Deterministic glTF 2.0 export (`.glb` or embedded `.gltf`): hierarchy, primitive meshes shared by geometry, PBR colours, lights, camera. Also owns the primitive tessellation the desktop viewport draws. Gate: `just gltf-gate` (Khronos validator + three.js render). |
-| `gamecraft-bevy` | GameCraft games on Bevy 0.20 on top of `gamecraft-sim`: headless logic plugin plus an optional windowed renderer (`render` feature). Games: a 29x29 maze that plays itself, and Murmuration (20 000 starlings, hawks, pillars, a flare), both with procedural sound (`audio` feature, clips synthesised in `synth.rs`, `--mute` or `GAMECRAFT_MUTE=1` to silence; gate runs are muted). Catalog entries live in `bevy/games/<slug>/`. `just sounds` renders every effect to `docs/sounds/` (WAV, spectrogram PNG, loudness table) and `just sounds-check` fails if those files are stale. Gates: `just bevy-gate`, `just murmuration-gate`. |
+| `gamecraft-trellis` | Image-to-3D prop pipe (TRELLIS.2 sidecar, plan-only without a Linux/CUDA box): L1 types + driver, CLI `trellis plan | assets | execute`, MCP `asset.trellis`. See `docs/TRELLIS2.md`. |
+| `gamecraft-bevy` | GameCraft games on Bevy 0.20 on top of `gamecraft-sim`: headless logic plugin plus an optional windowed renderer (`render` feature). Games: a 29x29 maze that plays itself, Murmuration (20 000 starlings, hawks, pillars, a flare), and the Toy Railway (two-level timetabled model railway; `just railway-gate`), all with procedural sound (`audio` feature, clips synthesised in `synth.rs`, `--mute` or `GAMECRAFT_MUTE=1` to silence; gate runs are muted). Catalog entries live in `bevy/games/<slug>/`. The Nekomimi VRM viewer (phase 1:
+orbit, ground, path plumbing) lives here too, behind the `vrm` feature. `just sounds` renders every effect to `docs/sounds/` (WAV, spectrogram PNG, loudness table) and `just sounds-check` fails if those files are stale. Gates: `just bevy-gate`, `just murmuration-gate`. |
 | `gamecraft-mcp` | MCP stdio server, dual-era (stateless `2026-07-28` with `server/discover`, plus the `initialize` handshake for `2025-11-25` back to `2024-11-05`): scene tools `scene_lint`, `spatial_query`, `scene_inspect`, `export_scene`; catalog tools `game_list`, `game_report`, `game_verify`, `game_create`; opt-in `scene_verify`. Every result is a one-sentence summary plus `structuredContent`; failures are `isError` results that say what to do next. Also hosts `catalog`, the game catalog shared with CLI and desktop. See `docs/MCP_CLIENTS.md`. Also the command registry (`commands [--json]`, `describe <id>`, `run --cmd 'id={json}'`; `id=@file.json` reads params from a file) and MCP tools `list_commands`, `describe_command`, `run_command`, `replay_record`, `replay_verify`, `replay_info` (12 commands in all). No arguments or `mcp` still means stdio. Status against the Craft app contract: `docs/CRAFT_CONTRACT.md`. |
 | `gamecraft-cli` | `lint`, `query`, `uid`, `forge`, `new`, `export`, `gltf <scene> [--out]` / `gltf --depot-out <dir>`, plus catalog parity `list [--filter] [--json]`, `report <slug> [--json]`, `verify <slug> [--timeout] [--json]`. Also `commands`, `describe`, `run --cmd` (the same registry as the MCP server). |
 | `gamecraft-desktop` | `egui`/`wgpu` app. **Library** mode (default): card grid of all Godot, three.js and Bevy games by category, detail card with description, last gate result, cheat sheet, Play / Watch demo / Run tests / Open folder; `/` filter, arrows, Enter. **Editor** mode: scene tree, shaded viewport, inspector, lint, trace scrubber, undo/redo; the side panels and the depot/scene and inspector/findings splits are draggable (View > Reset layout). Light/dark toggle, Ctrl+wheel UI zoom, golden-PNG tests (`egui_kittest`). |
@@ -266,7 +281,7 @@ the file that exists. Wallpapers are generated gradients - placeholder-grade.
 
 ## Browser games (three.js family)
 
-`web/` is a second, deliberately different track. The depot's rule is "the model
+`web/` is another, deliberately different track. The depot's rule is "the model
 writes a spec, never code". The web family breaks it: the model writes the whole
 game as a static three.js page, the way recent frontier models do well. What can
 still be asserted is asserted:
@@ -277,10 +292,15 @@ just web-serve     # http://127.0.0.1:11258/
 just web-verify    # headless boot, zero console errors, self-play must win
 ```
 
-| Game | What it is | Gate |
-|---|---|---|
-| `mossbrook` | "The Quiet Well": village RPG with a 14-stage story, a three-flame lantern, stealth, a 400 m world, sound | whole story played to the end, plus a self-test that the stealth bites |
-| `kaffeehaus` | Viennese coffee house management, multi-day, with sound | full day, win, plus a self-test that good play beats random play |
+Nineteen games across six categories (descriptions live in each game's
+`game.json`; the full playable list is the arcade index itself):
+**Calm puzzles** (bento, gassi, kintsugi, organ-builder, robot-sorting,
+shadow-sculpture), **Puzzle** (minesweeper, sudoku classic/color/letters),
+**Board classics** (hnefatafl), **Seek and find** (hoshi, spot-the-difference,
+tidy-the-room, where-is-benny), **Worlds and sims** (kaffeehaus,
+lantern-river, mossbrook), **Detective** (detective-case). Every game ships
+`game.json` plus a headless `verify.json` proof (all `won: true`);
+detective-case is metadata-only for now - it has no playable page yet.
 
 Player cheat sheets: `web/games/mossbrook/CHEATSHEET.md` (with walkthrough),
 `web/games/kaffeehaus/CHEATSHEET.md` (every number in the sim). Developer cheat
@@ -303,8 +323,8 @@ be finished. It does not prove it is fun. See `web/README.md`.
 
 ## Status — does today / next week / non-goals
 
-**Does today:** v0.13.0, 10 crates + CLI + desktop + web player; 225 test
-fns; 14 docs files; depot of real games; sentence → verified playable
+**Does today:** v0.14.0, 10 crates + CLI + desktop + web arcade; 246 test
+fns; 14 docs files; 16 Godot + 19 web + 3 Bevy games; sentence → verified playable
 Godot (`new` → `verify` → `report`/`export`).
 
 **Next week:** `serve` decision (persistent session + snapshot polling);
