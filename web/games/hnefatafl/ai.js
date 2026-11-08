@@ -1,5 +1,6 @@
-// A small alpha-beta searcher for Hnefatafl. Honest limits: fixed depth, a hand
-// written evaluation, no transposition table. It plays sensibly (takes a corner
+// A small alpha-beta searcher for Hnefatafl. Honest limits: iterative deepening to a
+// fixed depth (optionally cut by a time budget), a hand written evaluation, no
+// transposition table, no quiescence. It plays sensibly (takes a corner
 // when open, captures the king when it can, blocks a single open line) but it is
 // not a strong engine. No DOM here, so it runs under bun as well.
 import {
@@ -62,6 +63,28 @@ function reachTwo(board, k) {
   }
   board[k] = KING;
   return { n: seen.size, lined, forked };
+}
+/**
+ * Squares the king can reach by walking (4-neighbour) over anything that is not an
+ * attacker. A small region is a cordon closing in; the attackers win outright when it
+ * never touches the edge (see isEncircled in rules.js). An edge square in the region is
+ * worth extra: it means the cordon is not yet shut.
+ */
+function freeRegion(board, k) {
+  const seen = new Uint8Array(N);
+  const stack = [k];
+  seen[k] = 1;
+  let size = 0, edge = 0;
+  while (stack.length) {
+    const s = stack.pop();
+    size++;
+    if (rowOf(s) === 0 || rowOf(s) === 10 || colOf(s) === 0 || colOf(s) === 10) edge++;
+    for (let d = 0; d < 4; d++) {
+      const n = NB[s][d];
+      if (n >= 0 && !seen[n] && board[n] !== ATT) { seen[n] = 1; stack.push(n); }
+    }
+  }
+  return edge === 0 ? Math.min(size, 20) - 40 : size;
 }
 const CORNER_SQ = [0, 10, 110, 120];
 const PRESSURE = [0, 0, 1500, 350, 100, 30, 10];
@@ -145,6 +168,7 @@ export function evaluate(board, sideToMove, ply) {
   const r2 = reachTwo(board, k);
   score += mob * 2 + r2.n * 3 + r2.forked * 100;
   score += cornerPressure(board, k);
+  score += Math.min(freeRegion(board, k), 70) * 3;
   const kr = rowOf(k), kc = colOf(k);
   const dist = Math.min(kr, 10 - kr) + Math.min(kc, 10 - kc);
   score += (20 - dist) * 5;
@@ -174,7 +198,7 @@ function children(board, side) {
   for (const m of allMoves(board, side)) {
     const from = moveFrom(m), to = moveTo(m);
     const r = applyMove(board, from, to);
-    const key = r.kingEscaped || r.kingCaptured ? 1000 : r.captured.length * 10 + (board[from] === KING ? 1 : 0);
+    const key = r.terminal ? 1000 : r.captured.length * 10 + (board[from] === KING ? 1 : 0);
     kids.push({ from, to, r, key });
   }
   kids.sort((a, b) => b.key - a.key);
@@ -182,8 +206,7 @@ function children(board, side) {
 }
 
 function value(kid, side, depth, alpha, beta, ply, ctx) {
-  if (kid.r.kingEscaped) return WIN - ply;
-  if (kid.r.kingCaptured) return -WIN + ply;
+  if (kid.r.terminal) return kid.r.terminal.winner === DEF ? WIN - ply : -WIN + ply;
   return search(kid.r.board, side === DEF ? ATT : DEF, depth - 1, alpha, beta, ply + 1, ctx);
 }
 
@@ -234,13 +257,33 @@ export function bestMove(board, side, opts = {}) {
     ? kids.filter((kid) => !opts.seen.get(kid.r.board.join('') + nextSide))
     : kids;
   const field = fresh.length ? fresh : kids;
-  let bestScore = side === DEF ? -Infinity : Infinity;
+  // Iterative deepening: each pass reorders the root moves by the previous pass, which
+  // makes alpha-beta cut far more. With opts.timeMs it stops starting new passes once the
+  // budget is spent (non-deterministic by nature); without it the result depends only on
+  // the position, depth and seed, which is what the gate relies on.
+  const started = Date.now();
+  let bestScore = 0;
   let pool = [];
-  for (const kid of field) {
-    const s = value(kid, side, depth, -Infinity, Infinity, 0, ctx);
-    const better = side === DEF ? s > bestScore : s < bestScore;
-    if (better) { bestScore = s; pool = [kid]; } else if (s === bestScore) pool.push(kid);
+  let order = field;
+  let reached = 0;
+  for (let d = 1; d <= depth; d++) {
+    if (d > 1 && opts.timeMs && Date.now() - started > opts.timeMs * 0.4) break;
+    let passBest = side === DEF ? -Infinity : Infinity;
+    let passPool = [];
+    const scored = [];
+    for (const kid of order) {
+      const s = value(kid, side, d, -Infinity, Infinity, 0, ctx);
+      scored.push({ kid, s });
+      const better = side === DEF ? s > passBest : s < passBest;
+      if (better) { passBest = s; passPool = [kid]; } else if (s === passBest) passPool.push(kid);
+    }
+    bestScore = passBest;
+    pool = passPool;
+    reached = d;
+    scored.sort((a, b) => (side === DEF ? b.s - a.s : a.s - b.s));
+    order = scored.map((x) => x.kid);
+    if (Math.abs(passBest) >= WIN - 50) break; // a forced result is already found
   }
   const pick = pool[Math.floor(rand() * pool.length)];
-  return { from: pick.from, to: pick.to, score: bestScore, nodes: ctx.nodes };
+  return { from: pick.from, to: pick.to, score: bestScore, nodes: ctx.nodes, depth: reached };
 }

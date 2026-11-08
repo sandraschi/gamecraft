@@ -15,11 +15,14 @@ const LEVELS = {
   normal: { depth: 2, random: 0, label: 'Normal' },
   hard: { depth: 3, random: 0, label: 'Hard' },
 };
-// The gate game: attackers search 2 plies, defenders 1. At equal depth the defenders'
-// king race beats this AI's attackers almost every time, so equal depths end in a fast
-// escape; this pairing is a fixed, deterministic, decisive game and is stated as such.
-const TOUR_DEPTH = { [ATT]: 2, [DEF]: 1 };
-const TOUR_SEED = 7;
+// The gate game: both sides search 2 plies. Measured over seeds 1-4 the defenders' king
+// race wins every one of them by corner escape (28 to 46 plies), so this pairing is a
+// fixed, deterministic, decisive game, and it also shows the attackers are the weaker
+// side at equal depth. (Attackers 2 vs defenders 1 now ends undecided at 250 plies.)
+const TOUR_DEPTH = { [ATT]: 2, [DEF]: 2 };
+// Seed 3 is one of five seeds tried (1-4 and 7); all five end in a defender escape, in 28
+// to 140 plies. It is the seed that finishes inside the gate's time budget, nothing more.
+const TOUR_SEED = 3;
 
 const prefs = load(SAVE_KEY, { human: DEF, level: 'normal' });
 {
@@ -222,6 +225,8 @@ const REASONS = {
   escape: 'The king reached a corner.',
   'king-captured': 'The king was captured.',
   'no-moves': 'The other side has no legal move.',
+  'edge-fort': 'The king sits in an edge fort that cannot be broken.',
+  encirclement: 'The attackers closed an unbroken ring around every defender.',
   repetition: 'The same position came up three times.',
 };
 function updateHud() {
@@ -283,7 +288,7 @@ function doMove(from, to) {
 }
 
 function aiMove(side, depth, randomChance, seed) {
-  return bestMove(game.board, side, { depth, randomChance, seed });
+  return bestMove(game.board, side, { depth, randomChance, seed, seen: game.seen });
 }
 
 function maybeAi() {

@@ -4,7 +4,7 @@
   "category": "Board classics",
   "family": "threejs",
   "entry": "index.html",
-  "experiment": "Copenhagen Hnefatafl on 11x11 against an alpha-beta opponent: king to a corner or capture the king, custodian captures, restricted throne and corners, undo, hint, easy/normal/hard. The gate runs 31 rule checks on hand-built positions, then one full AI-vs-AI game (attackers 2 plies, defenders 1 ply, fixed seed) that is replayed in a fresh engine. The AI's defenders are stronger than its attackers. Shieldwall, edge fort and encirclement rules are not implemented.",
+  "experiment": "Copenhagen Hnefatafl on 11x11 against an alpha-beta opponent: king to a corner or capture the king, custodian captures, restricted throne and corners, undo, hint, easy/normal/hard. The gate runs 39 rule checks on hand-built positions, then one full AI-vs-AI game (both sides 2 plies, fixed seed) that is replayed in a fresh engine. The AI's defenders are stronger than its attackers. Shieldwall capture, the edge-fort win (cautious test) and the encirclement win are implemented.",
   "author": "gamecraft: rules engine and search written for this repo (the old skeleton and ai-games-collection were references only)",
   "win_marker": "GameCraft: tour complete, win",
   "thumb_checkpoint": "game-decided",

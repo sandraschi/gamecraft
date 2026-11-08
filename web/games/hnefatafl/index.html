@@ -45,7 +45,7 @@
     <li>The king is taken by attackers on all four sides, or on three sides when he stands next to the empty throne. On the board edge he cannot be taken.</li>
     <li>A side with no legal move loses. Three repetitions of a position is a draw.</li>
   </ul>
-  <p class="dim small">Not implemented: shieldwall captures, the edge-fort win and the encirclement win. The opponent is a small fixed-depth alpha-beta search; "easy" sometimes plays a random move.</p>
+  <p class="dim small">Also implemented: shieldwall capture (a row of pieces on an edge, both ends hostile and an enemy in front of each piece, is taken together; never the king), the edge-fort win (the king on an edge with a free move and two or more defenders that can never be captured; the test is cautious and may miss an exotic fort, never invents one) and the encirclement win (an unbroken ring of attackers, diagonal links allowed, around the king and every defender). The opponent is a small fixed-depth alpha-beta search; "easy" sometimes plays a random move.</p>
   <p class="dim small">Click a piece, then a highlighted square. Drag to turn the board, wheel to zoom. N new, S swap side, L strength, U undo, H hint.</p>
   <button id="help-go" class="go">Play</button>
 </div></div>

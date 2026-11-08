@@ -1,8 +1,8 @@
 {
   "slug": "hnefatafl",
   "title": "Hnefatafl",
-  "date": "2026-11-08T18:29:14.753Z",
-  "boot_ms": 606,
+  "date": "2026-11-08T20:28:05.842Z",
+  "boot_ms": 434,
   "self_test": {
     "pass": true,
     "checks": [
@@ -119,6 +119,38 @@
         "pass": true
       },
       {
+        "name": "shieldwall-captures-a-row-on-the-edge",
+        "pass": true
+      },
+      {
+        "name": "shieldwall-needs-both-ends-hostile",
+        "pass": true
+      },
+      {
+        "name": "shieldwall-may-end-in-a-corner",
+        "pass": true
+      },
+      {
+        "name": "shieldwall-never-takes-the-king",
+        "pass": true
+      },
+      {
+        "name": "encirclement-wins-for-the-attackers",
+        "pass": true
+      },
+      {
+        "name": "edge-fort-wins-for-the-defenders",
+        "pass": true
+      },
+      {
+        "name": "a-lone-king-on-the-edge-is-not-a-fort",
+        "pass": true
+      },
+      {
+        "name": "edge-fort-needs-a-king-that-can-move",
+        "pass": true
+      },
+      {
         "name": "ai-takes-the-corner-when-it-is-open",
         "pass": true
       },
@@ -131,10 +163,10 @@
         "pass": true
       }
     ],
-    "summary": "31/31 rule checks"
+    "summary": "39/39 rule checks"
   },
-  "steps": 64,
-  "sim_seconds": 1.1,
+  "steps": 46,
+  "sim_seconds": 0.8,
   "checkpoints": [
     {
       "name": "rule-battery",
@@ -146,7 +178,7 @@
     },
     {
       "name": "game-decided",
-      "step": 64
+      "step": 46
     }
   ],
   "shots": [
@@ -156,7 +188,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 7020,
+  "wall_ms": 6463,
   "console_errors": [],
   "console_warnings": [],
   "markers": [
@@ -165,7 +197,7 @@
     "GameCraft: checkpoint rule-battery",
     "GameCraft: checkpoint material-ledger",
     "GameCraft: checkpoint game-decided",
-    "GameCraft: Defenders won by escape after 64 moves",
+    "GameCraft: Defenders won by escape after 46 moves",
     "GameCraft: tour complete, win"
   ],
   "pass": true

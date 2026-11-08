@@ -212,6 +212,51 @@ export function ruleChecks() {
     }
     return mv.length > 60 ? true : `only ${mv.length} opening moves`;
   });
+  check('shieldwall-captures-a-row-on-the-edge', () => {
+    const spec = { 0: '...addd....', 1: '....aaa....', 5: '.......a...', 9: '..........K' };
+    const r = captures(spec, sq(5, 7), sq(0, 7));
+    const gone = [sq(0, 4), sq(0, 5), sq(0, 6)].every((s) => r.board[s] === EMPTY);
+    if (r.captured.length !== 3 || !gone) return `captured ${r.captured}`;
+    const open = captures({ ...spec, 1: '....a.a....' }, sq(5, 7), sq(0, 7));
+    return open.captured.length === 0 ? true : 'a row with an unguarded front square was taken';
+  });
+  check('shieldwall-needs-both-ends-hostile', () => {
+    const r = captures({ 0: '....ddd....', 1: '....aaa....', 5: '.......a...', 9: '..........K' }, sq(5, 7), sq(0, 7));
+    return r.captured.length === 0 ? true : `captured ${r.captured} with an open end`;
+  });
+  check('shieldwall-may-end-in-a-corner', () => {
+    const r = captures({ 0: '.dd........', 1: '.aa........', 5: '...a.......', 9: '..........K' }, sq(5, 3), sq(0, 3));
+    return r.captured.length === 2 && r.board[sq(0, 1)] === EMPTY && r.board[sq(0, 2)] === EMPTY ? true : `captured ${r.captured}`;
+  });
+  check('shieldwall-never-takes-the-king', () => {
+    const r = captures({ 0: '...adKd....', 1: '....aaa....', 5: '.......a...' }, sq(5, 7), sq(0, 7));
+    return !r.kingCaptured && r.board[sq(0, 5)] === KING ? true : 'the king was taken in a shieldwall';
+  });
+  check('encirclement-wins-for-the-attackers', () => {
+    const ring = { 3: '.....a.....', 4: '....a.a....', 5: '...adK.a...', 6: '....a.a....', 9: '.....a.....' };
+    const r = captures(ring, sq(9, 5), sq(7, 5));
+    if (!r.terminal || r.terminal.winner !== ATT || r.terminal.reason !== 'encirclement') return JSON.stringify(r.terminal);
+    const gap = captures({ ...ring, 6: '....a......' }, sq(9, 5), sq(7, 5));
+    if (gap.terminal) return 'a ring with a gap was declared encircled';
+    const stray = captures({ ...ring, 9: '.d...a.....' }, sq(9, 5), sq(7, 5));
+    return stray.terminal ? 'a defender outside the ring was ignored' : true;
+  });
+  check('edge-fort-wins-for-the-defenders', () => {
+    const fort = { 2: '.....a.....', 5: '.......d...', 9: '....ddd....', 10: '....dK.d...' };
+    const r = captures(fort, sq(5, 7), sq(9, 7));
+    if (!r.terminal || r.terminal.winner !== DEF || r.terminal.reason !== 'edge-fort') return JSON.stringify(r.terminal);
+    const loose = captures({ ...fort, 9: '....d.d....' }, sq(5, 7), sq(9, 7));
+    return loose.terminal ? 'a breakable wall was declared a fort' : true;
+  });
+  check('a-lone-king-on-the-edge-is-not-a-fort', () => {
+    const lone = captures({ 0: '.....K.....', 5: 'a..........' }, sq(0, 5), sq(0, 6));
+    const escort = captures({ 0: '.....K.....', 5: 'a......d...' }, sq(0, 5), sq(0, 6));
+    return !lone.terminal && !escort.terminal ? true : 'a king with at most one defender was given the fort';
+  });
+  check('edge-fort-needs-a-king-that-can-move', () => {
+    const boxed = captures({ 2: '.....a.....', 5: '.......d...', 9: '....ddd.d..', 10: '....dKd.d..' }, sq(5, 7), sq(9, 7));
+    return !boxed.terminal ? true : 'a king with no move was given the fort';
+  });
   check('ai-takes-the-corner-when-it-is-open', () => {
     const m = bestMove(boardFrom(rows({ 0: '.....K.....', 5: 'a..........' })), DEF, { depth: 2, seed: 1 });
     return m && isCorner(m.to) ? true : 'did not escape';

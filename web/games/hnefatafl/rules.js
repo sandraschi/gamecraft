@@ -15,10 +15,18 @@
 //    king cannot be captured.
 //  - The defenders win when the king reaches a corner; the attackers win by capturing
 //    the king. A side with no legal move loses.
+//  - Shieldwall: two or more enemy pieces in a row along an edge are captured together
+//    when both ends of the row are hostile (a piece of the mover's side or a corner), every
+//    piece of the row has a piece of the mover's side directly in front of it (towards the
+//    centre), and the move just played completed that. The king is never taken this way.
+//  - Edge fort (defenders win): the king touches an edge, can move, and no defender can
+//    ever be captured (see isEdgeFort for the exact, conservative test).
+//  - Encirclement (attackers win): an unbroken chain of attackers (diagonal links count)
+//    shuts the king and every defender inside, away from the board edge.
 //  - Threefold repetition of a position (same side to move) is declared a draw.
 //
-// NOT implemented, on purpose and stated in the help panel: shieldwall captures, the
-// edge-fort win, and the encirclement win.
+// Still approximate: the edge-fort test is sufficient but not necessary (it can miss an
+// exotic fort, it never declares a false one); a position is judged on the board alone.
 
 export const SIZE = 11;
 export const N = SIZE * SIZE;
@@ -128,9 +136,158 @@ function kingSurrounded(board, k) {
 }
 export const isKingCaptured = kingSurrounded;
 
+const onEdge = (s) => rowOf(s) === 0 || rowOf(s) === SIZE - 1 || colOf(s) === 0 || colOf(s) === SIZE - 1;
+
+/** The four edges: their squares in order, and the square directly in front of one (inward). */
+const EDGES = (() => {
+  const top = [], bottom = [], left = [], right = [];
+  for (let i = 0; i < SIZE; i++) {
+    top.push(sq(0, i));
+    bottom.push(sq(SIZE - 1, i));
+    left.push(sq(i, 0));
+    right.push(sq(i, SIZE - 1));
+  }
+  return [
+    { cells: top, front: (s) => s + SIZE },
+    { cells: bottom, front: (s) => s - SIZE },
+    { cells: left, front: (s) => s + 1 },
+    { cells: right, front: (s) => s - 1 },
+  ];
+})();
+
+/**
+ * Shieldwall captures completed by a move of `mover` to `to`. Mutates `nb` (removes the
+ * captured pieces) and returns their squares.
+ */
+function shieldwall(nb, to, mover) {
+  const victim = mover === ATT ? DEF : ATT; // the king (KING) is never in a shieldwall
+  const taken = [];
+  for (const edge of EDGES) {
+    const { cells } = edge;
+    let i = 0;
+    while (i < SIZE) {
+      if (nb[cells[i]] !== victim) { i++; continue; }
+      let j = i;
+      while (j + 1 < SIZE && nb[cells[j + 1]] === victim) j++;
+      if (j > i && i > 0 && j < SIZE - 1) {
+        const left = cells[i - 1], right = cells[j + 1];
+        const hostile = (s) => sideOf(nb[s]) === mover || isCorner(s);
+        let ok = hostile(left) && hostile(right);
+        let touched = to === left || to === right;
+        for (let k = i; ok && k <= j; k++) {
+          const f = edge.front(cells[k]);
+          if (sideOf(nb[f]) !== mover) ok = false;
+          if (f === to) touched = true;
+        }
+        if (ok && touched) {
+          for (let k = i; k <= j; k++) { taken.push(cells[k]); nb[cells[k]] = EMPTY; }
+        }
+      }
+      i = j + 1;
+    }
+  }
+  return taken;
+}
+
+/**
+ * Have the attackers shut the king and every defender inside an unbroken chain of
+ * attackers (diagonal links count)? Flood from the king over every square that is not an
+ * attacker; if the flood reaches the board edge, or misses a defender, they have not.
+ */
+export function isEncircled(board) {
+  const k = findKing(board);
+  if (k < 0) return false;
+  const seen = new Uint8Array(N);
+  const stack = [k];
+  seen[k] = 1;
+  let defenders = 0;
+  while (stack.length) {
+    const s = stack.pop();
+    if (onEdge(s)) return false;
+    if (board[s] === DEF) defenders++;
+    for (let d = 0; d < 4; d++) {
+      const n = NB[s][d];
+      if (n >= 0 && !seen[n] && board[n] !== ATT) { seen[n] = 1; stack.push(n); }
+    }
+  }
+  return defenders === countPieces(board).def;
+}
+
+/**
+ * The edge-fort win for the defenders: the king touches an edge, has a legal move, and no
+ * defender can ever be captured.
+ *
+ * "Can never be captured" is decided conservatively. Attackers can only use squares they
+ * can reach (empty squares connected to an attacker through empty squares). A defender is
+ * safe on an axis when one side is off the board, holds another safe defender, or is a
+ * square the attackers can never reach (and is not a hostile corner or empty throne).
+ * Safe-ness is the greatest fixed point of that rule, and every defender must be in it.
+ * A row of two or more defenders on an edge must also resist a shieldwall: one end or one
+ * front square must be something the attackers can never occupy. A fort this test cannot
+ * prove is simply not declared; a declared fort is real.
+ */
+export function isEdgeFort(board) {
+  const k = findKing(board);
+  if (k < 0 || !onEdge(k) || movesFrom(board, k).length === 0) return false;
+  const free = (s) => (board[s] === EMPTY || s === k) && !isCorner(s);
+  const reach = new Uint8Array(N);
+  const stack = [];
+  for (let s = 0; s < N; s++) {
+    if (board[s] !== ATT) continue;
+    for (let d = 0; d < 4; d++) {
+      const n = NB[s][d];
+      if (n >= 0 && free(n) && !reach[n]) { reach[n] = 1; stack.push(n); }
+    }
+  }
+  while (stack.length) {
+    const s = stack.pop();
+    for (let d = 0; d < 4; d++) {
+      const n = NB[s][d];
+      if (n >= 0 && free(n) && !reach[n]) { reach[n] = 1; stack.push(n); }
+    }
+  }
+  const sealed = (s) => free(s) && !reach[s] && !(s === THRONE && s !== k);
+  const safe = new Uint8Array(N);
+  const defenders = [];
+  for (let s = 0; s < N; s++) if (board[s] === DEF) { safe[s] = 1; defenders.push(s); }
+  const protects = (n) => n < 0 || safe[n] === 1 || sealed(n);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const s of defenders) {
+      if (!safe[s]) continue;
+      const [up, down, left, right] = NB[s];
+      if (!(protects(up) || protects(down)) || !(protects(left) || protects(right))) {
+        safe[s] = 0;
+        changed = true;
+      }
+    }
+  }
+  // A fort is a structure: a lone king, or a king with one escort, is not one.
+  if (defenders.length < 2 || defenders.some((s) => !safe[s])) return false;
+  for (const edge of EDGES) {
+    const { cells } = edge;
+    let i = 0;
+    while (i < SIZE) {
+      if (board[cells[i]] !== DEF) { i++; continue; }
+      let j = i;
+      while (j + 1 < SIZE && board[cells[j + 1]] === DEF) j++;
+      if (j > i) {
+        const guard = (s) => sealed(s) || board[s] === KING || board[s] === DEF;
+        let proof = guard(cells[i - 1]) || guard(cells[j + 1]);
+        for (let t = i; !proof && t <= j; t++) proof = guard(edge.front(cells[t]));
+        if (!proof) return false;
+      }
+      i = j + 1;
+    }
+  }
+  return true;
+}
+
 /**
  * Play from -> to on a copy of the board. Does not check legality (use movesFrom).
- * Returns the new board and what happened.
+ * Returns the new board and what happened. `terminal` is the decided result of the
+ * position, if any: { winner, reason } for escape, king capture, edge fort or encirclement.
  */
 export function applyMove(board, from, to) {
   const nb = board.slice();
@@ -159,7 +316,14 @@ export function applyMove(board, from, to) {
       captured.push(n);
     }
   }
-  return { board: nb, captured, kingCaptured, kingEscaped: p === KING && isCorner(to), mover };
+  for (const s of shieldwall(nb, to, mover)) captured.push(s);
+  const kingEscaped = p === KING && isCorner(to);
+  let terminal = null;
+  if (kingEscaped) terminal = { winner: DEF, reason: 'escape' };
+  else if (kingCaptured) terminal = { winner: ATT, reason: 'king-captured' };
+  else if (mover === DEF && isEdgeFort(nb)) terminal = { winner: DEF, reason: 'edge-fort' };
+  else if (mover === ATT && isEncircled(nb)) terminal = { winner: ATT, reason: 'encirclement' };
+  return { board: nb, captured, kingCaptured, kingEscaped, mover, terminal };
 }
 
 export function findKing(board) {
@@ -229,8 +393,7 @@ export class Game {
     this.moves.push({ from, to, side: r.mover, captured: r.captured });
     this.ply++;
     this.turn = enemy(r.mover);
-    if (r.kingEscaped) this.result = { winner: DEF, reason: 'escape' };
-    else if (r.kingCaptured) this.result = { winner: ATT, reason: 'king-captured' };
+    if (r.terminal) this.result = r.terminal;
     else if (allMoves(this.board, this.turn).length === 0) this.result = { winner: r.mover, reason: 'no-moves' };
     else {
       const key = keyOf(this.board, this.turn);
