@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GameCraft v0.14.0 — Technical Brochure &amp; Operator Handbook</title>
+  <meta name="author" content="Sandra Schipal" />
+  <style>
+    @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      line-height: 1.55;
+      font-size: 10.2pt;
+      margin: 0;
+      padding: 0;
+    }
+    .cover {
+      background: linear-gradient(145deg, #090d16 0%, #0f172a 55%, #0c4a6e 100%);
+      color: #f8fafc;
+      padding: 44px 40px 48px 40px;
+      border-radius: 14px;
+      margin-bottom: 28px;
+      page-break-after: always;
+    }
+    .cover-kicker {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.18);
+      border: 1px solid #38bdf8;
+      color: #7dd3fc;
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+    .cover h1 {
+      font-size: 32pt;
+      line-height: 1.1;
+      margin: 0 0 12px 0;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    .cover h2 {
+      font-size: 13.5pt;
+      font-weight: 400;
+      color: #bae6fd;
+      margin: 0 0 26px 0;
+    }
+    .cover-grid {
+      display: table;
+      width: 100%;
+      margin-top: 22px;
+      border-collapse: separate;
+      border-spacing: 10px;
+    }
+    .cover-stat {
+      display: table-cell;
+      width: 25%;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(125, 211, 252, 0.35);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .cover-stat .num {
+      font-size: 18pt;
+      font-weight: 800;
+      color: #38bdf8;
+      display: block;
+    }
+    .cover-stat .lbl {
+      font-size: 8pt;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .cover-footer {
+      margin-top: 28px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(148, 163, 184, 0.3);
+      font-size: 9pt;
+      color: #94a3b8;
+    }
+    h2.section-title {
+      font-size: 15pt;
+      color: #0c4a6e;
+      border-bottom: 2px solid #0284c7;
+      padding-bottom: 5px;
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+    h3 {
+      font-size: 11.5pt;
+      color: #0f172a;
+      margin-top: 16px;
+      margin-bottom: 6px;
+    }
+    p { margin: 0 0 9px 0; }
+    ul { margin: 6px 0 12px 0; padding-left: 20px; }
+    li { margin-bottom: 4px; }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px 0;
+      font-size: 9pt;
+    }
+    table.data-table th {
+      background: #0f172a;
+      color: #f8fafc;
+      text-align: left;
+      padding: 6px 8px;
+      font-weight: 700;
+    }
+    table.data-table td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    table.data-table tr:nth-child(even) td { background: #f8fafc; }
+    code, pre {
+      font-family: "Cascadia Code", "Consolas", "Courier New", monospace;
+      font-size: 8.8pt;
+    }
+    code {
+      background: #e2e8f0;
+      color: #0f172a;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 11px 14px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    .page-break { page-break-before: always; }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div class="cover-kicker">ArtCraft Fleet Technical Brochure &middot; Series #2</div>
+    <h1>GameCraft v0.14.0</h1>
+    <h2>Describe a game in a sentence. Get a Godot 4 project you can open, play, and edit.</h2>
+
+    <svg viewBox="0 0 760 165" width="100%" height="165" xmlns="http://www.w3.org/2000/svg" style="margin: 10px 0 16px 0;">
+      <rect x="2" y="2" width="756" height="161" rx="12" fill="#0b1322" stroke="#38bdf8" stroke-width="1.5"/>
+      <rect x="24" y="22" width="200" height="120" rx="8" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+      <text x="124" y="52" fill="#67e8f9" font-size="13" font-weight="bold" text-anchor="middle">L3: gamecraft-app</text>
+      <text x="124" y="76" fill="#e2e8f0" font-size="10" text-anchor="middle">Native eframe/egui Studio</text>
+      <text x="124" y="98" fill="#94a3b8" font-size="9.5" text-anchor="middle">In-Process Core Dispatch</text>
+      <text x="124" y="118" fill="#34d399" font-size="9.5" text-anchor="middle">Zero HTTP / Port Overhead</text>
+
+      <rect x="280" y="22" width="200" height="120" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="380" y="52" fill="#38bdf8" font-size="13" font-weight="bold" text-anchor="middle">L2: gamecraft-mcp</text>
+      <text x="380" y="76" fill="#e2e8f0" font-size="10" text-anchor="middle">CLI + Stdio MCP 2024-11-05</text>
+      <text x="380" y="98" fill="#94a3b8" font-size="9.5" text-anchor="middle">Human Verbs &amp; Agent Tools</text>
+      <text x="380" y="118" fill="#34d399" font-size="9.5" text-anchor="middle">Deterministic JSON Output</text>
+
+      <rect x="536" y="22" width="200" height="120" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+      <text x="636" y="52" fill="#34d399" font-size="13" font-weight="bold" text-anchor="middle">L1: gamecraft-core</text>
+      <text x="636" y="76" fill="#e2e8f0" font-size="10" text-anchor="middle">Single dispatch() Engine</text>
+      <text x="636" y="98" fill="#fcd34d" font-size="9.5" text-anchor="middle">deny(unwrap/expect/panic)</text>
+      <text x="636" y="118" fill="#94a3b8" font-size="9.5" text-anchor="middle">Pre-Write Backups &amp; Guards</text>
+
+      <line x1="224" y1="82" x2="280" y2="82" stroke="#38bdf8" stroke-width="2"/>
+      <line x1="480" y1="82" x2="536" y2="82" stroke="#10b981" stroke-width="2"/>
+    </svg>
+
+    <div class="cover-grid">
+      <div class="cover-stat">
+        <span class="num">v0.14.0</span>
+        <span class="lbl">Release Version</span>
+      </div>
+      <div class="cover-stat">
+        <span class="num">10 Crates</span>
+        <span class="lbl">Workspace Tiers</span>
+      </div>
+      <div class="cover-stat">
+        <span class="num">37735</span>
+        <span class="lbl">Pure-Rust LOC</span>
+      </div>
+      <div class="cover-stat">
+        <span class="num">6-Gate</span>
+        <span class="lbl">ArtCraft Verified</span>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <strong>Repository:</strong> <code>D:\Dev\repos\gamecraft</code> &middot;
+      <strong>Standard:</strong> <code>CRAFT_BROCHURE_STANDARD.md</code> &middot;
+      <strong>Compiled via:</strong> <code>BookCraft v0.5.0</code>
+    </div>
+  </div>
+
+  <p><strong>Describe a game in a sentence. Get a Godot 4 project you can open, play, and edit.</strong></p>
+<pre>
+gamecraft-cli new --prompt &quot;a snowy mountain pass at dusk, hard jumps&quot; --provider local
+</pre>
+<p>That runs a language model (a local Ollama model by default) which writes a small</p>
+<p>JSON description of a game: sky colours, jump strength, where the platforms and</p>
+<p>coins go, how far the goal is. GameCraft validates that description, compiles it</p>
+<p>into a real Godot scene, boots Godot headless, and checks the game can actually be</p>
+<p>finished. If it can&#39;t, you get a failure, not a broken level.</p>
+<p>The output is a normal Godot project folder. Open <code>project.godot</code> in the editor,</p>
+<p>press F5, or hit Start Game in the desktop viewer.</p>
+<p>Godot is one of three tracks in the same library: <strong>Godot</strong> (<code>depot/games/</code>,</p>
+<p>compiled from specs and booted headless), <strong>three.js browser games</strong></p>
+<p>(<code>web/games/</code>, served locally and verified headless), and <strong>Bevy sims</strong></p>
+<p>(<code>bevy/games/</code>, native executables). 16 + 19 + 3 and counting. The prompt</p>
+<p>path (<code>new</code>) targets Godot only.</p>
+<h2 class="section-title">What you get</h2>
+<p><code>new</code> writes a minimal but complete Godot project:</p>
+<pre>
+depot/games/snowy-mountain-pass/
+  project.godot      # open this in Godot 4.4
+  main.tscn          # the generated scene
+  spec.json          # the model&#39;s description, the input to the compiler
+  scripts/           # player, camera, runtime
+  icon.svg
+</pre>
+<p>The hand-built depot games additionally carry <code>lint.json</code>, <code>trace.json</code>,</p>
+<p><code>commands.jsonl</code>, <code>thumb.png</code>, <code>play.gif</code> and a <code>README.md</code>. The prompt path does</p>
+<p><strong>not</strong> produce those yet - no thumbnail, no recorded replay, no per-game lint</p>
+<p>dump. That gap is real and not hidden here.</p>
+<h2 class="section-title">What the AI actually controls</h2>
+<table class="data-table"><thead><tr>
+<th>Dial</th>
+<th>Effect</th>
+</tr></thead><tbody>
+<tr>
+<td><code>theme</code></td>
+<td>six colours: sky, horizon, ground, platforms, player, coins</td>
+</tr>
+<tr>
+<td><code>physics</code></td>
+<td>run speed, jump impulse, gravity - this is the &quot;game feel&quot;</td>
+</tr>
+<tr>
+<td><code>level</code></td>
+<td>ground slabs, floating platforms, coin positions, goal distance</td>
+</tr>
+<tr>
+<td><code>maze</code></td>
+<td>size (odd 7-25) and seed - a deterministic perfect maze</td>
+</tr>
+<tr>
+<td><code>title</code> / <code>slug</code></td>
+<td>name and folder</td>
+</tr>
+</tbody></table>
+<p>A full example is committed at <code>depot/games/snowy-mountain-pass/spec.json</code>.</p>
+<h2 class="section-title">What it cannot do yet</h2>
+<p>Straight answers, because this is the part that matters:</p>
+<ul>
+<li><strong>Eight archetypes, not thirteen.</strong> Prompts can produce <code>platformer</code>, <code>runner</code>,</li>
+</ul>
+<p><code>pong</code>, <code>maze</code>, <code>flight</code>, <code>driving</code>, <code>chess</code> and <code>talk</code>. Ask for a shooter and the</p>
+<p>compiler rejects the spec and lists what is supported - it does not silently hand</p>
+<p>back a platformer.</p>
+<ul>
+<li><strong>What each archetype lets you change:</strong> <code>platformer</code> gets the full level (ground</li>
+</ul>
+<p>slabs, platforms, coins, goal) plus physics and theme; <code>runner</code> gets theme and</p>
+<p>name (its jump timing is a fixed verified script); <code>pong</code> gets theme, name and</p>
+<p>ball speed (8-22); <code>maze</code> gets size (odd 7-25), seed and name; <code>flight</code> gets gate</p>
+<p>count, spacing and altitude; <code>driving</code> gets loop radius and checkpoint count;</p>
+<p><code>chess</code> gets board size, hop count and seed; <code>talk</code> gets how many conversations the</p>
+<p>door requires.</p>
+<ul>
+<li><strong>The other genres exist but are hand-built.</strong> The 16 depot games span</li>
+</ul>
+<p>platformer, runner, flight, driving, pong, breakout, flappy, maze, sokoban,</p>
+<p>sokoban-vault, chessboard, dialogue, shooter and tower defence. Only the eight above are wired to</p>
+<p>the prompt path. Flappy stays unwired on purpose: it is one of the four that never</p>
+<p>proved an in-engine win, so generating it would ship games I cannot verify.</p>
+<ul>
+<li><strong>Local model quality varies.</strong> <code>gemma4:12b</code> works. <code>qwen3.8:27b</code> crashes Ollama</li>
+</ul>
+<p>outright (socket reset, no output in 420 s) - do not use it.</p>
+<ul>
+<li><strong>Cloud providers are wired but only tested against a stub.</strong> No live API key</li>
+</ul>
+<p>was available, so OpenAI/Anthropic paths are unproven end to end.</p>
+<h2 class="section-title">Why &quot;spatial compiler&quot;</h2>
+<p>The name describes the plumbing, not the pitch.</p>
+<p>A language model asked to &quot;write a game&quot; will invent function names that do not</p>
+<p>exist and produce GDScript that fails on line 3. So the model here never writes</p>
+<p>code. It writes data. GameCraft then:</p>
+<p>1. <strong>Validates</strong> the data (supported archetype, positive sizes, reachable goal).</p>
+<p>2. <strong>Compiles</strong> it deterministically into Godot scene text - same spec, same bytes,</p>
+<p>every run.</p>
+<p>3. <strong>Verifies</strong> the result: lint the scene, replay the level in Rust, then boot</p>
+<p>Godot and require the win line to print.</p>
+<p>A hallucinating model can therefore produce a *rejected spec*. It cannot produce a</p>
+<p>broken scene, because the compiler is the only thing that writes scenes.</p>
+<h2 class="section-title">Is the output actually any good?</h2>
+<p>Checked, not assumed. <code>just verify-depot</code> boots every Godot depot game in Godot</p>
+<p>and requires its win line:</p>
+<pre>
+11 of the long-standing 15 games win
+4 unproven: breakout, flappy, topdown-shooter, tower-place
+sokoban-vault (added 2026-11-07): not gated yet
+</pre>
+<p>All 15 boot with zero engine errors. The four that do not win are documented with</p>
+<p>their specific cause in the Depot section - they are broken designs, not unverified</p>
+<p>guesses, and the gate stays red to say so.</p>
+<h2 class="section-title">The demo games</h2>
+<p><code>depot/games/</code> (16 Godot projects), <code>web/games/</code> (19 browser games) and</p>
+<p><code>bevy/games/</code> (maze, murmuration, toy-railway) are the proof, not the product -</p>
+<p>examples of what the pipelines emit, each with a trace recording or a verify</p>
+<p>proof and something playable. The interesting use is generating your own.</p>
+<h2 class="section-title">Quickstart</h2>
+<pre>
+$env:Path = &quot;$env:USERPROFILE\.cargo\bin;$env:Path&quot;
+
+# gates
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
+cargo check -p gamecraft-core --target wasm32-unknown-unknown
+
+# make a game from a prompt (local Ollama by default)
+cargo run -p gamecraft-cli -- new --prompt &quot;night forest, hard jumps&quot;
+
+# or skip the model entirely and compile a spec you wrote
+cargo run -p gamecraft-cli -- new --from-spec depot/games/snowy-mountain-pass/spec.json
+
+# check every depot game still boots and wins
+just depot-godot
+just verify-depot
+
+# viewer
+cargo run -p gamecraft-desktop
+
+# web arcade (three.js family: serve, then open http://127.0.0.1:11258/)
+cd web; bun install; bun run serve
+
+# MCP server over stdio
+cargo run -p gamecraft-mcp
+</pre>
+<p><code>new</code> needs neither Godot nor a GPU: it compiles and lints the scene in Rust and</p>
+<p>replays the level in the Rust sim. You need <strong>Godot 4.4</strong> on <code>PATH</code> (or</p>
+<p><code>GAMECRAFT_GODOT</code>) to play the result or to run the depot gates, and <strong>Ollama</strong> with</p>
+<p>a model pulled for <code>--provider local</code>. <code>--provider auto</code> probes local servers first.</p>
+<p><code>--from-spec</code> skips the model entirely.</p>
+<h2 class="section-title">Controls</h2>
+<p><strong>In the Godot games</strong>: arrow keys or WASD to move, Space/Enter to jump.</p>
+<p><strong>Browser games</strong> have per-game keys - see the game&#39;s <code>CHEATSHEET.md</code></p>
+<p>(linked from its detail card).</p>
+<p><strong>Gamepad.</strong> Godot&#39;s built-in <code>ui_*</code> actions carry joypad bindings for movement</p>
+<p>(D-pad and left stick) but <code>ui_accept</code> ships keys-only, so a pad could walk and</p>
+<p>never jump. The shared runtime adds the missing buttons at startup:</p>
+<table class="data-table"><thead><tr>
+<th>Input</th>
+<th>Effect</th>
+</tr></thead><tbody>
+<tr>
+<td>D-pad / left stick</td>
+<td>move, walk, drive, chess cursor</td>
+</tr>
+<tr>
+<td><strong>A</strong></td>
+<td>jump, flap, confirm knight move</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>quit the game (there is no menu to return to)</td>
+</tr>
+</tbody></table>
+<p><strong>Desktop viewer</strong> (<code>gilrs</code>, polled per frame): left stick orbits the camera,</p>
+<p>D-pad or stick vertical moves the depot selection, <strong>A</strong> starts the highlighted</p>
+<p>game, <strong>B</strong> returns selection to the scene root. Keyboard and mouse still work; a</p>
+<p>missing pad degrades to &quot;not connected&quot;.</p>
+<h2 class="section-title">Settings</h2>
+<p>One config file feeds every entry point: <code>%USERPROFILE%\.gamecraft\config.json</code></p>
+<p>(<code>~/.gamecraft/config.json</code>). The CLI reads it, the viewer edits it through</p>
+<p>Settings &gt; App settings. Precedence for every field: **CLI flag &gt; config file &gt;</p>
+<p>environment variable &gt; built-in default.**</p>
+<table class="data-table"><thead><tr>
+<th>Field</th>
+<th>What it does</th>
+<th>Default</th>
+</tr></thead><tbody>
+<tr>
+<td><code>provider</code></td>
+<td><code>auto</code> / <code>local</code> / <code>openai</code> / <code>anthropic</code> / <code>deepseek</code> / <code>meta</code></td>
+<td><code>auto</code></td>
+</tr>
+<tr>
+<td><code>model</code></td>
+<td>model id; empty = auto-pick (gemma4 family); presets in the dialog</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>ollama_endpoint</code></td>
+<td>local server URL; empty = provider default</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>openai_api_key</code></td>
+<td>cloud key; empty = <code>OPENAI_API_KEY</code> env</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>anthropic_api_key</code></td>
+<td>cloud key; empty = <code>ANTHROPIC_API_KEY</code> env</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>deepseek_api_key</code></td>
+<td>cloud key; empty = <code>DEEPSEEK_API_KEY</code> env</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>meta_api_key</code></td>
+<td>cloud key; empty = <code>META_API_KEY</code> env</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>godot_binary</code></td>
+<td>override for launching games</td>
+<td>empty = <code>godot</code></td>
+</tr>
+</tbody></table>
+<p>Keys are never printed or logged; the file inherits your profile&#39;s permissions.</p>
+<p><strong>Per-game tuning</strong> lives next to each game as <code>settings.json</code> (gitignored - local</p>
+<p>tuning, not content). Settings &gt; Game settings writes it for the highlighted game;</p>
+<p>Save &amp; play launches immediately. The shared runtime reads it at startup:</p>
+<pre>
+{&quot;speed_mult&quot;: 1.2, &quot;gravity_mult&quot;: 1.0, &quot;jump_mult&quot;: 1.1, &quot;autoplay&quot;: null}
+</pre>
+<p>Multipliers scale the baked-in base values, so one schema fits all sixteen games.</p>
+<p><code>autoplay: null</code> means &quot;whatever the environment says&quot; - the verifier and the demo</p>
+<p>button win over the file. Backgrounds and level geometry are baked in and still</p>
+<p>need regeneration.</p>
+<h2 class="section-title">Depot</h2>
+<p><code>depot/games/</code> holds 15 standalone Godot 4.4 projects. Each carries <code>project.godot</code>,</p>
+<p><code>main.tscn</code>, <code>scripts/</code>, <code>lint.json</code>, <code>trace.json</code>, <code>commands.jsonl</code>, <code>thumb.png</code>,</p>
+<p><code>play.gif</code> and a <code>README.md</code>; the two produced from a spec also carry <code>spec.json</code>.</p>
+<p>Three gates per game, enforced by the forge:</p>
+<p>1. <code>scene_lint</code> reports 0 findings (collision shapes, signal targets, resource ids, camera).</p>
+<p>2. The Rust trace replay reaches the goal within 600 frames, using the same constants the GDScript exports.</p>
+<p>3. <code>godot --headless --path depot/games/&lt;slug&gt; --quit-after 240</code> prints no ERROR/WARNING.</p>
+<p>Plus a byte-identical re-export: the forge builds each game twice and refuses a</p>
+<p>non-identical scene. <strong>Never hand-edit <code>depot/</code></strong> - regenerate it with <code>just forge</code>.</p>
+<h3>Win verification, and why it is red</h3>
+<p>Booting is not winning. <code>just verify-depot</code> replays each game in Godot and requires</p>
+<p>the win line its runtime prints (<code>goal reached</code>, <code>puzzle solved</code>, <code>door opened, win</code>,</p>
+<p>or <code>all hostiles down</code>).</p>
+<p>11 of 15 win today: driving, flight, night-forest, platformer, runner,</p>
+<p>snowy-mountain-pass, maze, pong, sokoban, chessboard-move, talk-inventory.</p>
+<p>The four that do not are unproven, not broken - all boot with zero errors:</p>
+<table class="data-table"><thead><tr>
+<th>Game</th>
+<th>What is missing</th>
+</tr></thead><tbody>
+<tr>
+<td><code>breakout</code></td>
+<td>The paddle tracks the ball, so every return is dead straight; the ball clears its own column then loops. Bricks are destructible, but 20 is unreachable.</td>
+</tr>
+<tr>
+<td><code>flappy</code></td>
+<td>Closed-loop altitude hold added; the bird still dies on pipes before x=55.</td>
+</tr>
+<tr>
+<td><code>topdown-shooter</code></td>
+<td>Bullet pool fixed (it was empty - the runtime filtered on invisibility), enemies die, but it stalls at 5 of 9.</td>
+</tr>
+<tr>
+<td><code>tower-place</code></td>
+<td>No placement policy; enemies never enter tower range.</td>
+</tr>
+</tbody></table>
+<h2 class="section-title">Building blocks</h2>
+<table class="data-table"><thead><tr>
+<th>Crate</th>
+<th>Role</th>
+</tr></thead><tbody>
+<tr>
+<td><code>gamecraft-core</code></td>
+<td>Node graph, transforms, AABB, collision matrix. No graphics deps; compiles to <code>wasm32-unknown-unknown</code>.</td>
+</tr>
+<tr>
+<td><code>gamecraft-commands</code></td>
+<td>Undoable command stack for every scene mutation.</td>
+</tr>
+<tr>
+<td><code>gamecraft-godot</code></td>
+<td>Deterministic <code>.tscn</code>/<code>.tres</code> parser <strong>and serializer</strong>, UID hashing, lint rules.</td>
+</tr>
+<tr>
+<td><code>gamecraft-sim</code></td>
+<td>Deterministic gameplay sims: kinematic stepper, BFS maze and crate solvers, and the seeded multi-threaded flock sim behind Murmuration.</td>
+</tr>
+<tr>
+<td><code>gamecraft-replay</code></td>
+<td><code>.gcraft</code> replay documents: game, config (seed and level), input log, recorded result. <code>verify</code> re-simulates from scratch and compares status, ticks and a state hash, so edited inputs, a swapped seed or changed rules are caught. Maze and murmuration. Examples in <code>docs/replays</code>, gate <code>just replays-check</code>.</td>
+</tr>
+<tr>
+<td><code>gamecraft-forge</code></td>
+<td>Game builders, <code>GameSpec</code> validation and compilation, the LLM front end, thumbnail rasterizer, economy and Steam asset generators.</td>
+</tr>
+<tr>
+<td><code>gamecraft-gltf</code></td>
+<td>Deterministic glTF 2.0 export (<code>.glb</code> or embedded <code>.gltf</code>): hierarchy, primitive meshes shared by geometry, PBR colours, lights, camera. Also owns the primitive tessellation the desktop viewport draws. Gate: <code>just gltf-gate</code> (Khronos validator + three.js render).</td>
+</tr>
+<tr>
+<td><code>gamecraft-trellis</code></td>
+<td>Image-to-3D prop pipe (TRELLIS.2 sidecar, plan-only without a Linux/CUDA box): L1 types + driver, CLI `trellis plan</td>
+<td>assets</td>
+<td>execute<code>, MCP </code>asset.trellis<code>. See </code>docs/TRELLIS2.md`.</td>
+</tr>
+</tbody></table>
+<p>| <code>gamecraft-bevy</code> | GameCraft games on Bevy 0.20 on top of <code>gamecraft-sim</code>: headless logic plugin plus an optional windowed renderer (<code>render</code> feature). Games: a 29x29 maze that plays itself, Murmuration (20 000 starlings, hawks, pillars, a flare), and the Toy Railway (two-level timetabled model railway; <code>just railway-gate</code>), all with procedural sound (<code>audio</code> feature, clips synthesised in <code>synth.rs</code>, <code>--mute</code> or <code>GAMECRAFT_MUTE=1</code> to silence; gate runs are muted). Catalog entries live in <code>bevy/games/&lt;slug&gt;/</code>. The Nekomimi VRM viewer (phase 1:</p>
+<p>orbit, ground, path plumbing) lives here too, behind the <code>vrm</code> feature. <code>just sounds</code> renders every effect to <code>docs/sounds/</code> (WAV, spectrogram PNG, loudness table) and <code>just sounds-check</code> fails if those files are stale. Gates: <code>just bevy-gate</code>, <code>just murmuration-gate</code>. |</p>
+<table class="data-table"><thead><tr>
+<th><code>gamecraft-mcp</code></th>
+<th>MCP stdio server, dual-era (stateless <code>2026-07-28</code> with <code>server/discover</code>, plus the <code>initialize</code> handshake for <code>2025-11-25</code> back to <code>2024-11-05</code>): scene tools <code>scene_lint</code>, <code>spatial_query</code>, <code>scene_inspect</code>, <code>export_scene</code>; catalog tools <code>game_list</code>, <code>game_report</code>, <code>game_verify</code>, <code>game_create</code>; opt-in <code>scene_verify</code>. Every result is a one-sentence summary plus <code>structuredContent</code>; failures are <code>isError</code> results that say what to do next. Also hosts <code>catalog</code>, the game catalog shared with CLI and desktop. See <code>docs/MCP_CLIENTS.md</code>. Also the command registry (<code>commands [--json]</code>, <code>describe &lt;id&gt;</code>, <code>run --cmd &#39;id={json}&#39;</code>; <code>id=@file.json</code> reads params from a file) and MCP tools <code>list_commands</code>, <code>describe_command</code>, <code>run_command</code>, <code>replay_record</code>, <code>replay_verify</code>, <code>replay_info</code> (12 commands in all). No arguments or <code>mcp</code> still means stdio. Status against the Craft app contract: <code>docs/CRAFT_CONTRACT.md</code>.</th>
+</tr></thead><tbody>
+<tr>
+<td><code>gamecraft-cli</code></td>
+<td><code>lint</code>, <code>query</code>, <code>uid</code>, <code>forge</code>, <code>new</code>, <code>export</code>, <code>gltf &lt;scene&gt; [--out]</code> / <code>gltf --depot-out &lt;dir&gt;</code>, plus catalog parity <code>list [--filter] [--json]</code>, <code>report &lt;slug&gt; [--json]</code>, <code>verify &lt;slug&gt; [--timeout] [--json]</code>. Also <code>commands</code>, <code>describe</code>, <code>run --cmd</code> (the same registry as the MCP server).</td>
+</tr>
+<tr>
+<td><code>gamecraft-desktop</code></td>
+<td><code>egui</code>/<code>wgpu</code> app. <strong>Library</strong> mode (default): card grid of all Godot, three.js and Bevy games by category, detail card with description, last gate result, cheat sheet, Play / Watch demo / Run tests / Open folder; <code>/</code> filter, arrows, Enter. <strong>Editor</strong> mode: scene tree, shaded viewport, inspector, lint, trace scrubber, undo/redo; the side panels and the depot/scene and inspector/findings splits are draggable (View &gt; Reset layout). Light/dark toggle, Ctrl+wheel UI zoom, golden-PNG tests (<code>egui_kittest</code>).</td>
+</tr>
+</tbody></table>
+<p>Games are <strong>compiled from a spec, never hand-written in GDScript</strong> - that is what</p>
+<p>makes the byte-identical depot gate possible.</p>
+<h2 class="section-title">Monetisation (Phase 8)</h2>
+<p><code>gamecraft-forge::economy</code> models monetisation as a deterministic state machine and</p>
+<p>synthesises a store asset bundle. Both are library APIs today; exposing them as CLI</p>
+<p>subcommands and MCP tools is the next step, not a claim of this release.</p>
+<ul>
+<li><code>economy_lint(&amp;EconomySpec)</code> flags faucet-dominant economies, missing or late</li>
+</ul>
+<p>scarcity (target is day 4), undecoupled currency tiers, inverted or late pity</p>
+<p>(past 90 pulls), and a missing $0.99 starter anchor.</p>
+<ul>
+<li><code>simulate(&amp;EconomySpec, seed)</code> - seeded, reproducible day-by-day balances with</li>
+</ul>
+<p>pity-ramped pulls.</p>
+<ul>
+<li><code>write_steam_bundle(slug, title, out)</code> - 20 files: trading cards, emoticons,</li>
+</ul>
+<p>profile backgrounds, 4K wallpapers, badge definition, Supporter Edition manifest,</p>
+<p>cloud-save JSON Schema, soundtrack.</p>
+<p><strong>Honest scope note:</strong> the soundtrack is <code>soundtrack.wav</code> (mono PCM generated in</p>
+<p>process). Real FLAC needs an encoder this crate does not carry, so the manifest names</p>
+<p>the file that exists. Wallpapers are generated gradients - placeholder-grade.</p>
+<h2 class="section-title">Browser games (three.js family)</h2>
+<p><code>web/</code> is another, deliberately different track. The depot&#39;s rule is &quot;the model</p>
+<p>writes a spec, never code&quot;. The web family breaks it: the model writes the whole</p>
+<p>game as a static three.js page, the way recent frontier models do well. What can</p>
+<p>still be asserted is asserted:</p>
+<pre>
+cd web; bun install
+just web-serve     # http://127.0.0.1:11258/
+just web-verify    # headless boot, zero console errors, self-play must win
+</pre>
+<p>Nineteen games across six categories (descriptions live in each game&#39;s</p>
+<p><code>game.json</code>; the full playable list is the arcade index itself):</p>
+<p><strong>Calm puzzles</strong> (bento, gassi, kintsugi, organ-builder, robot-sorting,</p>
+<p>shadow-sculpture), <strong>Puzzle</strong> (minesweeper, sudoku classic/color/letters),</p>
+<p><strong>Board classics</strong> (hnefatafl), <strong>Seek and find</strong> (hoshi, spot-the-difference,</p>
+<p>tidy-the-room, where-is-benny), <strong>Worlds and sims</strong> (kaffeehaus,</p>
+<p>lantern-river, mossbrook), <strong>Detective</strong> (detective-case). Every game ships</p>
+<p><code>game.json</code> plus a headless <code>verify.json</code> proof (all <code>won: true</code>);</p>
+<p>detective-case is metadata-only for now - it has no playable page yet.</p>
+<p>Player cheat sheets: <code>web/games/mossbrook/CHEATSHEET.md</code> (with walkthrough),</p>
+<p><code>web/games/kaffeehaus/CHEATSHEET.md</code> (every number in the sim). Developer cheat</p>
+<p>sheet: <code>web/CHEATSHEET.md</code>.</p>
+<p>The gate proves a game loads, its systems behave along a scripted tour, and it can</p>
+<p>be finished. It does not prove it is fun. See <code>web/README.md</code>.</p>
+<h2 class="section-title">Where to look</h2>
+<ul>
+<li><code>AGENTS.md</code> - repo layout, hard gates, rules.</li>
+<li><code>CHANGELOG.md</code> - history, including the two serializer bugs found and fixed.</li>
+<li><code>docs/NEW_GAME.md</code> - spec format, providers, measured model limits.</li>
+<li><code>docs/MCP_CLIENTS.md</code> - wiring the MCP server into a client.</li>
+<li><code>web/README.md</code>, <code>web/CHEATSHEET.md</code> - the three.js family and how to add a game.</li>
+<li><code>docs/LLM_AS_GAME_DESIGNER.md</code> - methods, strengths and weaknesses of a model as</li>
+</ul>
+<p>game designer, asset generators and libraries, social VR (Overte, Resonite,</p>
+<p>VRChat), licensing, and a human/model division of labour. Based on this repo.</p>
+<ul>
+<li><code>KIBITZ.md</code> / <code>KIBITZ_BACKTALK.md</code> - the review dialogue, kept as an audit trail.</li>
+</ul>
+<h2 class="section-title">Status — does today / next week / non-goals</h2>
+<p><strong>Does today:</strong> v0.14.0, 10 crates + CLI + desktop + web arcade; 246 test</p>
+<p>fns; 14 docs files; 16 Godot + 19 web + 3 Bevy games; sentence → verified playable</p>
+<p>Godot (<code>new</code> → <code>verify</code> → <code>report</code>/<code>export</code>).</p>
+<p><strong>Next week:</strong> <code>serve</code> decision (persistent session + snapshot polling);</p>
+<p>canonical-engine note (Godot-first?); 3 recipes stay green.</p>
+<p><strong>Non-goals:</strong> not Bevy-and-Godot forever — canonical note pending; no LLM</p>
+<p>in the verify path.</p>
+<h2 class="section-title">Lineage — the Storytold craft-app pattern</h2>
+<p>Storytold ArtCraft (storytold/artcraft — &quot;the IDE for artists&quot;) was the starting point. The 16 craft apps in the Storytold stable each ship one binary that is both the human CLI and the agent MCP server (stdio), headless-first, with <code>run.json</code> + report artifacts. That modus operandi and harness is what this repo implements; the code here is independent, the pattern is shared.</p>
+
+  
+  
+</body>
+</html>
