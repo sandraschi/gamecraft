@@ -1,0 +1,123 @@
+{
+  "manifest_version": "0.2",
+  "name": "gamecraft",
+  "display_name": "GameCraft",
+  "version": "__VERSION__",
+  "description": "L3 GameCraft egui/wgpu viewport shell, in-process on gamecraft-core",
+  "author": {
+    "name": "Sandra Schipal",
+    "url": "https://github.com/sandraschi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sandraschi/gamecraft"
+  },
+  "license": "MIT OR Apache-2.0",
+  "server": {
+    "type": "binary",
+    "entry_point": "gamecraft-mcp.exe",
+    "mcp_config": {
+      "command": "${__dirname}/gamecraft-mcp.exe",
+      "args": []
+    }
+  },
+  "compatibility": {
+    "platforms": [
+      "win32"
+    ]
+  },
+  "tools": [
+    {
+      "name": "scene_lint",
+      "description": "Check a Godot 4 scene for problems the editor only shows at runtime: physics bodies without collision shapes, signal connections to missing nodes or methods. Use before exporting or after editing a .tscn."
+    },
+    {
+      "name": "spatial_query",
+      "description": "World-space axis-aligned bounding box of one node and everything under it, after all parent transforms. Use to check sizes, overlaps, or whether something sits where you expect."
+    },
+    {
+      "name": "scene_inspect",
+      "description": "Read-only views of a parsed scene. operation='tree': paginated node list (pass next_offset back as offset for the next page); 'signals': every connection with resolved/reason; 'property': one node's transform and properties (needs node_path); 'find': substring..."
+    },
+    {
+      "name": "export_scene",
+      "description": "Turn a JSON scene spec into engine text, deterministically (same spec, same bytes, same uid)."
+    },
+    {
+      "name": "game_list",
+      "description": "Every game in the repo: forge-made Godot projects (depot/games), three.js pages (web/games) and native Bevy games (bevy/games), with group, one-line description and the last gate result (pass, what failed, when). Use first to find a slug."
+    },
+    {
+      "name": "game_report",
+      "description": "Everything known about one game: catalog entry, the player cheat sheet, the README, the full last gate record (web: verify.json with checkpoints and self-test; Godot: trace and lint) and its screenshot names. Use to explain a game or diagnose a failing gate."
+    },
+    {
+      "name": "game_describe",
+      "description": "One game in plain terms, generated from its files: title, runtime, group, description, whether it is playable at all (some entries are data or plans), goal and controls from its cheat sheet, the last gate result and the exact commands to start it."
+    },
+    {
+      "name": "game_help",
+      "description": "Help text generated from the repo. No topic: the overview of every command. topic = overview, games (every game with a one-line description), start, play, demo, running, stop, doctor, mcp, or a game slug (description plus the full cheat sheet)."
+    },
+    {
+      "name": "game_start",
+      "description": "OPT-IN (GAMECRAFT_MCP_ALLOW_LAUNCH=1). Bring a game up. Web games: starts the local arcade server if needed and returns the URL, without opening a browser unless open_browser is true."
+    },
+    {
+      "name": "game_play",
+      "description": "OPT-IN (GAMECRAFT_MCP_ALLOW_LAUNCH=1). Open a game for the user to play: web games in their default browser, Godot and Bevy games in their own window. Starts the arcade server first when needed. Same results as game_start with the browser opened."
+    },
+    {
+      "name": "game_demo",
+      "description": "OPT-IN (GAMECRAFT_MCP_ALLOW_LAUNCH=1). Like game_play, but the game plays itself: web games get ?autoplay=1, Godot games GAMECRAFT_AUTOPLAY=1, Bevy games --autoplay. Use to show what a game is without asking the user to play it."
+    },
+    {
+      "name": "game_running",
+      "description": "Native games (Godot, Bevy) started from this machine that are still alive, with pid, mode and start time, and whether the web arcade answers on its port. Web games run in a browser tab and are not listed. Read-only."
+    },
+    {
+      "name": "game_stop",
+      "description": "OPT-IN (GAMECRAFT_MCP_ALLOW_LAUNCH=1). Stop the native game named by slug, or all of them, that this tool started. server=true also stops the web arcade server if this tool started it. Web games cannot be stopped from here: the user closes the tab."
+    },
+    {
+      "name": "game_doctor",
+      "description": "Report-only: games that cannot be started (data or plans without code), games that never passed or now fail their gate, missing cheat sheets, descriptions or thumbnails, plans with no game yet, and whether bun, node, cargo and godot are installed."
+    },
+    {
+      "name": "game_verify",
+      "description": "OPT-IN: run one game's verification gate now and return the fresh result. Web games run the headless-Chromium self-play gate (needs GAMECRAFT_MCP_ALLOW_WEB=1, node and bun; rewrites verify.json and shots/)."
+    },
+    {
+      "name": "game_create",
+      "description": "Compile a GameSpec JSON into a new, verified Godot project under depot/games/<slug>/: the level is checked for completability by a Rust replay and the scene is linted before anything is written. You (the model) design the spec; no other model is called."
+    },
+    {
+      "name": "scene_verify",
+      "description": "OPT-IN (GAMECRAFT_MCP_ALLOW_GODOT=1): boot any Godot project directory headless and require a win marker. Prefer game_verify for games in the catalog; use this for a project elsewhere. The engine is killed on timeout and when this server exits."
+    },
+    {
+      "name": "replay_record",
+      "description": "Run a game's built-in autoplay and keep its inputs as a .gcraft document. Command id replay.record."
+    },
+    {
+      "name": "replay_verify",
+      "description": "Re-simulate a .gcraft from its seed and inputs and compare with the recorded result. Command id replay.verify."
+    },
+    {
+      "name": "replay_info",
+      "description": "Read a .gcraft header: game, config, input count and recorded result. Does not simulate. Command id replay.info."
+    },
+    {
+      "name": "list_commands",
+      "description": "Every command in the GameCraft registry with its id, menu path, shortcut and typed parameters. The same list `gamecraft commands --json` prints."
+    },
+    {
+      "name": "describe_command",
+      "description": "One command: summary, menu, shortcut, whether it is read-only, and its parameters with types and allowed values."
+    },
+    {
+      "name": "run_command",
+      "description": "Run any registered command by id with a params object. Same code path as the dedicated tools and as `gamecraft run --cmd id={json}`."
+    }
+  ]
+}

@@ -11,8 +11,10 @@
     CliPackage  = 'gamecraft-cli'
     CliBin      = 'gamecraft-cli'
     CliSmoke    = @('--help')
+    McpPackage  = 'gamecraft-mcp'
+    McpBin      = 'gamecraft-mcp'
     McpArgs     = @()
     McpSmoke    = @()
     Installer   = $true
-    Mcpb        = $false
+    Mcpb        = $true
 }
