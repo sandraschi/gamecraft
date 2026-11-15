@@ -1,5 +1,17 @@
 # Tidy the Room
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 The Spot the Difference room after a lively afternoon: six movable things lie on
 the floor. A photo in the corner (a second render of the tidy room) shows where
 they belong. Drag each home; it snaps within 0.22 m and otherwise stays where it

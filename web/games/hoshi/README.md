@@ -1,5 +1,17 @@
 # Hoshi
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 A sky built from real star positions (approximate J2000 RA/Dec and magnitudes) for
 48 named stars, plus 2400 seeded background stars kept clear of them and a faint
 Milky Way band. Seven figures with Western and Japanese names and a line of lore:
