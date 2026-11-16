@@ -1,5 +1,17 @@
 # Kintsugi
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 Four bowls (chawan, donburi, hachi, yunomi), each broken along seeded jagged
 cracks into 4 to 6 wall shards around a foot that stays in place. Shards are real
 shell geometry (outside, inside, rim and crack faces). Turn (15 degree steps), flip

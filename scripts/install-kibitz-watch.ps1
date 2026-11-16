@@ -46,7 +46,10 @@ foreach ($path in @($Pwsh, $Runner, $Opencode)) {
     }
 }
 
-$actionCmd = "`"$Pwsh`" -NoProfile -ExecutionPolicy Bypass -File `"$Runner`" -RepoRoot `"$RepoRoot`""
+$pyw = "D:\Dev\repos\mcp-central-docs\.venv\Scripts\pythonw.exe"
+$runHidden = "D:\Dev\repos\mcp-central-docs\scripts\run-hidden.py"
+$pwshArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$Runner`" -RepoRoot `"$RepoRoot`""
+$actionCmd = "`"$Pwsh`" $pwshArgs"
 & schtasks.exe /Create /TN $TaskName /TR $actionCmd /SC DAILY /ST 00:00 /RI $IntervalMin /DU 23:30 /IT /RL LIMITED /F
 if ($LASTEXITCODE -ne 0) {
     Write-Host "schtasks /Create failed (exit $LASTEXITCODE). Re-run from an elevated shell, then retry."
@@ -58,8 +61,15 @@ try {
     $capped = $current.Settings
     $capped.ExecutionTimeLimit = "PT45M"
     $capped.MultipleInstances = 2
-    Set-ScheduledTask -TaskName $TaskName -Settings $capped | Out-Null
-    Write-Host "Settings patched: 45 min execution cap, parallel runs ignored."
+    $capped.Hidden = $true
+    if ((Test-Path -LiteralPath $pyw) -and (Test-Path -LiteralPath $runHidden)) {
+        $hiddenAction = New-ScheduledTaskAction -Execute $pyw -Argument "`"$runHidden`" `"$Pwsh`" $pwshArgs"
+        Set-ScheduledTask -TaskName $TaskName -Action $hiddenAction -Settings $capped | Out-Null
+        Write-Host "Settings patched: 45 min execution cap, parallel runs ignored, hidden (pythonw trampoline)."
+    } else {
+        Set-ScheduledTask -TaskName $TaskName -Settings $capped | Out-Null
+        Write-Host "Settings patched: 45 min execution cap, parallel runs ignored, hidden."
+    }
 } catch {
     Write-Host "WARNING: settings patch failed, task runs uncapped: $_"
 }

@@ -1,5 +1,17 @@
 # Mossbrook: The Quiet Well
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 An angled top-down village RPG, rebuilt from scratch from Simon Willison's
 Emberwick prompt sequence, all four prompts
 (simonwillison.net/2026/Oct/28/vibe-game-development/).

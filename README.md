@@ -1,5 +1,15 @@
 # GameCraft
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 **Describe a game in a sentence. Get a Godot 4 project you can open, play, and edit.**
 
 ```powershell
