@@ -1,5 +1,17 @@
 # Boomy Sorts
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 A Raspbot-like robot at a conveyor junction sorts parcels (4 colours x 2 sizes x
 star or not = 16 kinds) into LEFT, RIGHT or ON using up to four first-match rules:
 IF a [AND b] THEN bin. Five jobs, the later ones needing the right rule order.

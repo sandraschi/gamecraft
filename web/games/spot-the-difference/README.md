@@ -1,5 +1,17 @@
 # Spot the Difference
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 One cluttered living room (`../_shared/room.js`, procedural, deterministic) rendered
 twice side by side; the right copy gets five changes: colour, missing, moved, turned,
 grown, or a clock showing another time. Differences are drawn fresh every round
