@@ -1,5 +1,17 @@
 # GameCraft web family (three.js)
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 The lightweight sibling of the Godot depot. Each game is a static page under
 `games/<slug>/` (index.html + ES modules, three.js from `node_modules` via an
 import map). No engine, no build step, runs in any browser including phones.

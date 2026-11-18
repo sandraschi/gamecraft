@@ -1,5 +1,17 @@
 # Kaffeehaus (Cafe Morgenstern)
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 Viennese coffee house management. You are the Herr Ober: seat guests, serve,
 bring newspapers, collect bills. No reflexes needed; pause any time.
 

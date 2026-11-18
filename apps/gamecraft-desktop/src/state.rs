@@ -198,11 +198,14 @@ pub(crate) fn apply_theme(ctx: &egui::Context, light: bool) {
         egui::Visuals::dark()
     };
     let line = if light {
-        visuals.override_text_color = Some(egui::Color32::from_rgb(26, 28, 34));
-        visuals.panel_fill = egui::Color32::from_rgb(246, 244, 239);
-        visuals.window_fill = egui::Color32::from_rgb(252, 251, 248);
-        visuals.extreme_bg_color = egui::Color32::from_rgb(255, 255, 255);
-        visuals.faint_bg_color = egui::Color32::from_rgb(236, 233, 226);
+        visuals.override_text_color = Some(egui::Color32::BLACK);
+        visuals.weak_text_color = Some(egui::Color32::BLACK);
+        visuals.panel_fill = egui::Color32::WHITE;
+        visuals.window_fill = egui::Color32::WHITE;
+        visuals.extreme_bg_color = egui::Color32::WHITE;
+        visuals.faint_bg_color = egui::Color32::WHITE;
+        visuals.widgets.noninteractive.fg_stroke = egui::Stroke::new(1.0, egui::Color32::BLACK);
+        visuals.widgets.inactive.fg_stroke = egui::Stroke::new(1.0, egui::Color32::BLACK);
         visuals.widgets.active.fg_stroke = egui::Stroke::new(1.5, ACCENT_DARK);
         visuals.hyperlink_color = ACCENT_DARK;
         visuals.selection.bg_fill = egui::Color32::from_rgba_unmultiplied(214, 140, 0, 60);
