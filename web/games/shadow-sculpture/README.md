@@ -1,5 +1,17 @@
 # Kage-e
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 Six pictures (Mount Fuji, a house, a cat, a teapot, a rocket, a familiar face) drawn
 as ASCII masks. Each becomes a sculpture: a greedy rectangle cover of the mask, every
 block at its own random depth. A shadow-mapped directional light projects it on the

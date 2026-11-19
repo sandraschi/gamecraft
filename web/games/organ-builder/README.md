@@ -1,5 +1,17 @@
 # Orgelbauer
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 Stand pipes in a little organ so it plays a tune left to right. Pipe length follows
 pitch (length proportional to 1/frequency, C4 = 2.6 m), and the voice is a small
 additive flue-pipe synth with a breathy chiff (WebAudio, only after a gesture).

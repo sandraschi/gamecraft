@@ -1,5 +1,17 @@
 # GameCraft Depot - thirteen playable Godot 4 games
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 Every folder under `games/` is a standalone Godot 4.4 project. Open it in Godot
 (or `godot --path games/<slug>`) and press F5. No manual fixups, no missing
 resources, no import step.
