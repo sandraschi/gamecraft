@@ -1,5 +1,17 @@
 # Lantern River
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 Toro nagashi at night: paper lanterns drift down a meandering river past rocks.
 Hold the pointer on the water and lanterns within 2.6 m drift away from it. A cove
 under a torii on the far bank catches any lantern that reaches it; every two light

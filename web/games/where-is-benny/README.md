@@ -1,5 +1,17 @@
 # Where is Benny?
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 Hidden-object game at a sunny funfair: six striped stalls, a turning carousel, a
 Ferris wheel, bunting, and a crowd of 130 / 200 / 270 instanced people with
 24 / 34 / 44 dogs over three rounds. The poster (with its own turning 3D portrait)

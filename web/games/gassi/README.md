@@ -1,5 +1,17 @@
 # Gassi
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+Run this from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app, the CLI, and the MCP bundle.
+
 Benny walks a route once through a stylized Alsergrund (5x5 street grid with real
 street names, not a map; Strudlhofstiege, Palais Liechtenstein, Berggasse 19,
 Sigmund-Freud-Park, Votivkirche, Volksoper, Franz-Josefs-Bahnhof). The glowing trail
