@@ -29,4 +29,3 @@ Touch the goal flag at x = 31.
 Three grounds, two gaps, three stair platforms, four coins.
 Jump tuning: speed 4.5, jump 9.0, gravity 22.0 (see trace.json).
 Coins sit on jump arcs, never off the critical path (Nintendo lesson 1).
-

@@ -28,4 +28,3 @@ Land the knight on all 4 targets, legally.
 
 Cursor/accept split: arrows aim, Space commits - and only
 knight moves land. The trace is verified hop by hop.
-

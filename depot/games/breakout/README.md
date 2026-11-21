@@ -28,4 +28,3 @@ Clear all 20 bricks.
 
 AI paddle tracks the descending ball (attract mode headless).
 Mirrored sim clears all 20 bricks inside the frame budget.
-

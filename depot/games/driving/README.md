@@ -30,4 +30,3 @@ Top-down circuit: 8 checkpoints on a 12-unit-radius loop.
 The car has constant speed and a bounded turn rate, so the lap is a real
 steering problem - a tighter loop would be un-drivable and the simulator
 rejects one (see gamecraft-sim drive_tests).
-

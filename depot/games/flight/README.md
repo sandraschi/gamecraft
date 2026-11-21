@@ -31,4 +31,3 @@ from a spec (kind, footprint, height, LOD), not modelled: farmhouse and
 igloo at LOD 2, barn at LOD 1, church at LOD 2 with tower and spire.
 Creatures are two-primitive silhouettes (person = capsule + head).
 Pitch with Up/Down; the autopilot replay tracks each gate's altitude.
-
