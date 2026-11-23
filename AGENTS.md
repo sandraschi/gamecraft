@@ -9,7 +9,7 @@ Pure-Rust spatial compiler, scene verification engine, and MCP server for Godot 
 | `crates/gamecraft-core` | L1 | Node graph, transform hierarchy (`glam`), AABB, collision matrix, signal registry. **No `wgpu`/`egui`/godot deps. Must compile to `wasm32-unknown-unknown`.** |
 | `crates/gamecraft-commands` | L1 | `Command` trait (`execute`/`undo`/`serialize_json`) + `AddNodeCommand`, `ReparentNodeCommand`, `SetPropertyCommand`, `SetTransformCommand`, undo/redo `CommandStack`. |
 | `crates/gamecraft-godot` | L1 | Deterministic `nom` parser **and serializer** for Godot 4 `.tscn`/`.tres`, deterministic UID hashing, **and the scene lint rules** (`lint.rs`). |
-| `crates/gamecraft-mcp` | L2 | Hand-rolled MCP `2024-11-05` stdio server exposing `scene_lint`, `spatial_query`, `export_scene`. Re-exports the lint API from `gamecraft-godot`. |
+| `crates/gamecraft-mcp` | L2 | Hand-rolled MCP `2026-07-28` stdio server exposing `scene_lint`, `spatial_query`, `export_scene`. Re-exports the lint API from `gamecraft-godot`. |
 | `crates/gamecraft-sim` | L1 | Deterministic gameplay sims: kinematic stepper, BFS maze and crate-push solvers. Shared by forge and the MCP verify tool. |
 | `crates/gamecraft-forge` | L1 | Depot forge: 13 game builders (platformer/arcade/combat/puzzle), mirrored Rust trace sims, software rasterizer for `thumb.png` / `play.gif`. **Must not depend on `gamecraft-mcp`.** |
 | `apps/gamecraft-cli` | L3 | `clap` CLI (`lint`, `query`, `uid`, `forge`). |

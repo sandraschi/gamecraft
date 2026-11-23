@@ -21,6 +21,16 @@ compiled from specs and booted headless), **three.js browser games**
 (`bevy/games/`, native executables). 16 + 19 + 3 and counting. The prompt
 path (`new`) targets Godot only.
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app and the CLI (Start Menu shortcut, CLI on the user PATH). `-RegisterClients` also registers the MCP exe with the IDEs that are installed. `-Clients cursor,claude-desktop` limits that list. `-Mcpb` installs the Claude Desktop extension bundle.
+
 ## What you get
 
 `new` writes a minimal but complete Godot project:
@@ -253,7 +263,7 @@ The four that do not are unproven, not broken - all boot with zero errors:
 | `gamecraft-trellis` | Image-to-3D prop pipe (TRELLIS.2 sidecar, plan-only without a Linux/CUDA box): L1 types + driver, CLI `trellis plan | assets | execute`, MCP `asset.trellis`. See `docs/TRELLIS2.md`. |
 | `gamecraft-bevy` | GameCraft games on Bevy 0.20 on top of `gamecraft-sim`: headless logic plugin plus an optional windowed renderer (`render` feature). Games: a 29x29 maze that plays itself, Murmuration (20 000 starlings, hawks, pillars, a flare), and the Toy Railway (two-level timetabled model railway; `just railway-gate`), all with procedural sound (`audio` feature, clips synthesised in `synth.rs`, `--mute` or `GAMECRAFT_MUTE=1` to silence; gate runs are muted). Catalog entries live in `bevy/games/<slug>/`. The Nekomimi VRM viewer (phase 1:
 orbit, ground, path plumbing) lives here too, behind the `vrm` feature. `just sounds` renders every effect to `docs/sounds/` (WAV, spectrogram PNG, loudness table) and `just sounds-check` fails if those files are stale. Gates: `just bevy-gate`, `just murmuration-gate`. |
-| `gamecraft-mcp` | MCP stdio server, dual-era (stateless `2026-07-28` with `server/discover`, plus the `initialize` handshake for `2025-11-25` back to `2024-11-05`): scene tools `scene_lint`, `spatial_query`, `scene_inspect`, `export_scene`; catalog tools `game_list`, `game_report`, `game_verify`, `game_create`; opt-in `scene_verify`. Every result is a one-sentence summary plus `structuredContent`; failures are `isError` results that say what to do next. Also hosts `catalog`, the game catalog shared with CLI and desktop. See `docs/MCP_CLIENTS.md`. Also the command registry (`commands [--json]`, `describe <id>`, `run --cmd 'id={json}'`; `id=@file.json` reads params from a file) and MCP tools `list_commands`, `describe_command`, `run_command`, `replay_record`, `replay_verify`, `replay_info` (12 commands in all). No arguments or `mcp` still means stdio. Status against the Craft app contract: `docs/CRAFT_CONTRACT.md`. |
+| `gamecraft-mcp` | MCP stdio server, dual-era (stateless `2026-07-28` with `server/discover`, plus the `initialize` handshake for `2025-11-25` back to `2026-07-28`): scene tools `scene_lint`, `spatial_query`, `scene_inspect`, `export_scene`; catalog tools `game_list`, `game_report`, `game_verify`, `game_create`; opt-in `scene_verify`. Every result is a one-sentence summary plus `structuredContent`; failures are `isError` results that say what to do next. Also hosts `catalog`, the game catalog shared with CLI and desktop. See `docs/MCP_CLIENTS.md`. Also the command registry (`commands [--json]`, `describe <id>`, `run --cmd 'id={json}'`; `id=@file.json` reads params from a file) and MCP tools `list_commands`, `describe_command`, `run_command`, `replay_record`, `replay_verify`, `replay_info` (12 commands in all). No arguments or `mcp` still means stdio. Status against the Craft app contract: `docs/CRAFT_CONTRACT.md`. |
 | `gamecraft-cli` | `lint`, `query`, `uid`, `forge`, `new`, `export`, `gltf <scene> [--out]` / `gltf --depot-out <dir>`, plus catalog parity `list [--filter] [--json]`, `report <slug> [--json]`, `verify <slug> [--timeout] [--json]`. Also `commands`, `describe`, `run --cmd` (the same registry as the MCP server). |
 | `gamecraft-desktop` | `egui`/`wgpu` app. **Library** mode (default): card grid of all Godot, three.js and Bevy games by category, detail card with description, last gate result, cheat sheet, Play / Watch demo / Run tests / Open folder; `/` filter, arrows, Enter. **Editor** mode: scene tree, shaded viewport, inspector, lint, trace scrubber, undo/redo; the side panels and the depot/scene and inspector/findings splits are draggable (View > Reset layout). Light/dark toggle, Ctrl+wheel UI zoom, golden-PNG tests (`egui_kittest`). |
 

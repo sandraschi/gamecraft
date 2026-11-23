@@ -10,7 +10,7 @@
 //!   `_meta["io.modelcontextprotocol/serverInfo"]`; `tools/list` carries the
 //!   `ttlMs`/`cacheScope` cache hints. An unsupported version gets
 //!   `UnsupportedProtocolVersionError` (-32022) listing what is supported.
-//! - **Legacy** `2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`: the
+//! - **Legacy** `2025-11-25`, `2025-06-18`, `2025-03-26`, `2026-07-28`: the
 //!   `initialize` handshake, negotiated to the client's revision (older clients
 //!   ignore the newer tool fields: titles, annotations, `outputSchema`).
 //!
@@ -41,7 +41,7 @@ use std::io::{BufRead, Write};
 /// Stateless revisions: version, identity and capabilities ride on every request.
 const MODERN_VERSIONS: [&str; 1] = ["2026-07-28"];
 /// Handshake revisions, newest first; `initialize` negotiates among these.
-const LEGACY_VERSIONS: [&str; 4] = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
+const LEGACY_VERSIONS: [&str; 4] = ["2025-11-25", "2025-06-18", "2025-03-26", "2026-07-28"];
 /// `_meta` key carrying a modern request's protocol version.
 const META_VERSION: &str = "io.modelcontextprotocol/protocolVersion";
 /// `_meta` key carrying the server's identity on modern results.
@@ -764,8 +764,8 @@ mod tests {
     #[test]
     fn legacy_initialize_negotiates_known_versions_and_falls_back_to_newest_legacy() {
         assert_eq!(
-            negotiate(&json!({"params": {"protocolVersion": "2024-11-05"}})),
-            "2024-11-05"
+            negotiate(&json!({"params": {"protocolVersion": "2026-07-28"}})),
+            "2026-07-28"
         );
         assert_eq!(
             negotiate(&json!({"params": {"protocolVersion": "2025-11-25"}})),

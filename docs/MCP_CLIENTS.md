@@ -61,7 +61,7 @@ at startup; opencode re-reads on new session).
   carry `resultType: "complete"` and `_meta["io.modelcontextprotocol/serverInfo"]`;
   `tools/list` carries `ttlMs` (1 h) and `cacheScope: "public"`. An unknown
   version gets error `-32022` with `data.supported`. **Legacy** `2025-11-25`,
-  `2025-06-18`, `2025-03-26`, `2024-11-05`: the `initialize` handshake, which
+  `2025-06-18`, `2025-03-26`, `2026-07-28`: the `initialize` handshake, which
   returns `instructions` and negotiates to the client's revision (anything
   unknown gets `2025-11-25`).
 - Every tool has a `title`, `annotations` (`readOnlyHint`, `destructiveHint`,

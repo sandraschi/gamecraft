@@ -3,7 +3,7 @@
 **Status:** PROPOSED
 **Date:** 2026-10-29
 **Target crate:** `crates/gamecraft-mcp`
-**Transport:** MCP `2024-11-05`, stdio, newline-delimited JSON-RPC
+**Transport:** MCP `2026-07-28`, stdio, newline-delimited JSON-RPC
 
 ---
 
