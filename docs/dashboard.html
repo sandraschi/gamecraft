@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GameCraft - Dashboard</title>
+<style>
+:root {
+  --bg: #0a0910; --panel: #14121d; --panel2: #1b1827; --line: #2a2639; --text: #f1eefb; --dim: #a29bb8; --faint: #6f6887;
+  --godot: #5aa9ff; --threejs: #ffb347; --bevy: #ff6f91;
+  --ok: #4ade80; --warn: #fbbf24; --bad: #f87171; --plan: #a78bfa;
+  --radius: 16px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; color: var(--text); background: var(--bg);
+  font: 15px/1.55 Inter, "Segoe UI", system-ui, sans-serif;
+  background-image:
+    radial-gradient(900px 500px at 8% -5%, rgba(90,169,255,.16), transparent 60%),
+    radial-gradient(800px 480px at 95% 0%, rgba(255,111,145,.14), transparent 60%),
+    radial-gradient(900px 600px at 50% 110%, rgba(255,179,71,.10), transparent 60%);
+  background-attachment: fixed;
+}
+a { color: inherit; }
+.wrap { max-width: 1480px; margin: 0 auto; padding: 0 28px 80px; }
+
+/* hero */
+.hero { padding: 64px 0 28px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: end; }
+.eyebrow { letter-spacing: .22em; text-transform: uppercase; font-size: 12px; color: var(--dim); }
+h1 { font-size: clamp(44px, 6vw, 84px); line-height: 1; margin: 10px 0 16px; letter-spacing: -.03em; font-weight: 800; }
+h1 span { background: linear-gradient(100deg, var(--godot), var(--threejs) 50%, var(--bevy)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { font-size: 18px; color: var(--dim); max-width: 60ch; margin: 0; }
+.lede b { color: var(--text); font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.stat { background: linear-gradient(160deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+.stat .n { font-size: 38px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.stat .l { color: var(--dim); font-size: 12.5px; text-transform: uppercase; letter-spacing: .1em; }
+.stat.ok .n { color: var(--ok); }
+
+/* bar */
+.bar { position: sticky; top: 0; z-index: 20; margin: 0 -28px; padding: 14px 28px; display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center;
+  background: rgba(10,9,16,.82); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.tabs { display: flex; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+.tab { border: 0; background: transparent; color: var(--dim); font: inherit; font-weight: 600; padding: 7px 16px; border-radius: 999px; cursor: pointer; }
+.tab.on { background: var(--text); color: #14121d; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--panel); color: var(--dim); font: inherit; font-size: 13px; padding: 6px 13px; border-radius: 999px; cursor: pointer; display: inline-flex; gap: 7px; align-items: center; }
+.chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.chip.on { color: var(--text); border-color: var(--c, var(--text)); box-shadow: 0 0 0 1px var(--c, var(--text)) inset; }
+.search { margin-left: auto; background: var(--panel); border: 1px solid var(--line); color: var(--text); border-radius: 999px; padding: 8px 16px; font: inherit; width: 230px; }
+.search:focus { outline: 2px solid var(--threejs); outline-offset: 1px; }
+.pill { font-size: 12.5px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--dim); }
+.pill b { color: var(--text); }
+.pill.on { border-color: rgba(74,222,128,.5); color: var(--ok); }
+.pill.off { border-color: rgba(251,191,36,.5); color: var(--warn); cursor: pointer; }
+
+/* kanban */
+.board { display: grid; grid-template-columns: repeat(4, minmax(290px, 1fr)); gap: 18px; padding-top: 26px; overflow-x: auto; align-items: start; }
+.col { background: rgba(20,18,29,.6); border: 1px solid var(--line); border-radius: 20px; padding: 14px; min-height: 160px; }
+.col h2 { margin: 2px 6px 14px; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+.col h2 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 14px var(--c); }
+.col h2 .ct { margin-left: auto; color: var(--dim); font-weight: 500; }
+.col .sub { margin: -8px 6px 14px; color: var(--faint); font-size: 12.5px; }
+.stack { display: grid; gap: 14px; }
+
+/* sections */
+.sec { padding-top: 34px; }
+.sec h2 { font-size: 24px; margin: 0 0 4px; letter-spacing: -.01em; display: flex; align-items: baseline; gap: 12px; }
+.sec h2 small { font-size: 13px; color: var(--dim); font-weight: 500; }
+.sec p.d { margin: 0 0 16px; color: var(--faint); font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+
+/* card */
+.card { background: linear-gradient(170deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: transform .18s, border-color .18s, box-shadow .18s; }
+.card:hover { transform: translateY(-3px); border-color: var(--tc); box-shadow: 0 14px 40px -18px var(--tc); }
+.shot { position: relative; aspect-ratio: 16/9; background: linear-gradient(135deg, color-mix(in srgb, var(--tc) 30%, #0a0910), #0a0910); overflow: hidden; }
+.shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot .ph { position: absolute; inset: 0; display: grid; place-items: center; font-size: 54px; font-weight: 800; color: color-mix(in srgb, var(--tc) 55%, transparent); }
+.shot .tag { position: absolute; left: 10px; top: 10px; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(10,9,16,.78); color: var(--tc); border: 1px solid color-mix(in srgb, var(--tc) 50%, transparent); backdrop-filter: blur(6px); }
+.shot .st { position: absolute; right: 10px; top: 10px; width: 11px; height: 11px; border-radius: 50%; background: var(--sc); box-shadow: 0 0 0 3px rgba(10,9,16,.7), 0 0 12px var(--sc); }
+.body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.title { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.m { font-size: 11.5px; color: var(--dim); border: 1px solid var(--line); padding: 2px 9px; border-radius: 999px; }
+.desc { color: var(--dim); font-size: 13.5px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; }
+.prog { font-size: 12.5px; color: var(--sc); margin-top: auto; }
+.acts { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+.btn { font: inherit; font-size: 13px; font-weight: 700; text-decoration: none; padding: 7px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; }
+.btn.pri { background: var(--tc); color: #15121c; border-color: transparent; }
+.btn:hover { filter: brightness(1.12); }
+.btn.dis { opacity: .4; pointer-events: none; }
+
+.empty { color: var(--faint); padding: 18px 8px; font-size: 14px; }
+footer { margin-top: 70px; padding-top: 26px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 10px 22px; color: var(--dim); font-size: 14px; }
+footer a { text-decoration: none; border-bottom: 1px dotted var(--faint); }
+footer .gen { margin-left: auto; color: var(--faint); font-size: 12.5px; }
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(30px); opacity: 0; background: var(--text); color: #14121d; padding: 9px 18px; border-radius: 999px; font-weight: 600; transition: .25s; z-index: 50; }
+.toast.on { opacity: 1; transform: translateX(-50%); }
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding-top: 40px; } .search { margin-left: 0; width: 100%; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Describe a game in a sentence</div>
+      <h1><span>GameCraft</span></h1>
+      <p class="lede" id="lede"></p>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <nav class="bar">
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-v="board">Board</button>
+      <button class="tab" data-v="groups">By category</button>
+      <button class="tab" data-v="tracks">By engine</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <span class="pill" id="arcade">checking arcade...</span>
+    <input class="search" id="q" type="search" placeholder="Search games" aria-label="Search games">
+  </nav>
+
+  <main id="main"></main>
+
+  <footer id="foot"></footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = {"generated":"2026-11-23T19:42:37.370Z","arcade":"http://127.0.0.1:11258","groups":["Worlds and sims","Calm puzzles","Puzzles","Board classics","Seek and find","Mystery","Arcade","Action","Physics"],"games":[{"id":"web:kaffeehaus","slug":"kaffeehaus","track":"threejs","title":"Kaffeehaus","group":"Worlds and sims","status":"verified","progress":"6 checkpoints, won in 45001 steps","desc":"Viennese coffee house management: seat, serve, bill, keep the regulars. Original design; the sim is pure logic and self-tests that good play beats random play.","author":"Claude Opus 5.5, gamecraft session 2026-10-31","date":"2026-11-01","thumb":"../web/games/kaffeehaus/thumb.png","cheat":"../web/games/kaffeehaus/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:lantern-river","slug":"lantern-river","track":"threejs","title":"Lantern River","group":"Worlds and sims","status":"verified","progress":"5 checkpoints, won in 3765 steps","desc":"Toro nagashi at night: breathe on drifting paper lanterns to guide them into a shrine cove; misses float on, nothing is lost. Pure sim with a self-test: the current alone brings almost none home, random breathing few, careful breathing most.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/lantern-river/thumb.png","cheat":"../web/games/lantern-river/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:mossbrook","slug":"mossbrook","track":"threejs","title":"Mossbrook","group":"Worlds and sims","status":"verified","progress":"14 checkpoints, won in 11537 steps","desc":"Simon Willison's Emberwick prompt sequence (simonwillison.net/2026/Oct/28/vibe-game-development/), all 4 prompts, rebuilt from scratch","author":"Claude Opus 5.5, gamecraft session 2026-10-31","date":"2026-11-01","thumb":"../web/games/mossbrook/thumb.png","cheat":"../web/games/mossbrook/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"bevy:murmuration","slug":"murmuration","track":"bevy","title":"Murmuration","group":"Worlds and sims","status":"verified","progress":"murmuration settled, roost reached (roost 17018 of 17000 needed, alive 19929 of 20000, eaten 71, tick 2564)","desc":"Steer 20 000 starlings into the roost while hawks hunt them; one lure, one flare, a deterministic flock simulation.","author":"","date":"2026-11-02","thumb":"../bevy/games/murmuration/thumb.png","cheat":"../bevy/games/murmuration/CHEATSHEET.md","cmd":"cargo run --profile play --bin gamecraft-bevy-murmuration","playable":true},{"id":"godot:night-forest","slug":"night-forest","track":"godot","title":"Night Forest Run","group":"Worlds and sims","status":"verified","progress":"won in 420 frames, lint clean","desc":"Generated from a prompt (platformer archetype) and compiled to a Godot scene.","author":"","date":"","thumb":"../depot/games/night-forest/thumb.png","gif":"../depot/games/night-forest/play.gif","folder":"../depot/games/night-forest/","cheat":"../depot/games/night-forest/CHEATSHEET.md","playable":true},{"id":"godot:snowy-mountain-pass","slug":"snowy-mountain-pass","track":"godot","title":"Snowy Mountain Pass","group":"Worlds and sims","status":"verified","progress":"won in 267 frames, lint clean","desc":"Generated from a prompt (platformer archetype) and compiled to a Godot scene.","author":"","date":"","thumb":"../depot/games/snowy-mountain-pass/thumb.png","gif":"../depot/games/snowy-mountain-pass/play.gif","folder":"../depot/games/snowy-mountain-pass/","cheat":"../depot/games/snowy-mountain-pass/CHEATSHEET.md","playable":true},{"id":"godot:talk-inventory","slug":"talk-inventory","track":"godot","title":"Talk & Key","group":"Worlds and sims","status":"verified","progress":"won in 45 frames, lint clean","desc":"Win: Talk to the keeper 3 times, then open the door. Controls: Arrows walk. Bump the NPC 3 times, then take the door.","author":"","date":"","thumb":"../depot/games/talk-inventory/thumb.png","gif":"../depot/games/talk-inventory/play.gif","folder":"../depot/games/talk-inventory/","cheat":"../depot/games/talk-inventory/CHEATSHEET.md","playable":true},{"id":"bevy:toy-railway","slug":"toy-railway","track":"bevy","title":"Toy Railway","group":"Worlds and sims","status":"verified","progress":"railway ran safe and on time (24 h: arrivals 2158, collisions 0, overruns 0, held at red 0, worst arrival +0 s, worst departure +0 s)","desc":"A two-level model railway with a real timetable: block signals and interlocking keep Sparky and the bullet apart, two helices join the levels, and the camera zooms from a tilt-shift table view down to eye height on the platform.","author":"","date":"2026-11-07","thumb":"../bevy/games/toy-railway/thumb.png","cheat":"../bevy/games/toy-railway/CHEATSHEET.md","cmd":"cargo run --profile play --bin gamecraft-bevy-railway","playable":true},{"id":"web:bento","slug":"bento","track":"threejs","title":"Bento","group":"Calm puzzles","status":"verified","progress":"4 checkpoints, won in 240 steps","desc":"Untimed packing puzzle: food-shaped polyominoes into a lacquer box, six sizes. Boxes are cut from a full grid so every one has an answer; a separate backtracking solver re-proves it in the self-test.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/bento/thumb.png","cheat":"../web/games/bento/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:robot-sorting","slug":"robot-sorting","track":"threejs","title":"Boomy Sorts","group":"Calm puzzles","status":"verified","progress":"6 checkpoints, won in 4550 steps","desc":"Gentle programming puzzle: a Raspbot-like robot sorts parcels by colour, size and star using first-match IF/THEN rules. Five jobs; self-test proves reference programs sort all 16 parcel kinds while empty and wrong-order programs fail on every shift.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/robot-sorting/thumb.png","cheat":"../web/games/robot-sorting/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:gassi","slug":"gassi","track":"threejs","title":"Gassi","group":"Calm puzzles","status":"verified","progress":"5 checkpoints, won in 1237 steps","desc":"Route memory with Benny: he walks a route once through a stylized Alsergrund (Strudlhofstiege, Berggasse 19, Votivkirche), you lead it back from memory. Self-test proves routes turn enough that blind guessing is under 3%.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/gassi/thumb.png","cheat":"../web/games/gassi/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:shadow-sculpture","slug":"shadow-sculpture","track":"threejs","title":"Kage-e","group":"Calm puzzles","status":"verified","progress":"4 checkpoints, won in 338 steps","desc":"Shadow puzzle: a heap of blocks built from a picture, each block at its own depth; drag it until the real shadow-mapped shadow on the wall becomes the picture. Solved by silhouette overlap, so mirror poses of symmetric pictures count too.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/shadow-sculpture/thumb.png","cheat":"../web/games/shadow-sculpture/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:kintsugi","slug":"kintsugi","track":"threejs","title":"Kintsugi","group":"Calm puzzles","status":"verified","progress":"5 checkpoints, won in 308 steps","desc":"Calm puzzle: four bowls broken along seeded jagged cracks; turn, flip and slide shards home, then gold flows into the seams. No timer, no fail state. Self-test proves cracks never cross and only the true pose snaps.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/kintsugi/thumb.png","cheat":"../web/games/kintsugi/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:organ-builder","slug":"organ-builder","track":"threejs","title":"Orgelbauer","group":"Calm puzzles","status":"verified","progress":"4 checkpoints, won in 991 steps","desc":"Ear puzzle: stand pipes in an organ so it plays a traditional tune left to right; pipe length follows pitch (L proportional to 1/f), synthesized flue-pipe voice in WebAudio. Self-test proves the bench always holds exactly the tune and a lucky order is under 1%.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/organ-builder/thumb.png","cheat":"../web/games/organ-builder/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"bevy:maze","slug":"maze","track":"bevy","title":"Bevy Maze","group":"Puzzles","status":"verified","progress":"maze solved, goal reached (moves 272, bumps 0, tick 1627)","desc":"A 29x29 generated maze on Bevy: walk to the gold goal, rules tick at 60 Hz, a deterministic autopilot proves it is solvable.","author":"","date":"2026-11-02","thumb":"../bevy/games/maze/thumb.png","cheat":"../bevy/games/maze/CHEATSHEET.md","cmd":"cargo run --profile dev --bin gamecraft-bevy-maze","playable":true},{"id":"godot:chessboard-move","slug":"chessboard-move","track":"godot","title":"Knight Tour","group":"Puzzles","status":"verified","progress":"won in 33 frames, lint clean","desc":"Win: Land the knight on all 4 targets, legally. Controls: Arrows move the cursor, Space jumps the knight there.","author":"","date":"","thumb":"../depot/games/chessboard-move/thumb.png","gif":"../depot/games/chessboard-move/play.gif","folder":"../depot/games/chessboard-move/","cheat":"../depot/games/chessboard-move/CHEATSHEET.md","playable":true},{"id":"godot:maze","slug":"maze","track":"godot","title":"Maze","group":"Puzzles","status":"verified","progress":"won in 129 frames, lint clean","desc":"Win: Reach the exit in the far corner. Controls: Arrow keys move cell to cell. Find the gold exit.","author":"","date":"","thumb":"../depot/games/maze/thumb.png","gif":"../depot/games/maze/play.gif","folder":"../depot/games/maze/","cheat":"../depot/games/maze/CHEATSHEET.md","playable":true},{"id":"web:minesweeper","slug":"minesweeper","track":"threejs","title":"Minesweeper AI","group":"Puzzles","status":"verified","progress":"3 checkpoints, won in 30 steps","desc":"Windows-classic 9x9 beginner (10 mines) with take-back (undo stack) + autosolver (safe/flag deduction + probability fallback). First-click-safe + chord. Vendored deduction from ai-games-collection/games/puzzle-games/minesweeper.js MinesweeperAI.findSafeMoves (MIT). Tour: solver clears board, checkpoints per phase.","author":"ai-games-collection (deduction) + gamecraft session 2026-11-02","date":"2026-11-02","thumb":"../web/games/minesweeper/thumb.png","cheat":"../web/games/minesweeper/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:rubiks","slug":"rubiks","track":"threejs","title":"Rubik's Cube 2/3/4","group":"Puzzles","status":"planned","progress":"","desc":"Rubik's in several sizes from ai-games-collection/games/puzzle-games/rubiks.js: 2x2 pocket, 3x3 classic, 4x4 revenge. Scramble + solver tour (layer method), checkpoints per face. Sizes param ?size=2|3|4, same __gamecraft contract.","author":"ai-games-collection (cube) + gamecraft session 2026-11-02","date":"","thumb":"","cheat":"","playable":false,"selfTest":""},{"id":"godot:sokoban","slug":"sokoban","track":"godot","title":"Sokoban","group":"Puzzles","status":"verified","progress":"won in 16 frames, lint clean","desc":"Win: All crates on targets. Controls: Arrows push one crate at a time. Cover all 3 targets.","author":"","date":"","thumb":"../depot/games/sokoban/thumb.png","gif":"../depot/games/sokoban/play.gif","folder":"../depot/games/sokoban/","cheat":"../depot/games/sokoban/CHEATSHEET.md","playable":true},{"id":"godot:sokoban-vault","slug":"sokoban-vault","track":"godot","title":"Sokoban Vault","group":"Puzzles","status":"verified","progress":"won in 30 frames, lint clean","desc":"Win: All crates on targets. Controls: Arrows push one crate at a time. Cover all 4 targets.","author":"","date":"","thumb":"../depot/games/sokoban-vault/thumb.png","gif":"../depot/games/sokoban-vault/play.gif","folder":"../depot/games/sokoban-vault/","cheat":"../depot/games/sokoban-vault/CHEATSHEET.md","playable":true},{"id":"web:sudoku","slug":"sudoku","track":"threejs","title":"Sudoku Classic","group":"Puzzles","status":"verified","progress":"3 checkpoints, won in 30 steps","desc":"9x9 classic (easy 51 givens) with take-back (undo stack) + Hint (naked-single solver). Generator (diagonal boxes + backtrack) + solver from ai-games-collection/games/puzzle-games/sudoku.js (MIT). Tour: solver fills all, checkpoints per phase.","author":"ai-games-collection (generator/solver) + gamecraft session 2026-11-02","date":"2026-11-02","thumb":"../web/games/sudoku/thumb.png","cheat":"../web/games/sudoku/CHEATSHEET.md","playable":true,"selfTest":""},{"id":"web:sudoku-color","slug":"sudoku-color","track":"threejs","title":"Sudoku Color","group":"Puzzles","status":"verified","progress":"3 checkpoints, won in 30 steps","desc":"9x9 color skin of Sudoku Classic. Numbers 1-9 mapped to colors (same generator/solver, take-back, Hint/AI). From ai-games-collection sudoku-color. Tour: solver fills all.","author":"ai-games-collection (color) + gamecraft session 2026-11-02","date":"2026-11-02","thumb":"../web/games/sudoku-color/thumb.png","cheat":"../web/games/sudoku-color/CHEATSHEET.md","playable":true,"selfTest":""},{"id":"web:sudoku-letters","slug":"sudoku-letters","track":"threejs","title":"Sudoku Letters","group":"Puzzles","status":"verified","progress":"3 checkpoints, won in 30 steps","desc":"9x9 letters A-I skin of Sudoku Classic. Same generator/solver (numbers 1-9 internally, A-I displayed), same take-back + Hint/AI. From ai-games-collection sudoku-letters (9x9 + 16x16 A-P). Tour: solver fills all.","author":"ai-games-collection (letters) + gamecraft session 2026-11-02","date":"2026-11-02","thumb":"../web/games/sudoku-letters/thumb.png","cheat":"../web/games/sudoku-letters/CHEATSHEET.md","playable":true,"selfTest":""},{"id":"godot:tower-place","slug":"tower-place","track":"godot","title":"Tower Place","group":"Puzzles","status":"verified","progress":"won in 504 frames, lint clean","desc":"Win: Destroy all 8 lane marchers before any leaks. Controls: Towers are pre-placed (3 fixed). Watch the wave break.","author":"","date":"","thumb":"../depot/games/tower-place/thumb.png","gif":"../depot/games/tower-place/play.gif","folder":"../depot/games/tower-place/","cheat":"../depot/games/tower-place/CHEATSHEET.md","playable":true},{"id":"web:hnefatafl","slug":"hnefatafl","track":"threejs","title":"Hnefatafl","group":"Board classics","status":"verified","progress":"3 checkpoints, won in 46 steps","desc":"Copenhagen Hnefatafl on 11x11 against an alpha-beta opponent: king to a corner or capture the king, custodian captures, restricted throne and corners, undo, hint, easy/normal/hard. The gate runs 39 rule checks on hand-built positions, then one full AI-vs-AI game (both sides 2 plies, fixed seed) that is replayed in a fresh engine. The AI's defenders are stronger than its attackers. Shieldwall capture, the edge-fort win (cautious test) and the encirclement win are implemented.","author":"gamecraft: rules engine and search written for this repo (the old skeleton and ai-games-collection were references only)","date":"2026-11-08","thumb":"../web/games/hnefatafl/thumb.png","cheat":"../web/games/hnefatafl/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:trichess","slug":"trichess","track":"threejs","title":"Tri-D Chess","group":"Board classics","status":"planned","progress":"","desc":"Star Trek tri-dimensional chess (Bartmess/Roth rules): 3 neutral 4x4 boards + 4 attack 2x2 on pins. Pieces move within board + up/down via pins. Full rules from ai-games-collection/games/board-games/td-chess-logic.js (MIT). Skeleton: pin-attack mate in 3.","author":"ai-games-collection (logic) + gamecraft session 2026-11-02","date":"","thumb":"","cheat":"","playable":false,"selfTest":""},{"id":"web:hoshi","slug":"hoshi","track":"threejs","title":"Hoshi","group":"Seek and find","status":"verified","progress":"5 checkpoints, won in 1411 steps","desc":"Constellation drawing on a sky built from real star coordinates: seven figures with Western and Japanese names (Hokuto Shichisei, Tsuzumi-boshi, Orihime and Hikoboshi, Subaru, Tsuri-boshi). Self-test proves every figure is connected, fits its view and has no ambiguous neighbours.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/hoshi/thumb.png","cheat":"../web/games/hoshi/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:spot-the-difference","slug":"spot-the-difference","track":"threejs","title":"Spot the Difference","group":"Seek and find","status":"verified","progress":"6 checkpoints, won in 348 steps","desc":"One cluttered room rendered twice, five changes in the second copy. Differences are picked fresh each round from the room's items; self-test proves they are always visible, separate and real.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/spot-the-difference/thumb.png","cheat":"../web/games/spot-the-difference/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:tidy-the-room","slug":"tidy-the-room","track":"threejs","title":"Tidy the Room","group":"Seek and find","status":"verified","progress":"5 checkpoints, won in 279 steps","desc":"Inverse of Spot the Difference on the same room: six things scattered on the floor, a photo shows where they live, drag them home. Self-test proves no mess is pre-solved or off-screen.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/tidy-the-room/thumb.png","cheat":"../web/games/tidy-the-room/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:where-is-benny","slug":"where-is-benny","track":"threejs","title":"Where is Benny?","group":"Seek and find","status":"verified","progress":"6 checkpoints, won in 288 steps","desc":"Hidden-object game at a sunny funfair: an orbitable crowd with up to 44 dogs, five German Shepherd look-alikes and a Malinois, one Benny. Self-test proves there is always exactly one dog matching the poster.","author":"Claude Opus 5.5, gamecraft session 2026-11-01","date":"2026-11-01","thumb":"../web/games/where-is-benny/thumb.png","cheat":"../web/games/where-is-benny/CHEATSHEET.md","playable":true,"selfTest":"self-test passes"},{"id":"web:detective-case","slug":"detective-case","track":"threejs","title":"Detective Case - Naschmarkt","group":"Mystery","status":"progress","progress":"no playable entry yet","desc":"Uncracked.city lift: search places, interrogate LLM liars, hold clue vs statement, 3-try report. Case data in wien-naschmarkt-01.json, validator requires solvable chain.","author":"gamecraft + ai-games-collection 2026-11-04","date":"","thumb":"","cheat":"","playable":false,"selfTest":""},{"id":"godot:breakout","slug":"breakout","track":"godot","title":"Breakout","group":"Arcade","status":"verified","progress":"won in 538 frames, lint clean","desc":"Win: Clear all 20 bricks. Controls: Left/Right move the paddle. Clear 20 bricks, 3 balls.","author":"","date":"","thumb":"../depot/games/breakout/thumb.png","gif":"../depot/games/breakout/play.gif","folder":"../depot/games/breakout/","cheat":"../depot/games/breakout/CHEATSHEET.md","playable":true},{"id":"godot:flappy","slug":"flappy","track":"godot","title":"Flappy","group":"Arcade","status":"verified","progress":"won in 506 frames, lint clean","desc":"Win: Pass pipe 10 (x = 48.5). Controls: Space flaps. Thread 10 pipes; floor and pipes reset you.","author":"","date":"","thumb":"../depot/games/flappy/thumb.png","gif":"../depot/games/flappy/play.gif","folder":"../depot/games/flappy/","cheat":"../depot/games/flappy/CHEATSHEET.md","playable":true},{"id":"godot:pong","slug":"pong","track":"godot","title":"Pong","group":"Arcade","status":"verified","progress":"won in 215 frames, 2-0, lint clean","desc":"Win: Outscore the simple AI (first to 2). Controls: Up/Down move the right paddle. First to 2.","author":"","date":"","thumb":"../depot/games/pong/thumb.png","gif":"../depot/games/pong/play.gif","folder":"../depot/games/pong/","cheat":"../depot/games/pong/CHEATSHEET.md","playable":true},{"id":"godot:runner","slug":"runner","track":"godot","title":"Runner","group":"Arcade","status":"verified","progress":"won in 415 frames, lint clean","desc":"Win: Reach x = 38. Controls: Auto-runs. Space jumps (hint markers auto-jump headless).","author":"","date":"","thumb":"../depot/games/runner/thumb.png","gif":"../depot/games/runner/play.gif","folder":"../depot/games/runner/","cheat":"../depot/games/runner/CHEATSHEET.md","playable":true},{"id":"godot:topdown-shooter","slug":"topdown-shooter","track":"godot","title":"Topdown Shooter","group":"Arcade","status":"verified","progress":"won in 361 frames, lint clean","desc":"Win: Destroy all 9 enemies. Controls: WASD twin-stick, autofire handles aiming. Survive 3 waves.","author":"","date":"","thumb":"../depot/games/topdown-shooter/thumb.png","gif":"../depot/games/topdown-shooter/play.gif","folder":"../depot/games/topdown-shooter/","cheat":"../depot/games/topdown-shooter/CHEATSHEET.md","playable":true},{"id":"godot:driving","slug":"driving","track":"godot","title":"Driving","group":"Action","status":"verified","progress":"won in 335 frames, lint clean","desc":"Win: Pass all 8 checkpoints and cross the line. Controls: Left/Right steer. Constant speed, one lap to win.","author":"","date":"","thumb":"../depot/games/driving/thumb.png","gif":"../depot/games/driving/play.gif","folder":"../depot/games/driving/","cheat":"../depot/games/driving/CHEATSHEET.md","playable":true},{"id":"godot:flight","slug":"flight","track":"godot","title":"Flight","group":"Action","status":"verified","progress":"won in 501 frames, lint clean","desc":"Win: Pass all 5 gates. Controls: Up/Down pitch to climb or dive. Speed is fixed; fly through all 5 gates.","author":"","date":"","thumb":"../depot/games/flight/thumb.png","gif":"../depot/games/flight/play.gif","folder":"../depot/games/flight/","cheat":"../depot/games/flight/CHEATSHEET.md","playable":true},{"id":"godot:platformer","slug":"platformer","track":"godot","title":"Platformer","group":"Action","status":"verified","progress":"won in 414 frames, lint clean","desc":"Win: Touch the goal flag at x = 31. Controls: Left/Right arrows to run, Space to jump. Grab coins, tag the red goal. Falling resets you to spawn.","author":"","date":"","thumb":"../depot/games/platformer/thumb.png","gif":"../depot/games/platformer/play.gif","folder":"../depot/games/platformer/","cheat":"../depot/games/platformer/CHEATSHEET.md","playable":true},{"id":"web:jenga","slug":"jenga","track":"threejs","title":"Jenga Tower","group":"Physics","status":"planned","progress":"","desc":"Cannon.js tower from ai-games-collection/games/jenga.html (Three.js r128 + Cannon 0.6.2) → Godot RigidBody3D forge. 54 blocks, pull-and-place, topples physically. Sizes: classic 54, mini 27, giant 72. Godot gives deterministic trace + lint, not just eye candy.","author":"ai-games-collection (feel) + gamecraft forge (physics sim) 2026-11-02","date":"","thumb":"","cheat":"","playable":false,"selfTest":""}],"docs":[{"label":"README","href":"../README.md"},{"label":"Product requirements","href":"../docs/PRD.md"},{"label":"Tiered plan","href":"../docs/TIERED_PLAN.md"},{"label":"Writing a new game","href":"../docs/NEW_GAME.md"},{"label":"Craft contract","href":"../docs/CRAFT_CONTRACT.md"},{"label":"LLM as game designer","href":"../docs/LLM_AS_GAME_DESIGNER.md"},{"label":"Toy railway","href":"../docs/TOY_RAILWAY.md"},{"label":"Changelog","href":"../CHANGELOG.md"},{"label":"Install","href":"../INSTALL.md"}]};
+const TRACKS = {
+  threejs: { name: "three.js", color: "var(--threejs)", blurb: "Browser games, served locally, verified by headless self-play." },
+  godot: { name: "Godot", color: "var(--godot)", blurb: "Forge-compiled projects with lint, trace replay and recorded play." },
+  bevy: { name: "Bevy", color: "var(--bevy)", blurb: "Native Rust sims, gated by a deterministic run to the win." },
+};
+const STATUS = {
+  planned: { name: "Planned", color: "var(--plan)", sub: "Specified, not built yet" },
+  progress: { name: "In progress", color: "var(--warn)", sub: "Exists, no passing gate on record" },
+  verified: { name: "Verified", color: "var(--ok)", sub: "Gate passes: it can be won" },
+  attention: { name: "Needs attention", color: "var(--bad)", sub: "Last gate run failed" },
+};
+const state = { view: "board", tracks: new Set(Object.keys(TRACKS)), q: "" };
+const G = DATA.games;
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+function toast(t) { const n = $("#toast"); n.textContent = t; n.classList.add("on"); setTimeout(() => n.classList.remove("on"), 1800); }
+function copy(text) { navigator.clipboard.writeText(text).then(() => toast("Copied: " + text), () => toast("Copy failed")); }
+
+/* hero */
+(function hero() {
+  const v = G.filter((g) => g.status === "verified").length;
+  const engines = Object.keys(TRACKS).filter((t) => G.some((g) => g.track === t)).length;
+  $("#lede").innerHTML = "<b>" + G.length + " games</b> across " + engines + " engines, from a one-sentence prompt to a Godot project you can open and play. " +
+    "<b>" + v + "</b> of them have won their own gate: a scripted run that actually finishes the game, with lint and replay on disk.";
+  const stats = [
+    [G.length, "games", ""], [v, "verified", "ok"], [DATA.groups.length, "categories", ""],
+    [G.filter((g) => g.track === "threejs").length, "in the browser", ""],
+    [G.filter((g) => g.track === "godot").length, "godot projects", ""],
+    [G.filter((g) => g.track === "bevy").length, "native bevy sims", ""],
+  ];
+  for (const [n, l, c] of stats) { const s = el("div", "stat " + c); s.append(el("div", "n", n), el("div", "l", l)); $("#stats").append(s); }
+})();
+
+/* filters */
+(function chips() {
+  for (const [k, t] of Object.entries(TRACKS)) {
+    const b = el("button", "chip on"); b.style.setProperty("--c", t.color);
+    const i = el("i"); i.style.background = t.color; b.append(i, document.createTextNode(t.name + " " + G.filter((g) => g.track === k).length));
+    b.onclick = () => { state.tracks.has(k) ? state.tracks.delete(k) : state.tracks.add(k); b.classList.toggle("on"); render(); };
+    $("#chips").append(b);
+  }
+  document.querySelectorAll(".tab").forEach((t) => t.onclick = () => {
+    document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === t)); state.view = t.dataset.v; render();
+  });
+  $("#q").oninput = (e) => { state.q = e.target.value.trim().toLowerCase(); render(); };
+})();
+
+/* arcade server probe */
+(function probe() {
+  const p = $("#arcade");
+  const ctl = new AbortController(); setTimeout(() => ctl.abort(), 1800);
+  fetch(DATA.arcade + "/api/games", { mode: "no-cors", signal: ctl.signal }).then(() => {
+    p.className = "pill on"; p.innerHTML = "arcade server <b>online</b>: play links are live";
+  }).catch(() => {
+    p.className = "pill off"; p.innerHTML = "arcade <b>offline</b>: click to copy start command";
+    p.onclick = () => copy("cd web; bun run serve.ts");
+  });
+})();
+
+function visible() {
+  return G.filter((g) => state.tracks.has(g.track) &&
+    (!state.q || (g.title + " " + g.group + " " + g.desc + " " + TRACKS[g.track].name).toLowerCase().includes(state.q)));
+}
+
+function card(g) {
+  const t = TRACKS[g.track], s = STATUS[g.status];
+  const c = el("article", "card"); c.style.setProperty("--tc", t.color); c.style.setProperty("--sc", s.color);
+  const shot = el("div", "shot");
+  shot.append(el("div", "ph", g.title.charAt(0)));
+  if (g.thumb) {
+    const img = el("img"); img.src = g.thumb; img.alt = ""; img.loading = "lazy"; img.onerror = () => img.remove(); shot.append(img);
+    if (g.gif) { c.onmouseenter = () => { img.src = g.gif; }; c.onmouseleave = () => { img.src = g.thumb; }; }
+  }
+  shot.append(el("span", "tag", t.name), el("span", "st"));
+  shot.lastChild.title = s.name;
+  const body = el("div", "body");
+  body.append(el("div", "title", g.title));
+  const meta = el("div", "meta"); meta.append(el("span", "m", g.group), el("span", "m", s.name));
+  if (g.date) meta.append(el("span", "m", "verified " + g.date));
+  body.append(meta);
+  if (g.desc) body.append(el("p", "desc", g.desc));
+  if (g.progress) body.append(el("div", "prog", g.progress));
+  const acts = el("div", "acts");
+  if (g.track === "threejs") {
+    const base = DATA.arcade + "/games/" + g.slug + "/";
+    const play = el("a", "btn pri", g.playable ? "Play" : "Not playable yet"); if (g.playable) { play.href = base; play.target = "_blank"; } else play.classList.add("dis");
+    acts.append(play);
+    if (g.playable) { const tour = el("a", "btn", "Watch the tour"); tour.href = base + "?autoplay=1"; tour.target = "_blank"; acts.append(tour); }
+  } else if (g.track === "godot") {
+    if (g.gif) { const a = el("a", "btn pri", "Watch replay"); a.href = g.gif; a.target = "_blank"; acts.append(a); }
+    const f = el("a", "btn", "Project folder"); f.href = g.folder; f.target = "_blank"; acts.append(f);
+  } else if (g.cmd) {
+    const b = el("button", "btn pri", "Copy run command"); b.onclick = () => copy(g.cmd); acts.append(b);
+  }
+  if (g.cheat) { const a = el("a", "btn", "Cheatsheet"); a.href = g.cheat; a.target = "_blank"; acts.append(a); }
+  body.append(acts);
+  c.append(shot, body);
+  return c;
+}
+
+function empty() { return el("div", "empty", "Nothing matches these filters."); }
+
+function board(list) {
+  const b = el("div", "board");
+  for (const [k, s] of Object.entries(STATUS)) {
+    const items = list.filter((g) => g.status === k);
+    const col = el("section", "col"); col.style.setProperty("--c", s.color);
+    const h = el("h2"); const d = el("span", "dot"); h.append(d, document.createTextNode(s.name), el("span", "ct", items.length));
+    col.append(h, el("div", "sub", s.sub));
+    const st = el("div", "stack");
+    if (!items.length) st.append(el("div", "empty", k === "attention" ? "Nothing failing. Good." : "Empty."));
+    items.forEach((g) => st.append(card(g)));
+    col.append(st); b.append(col);
+  }
+  return b;
+}
+
+function sections(list, keys, labelOf, descOf, titleOf) {
+  const wrap = el("div");
+  for (const k of keys) {
+    const items = list.filter((g) => labelOf(g) === k);
+    if (!items.length) continue;
+    const s = el("section", "sec");
+    const h = el("h2", null, titleOf ? titleOf(k) : k); h.append(el("small", null, items.length + (items.length === 1 ? " game" : " games") + " - " + items.filter((g) => g.status === "verified").length + " verified"));
+    s.append(h);
+    const d = descOf(k); if (d) s.append(el("p", "d", d));
+    const gr = el("div", "grid"); items.forEach((g) => gr.append(card(g))); s.append(gr); wrap.append(s);
+  }
+  if (!wrap.children.length) wrap.append(empty());
+  return wrap;
+}
+
+function render() {
+  const list = visible(), m = $("#main"); m.replaceChildren();
+  if (state.view === "board") m.append(board(list));
+  else if (state.view === "groups") m.append(sections(list, DATA.groups, (g) => g.group, () => ""));
+  else m.append(sections(list, Object.keys(TRACKS), (g) => g.track, (k) => TRACKS[k].blurb, (k) => TRACKS[k].name));
+}
+
+/* footer */
+(function foot() {
+  const f = $("#foot");
+  for (const d of DATA.docs) { const a = el("a", null, d.label); a.href = d.href; f.append(a); }
+  f.append(el("span", "gen", "Generated " + DATA.generated.slice(0, 16).replace("T", " ") + " UTC by scripts/build-dashboard.mjs"));
+})();
+
+render();
+</script>
+</body>
+</html>

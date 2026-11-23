@@ -154,3 +154,7 @@ release-dry:
 # Same, then tag, push the tag and upload to GitHub (clean, pushed trunk required).
 release:
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 -Publish
+
+# Rebuild docs/dashboard.html (kanban + grouped game links) from the games on disk
+dashboard:
+    bun scripts/build-dashboard.mjs

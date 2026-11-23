@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GameCraft - Dashboard</title>
+<style>
+:root {
+  --bg: #0a0910; --panel: #14121d; --panel2: #1b1827; --line: #2a2639; --text: #f1eefb; --dim: #a29bb8; --faint: #6f6887;
+  --godot: #5aa9ff; --threejs: #ffb347; --bevy: #ff6f91;
+  --ok: #4ade80; --warn: #fbbf24; --bad: #f87171; --plan: #a78bfa;
+  --radius: 16px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; color: var(--text); background: var(--bg);
+  font: 15px/1.55 Inter, "Segoe UI", system-ui, sans-serif;
+  background-image:
+    radial-gradient(900px 500px at 8% -5%, rgba(90,169,255,.16), transparent 60%),
+    radial-gradient(800px 480px at 95% 0%, rgba(255,111,145,.14), transparent 60%),
+    radial-gradient(900px 600px at 50% 110%, rgba(255,179,71,.10), transparent 60%);
+  background-attachment: fixed;
+}
+a { color: inherit; }
+.wrap { max-width: 1480px; margin: 0 auto; padding: 0 28px 80px; }
+
+/* hero */
+.hero { padding: 64px 0 28px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: end; }
+.eyebrow { letter-spacing: .22em; text-transform: uppercase; font-size: 12px; color: var(--dim); }
+h1 { font-size: clamp(44px, 6vw, 84px); line-height: 1; margin: 10px 0 16px; letter-spacing: -.03em; font-weight: 800; }
+h1 span { background: linear-gradient(100deg, var(--godot), var(--threejs) 50%, var(--bevy)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { font-size: 18px; color: var(--dim); max-width: 60ch; margin: 0; }
+.lede b { color: var(--text); font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.stat { background: linear-gradient(160deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+.stat .n { font-size: 38px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.stat .l { color: var(--dim); font-size: 12.5px; text-transform: uppercase; letter-spacing: .1em; }
+.stat.ok .n { color: var(--ok); }
+
+/* bar */
+.bar { position: sticky; top: 0; z-index: 20; margin: 0 -28px; padding: 14px 28px; display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center;
+  background: rgba(10,9,16,.82); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.tabs { display: flex; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+.tab { border: 0; background: transparent; color: var(--dim); font: inherit; font-weight: 600; padding: 7px 16px; border-radius: 999px; cursor: pointer; }
+.tab.on { background: var(--text); color: #14121d; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--panel); color: var(--dim); font: inherit; font-size: 13px; padding: 6px 13px; border-radius: 999px; cursor: pointer; display: inline-flex; gap: 7px; align-items: center; }
+.chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.chip.on { color: var(--text); border-color: var(--c, var(--text)); box-shadow: 0 0 0 1px var(--c, var(--text)) inset; }
+.search { margin-left: auto; background: var(--panel); border: 1px solid var(--line); color: var(--text); border-radius: 999px; padding: 8px 16px; font: inherit; width: 230px; }
+.search:focus { outline: 2px solid var(--threejs); outline-offset: 1px; }
+.pill { font-size: 12.5px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--dim); }
+.pill b { color: var(--text); }
+.pill.on { border-color: rgba(74,222,128,.5); color: var(--ok); }
+.pill.off { border-color: rgba(251,191,36,.5); color: var(--warn); cursor: pointer; }
+
+/* kanban */
+.board { display: grid; grid-template-columns: repeat(4, minmax(290px, 1fr)); gap: 18px; padding-top: 26px; overflow-x: auto; align-items: start; }
+.col { background: rgba(20,18,29,.6); border: 1px solid var(--line); border-radius: 20px; padding: 14px; min-height: 160px; }
+.col h2 { margin: 2px 6px 14px; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+.col h2 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 14px var(--c); }
+.col h2 .ct { margin-left: auto; color: var(--dim); font-weight: 500; }
+.col .sub { margin: -8px 6px 14px; color: var(--faint); font-size: 12.5px; }
+.stack { display: grid; gap: 14px; }
+
+/* sections */
+.sec { padding-top: 34px; }
+.sec h2 { font-size: 24px; margin: 0 0 4px; letter-spacing: -.01em; display: flex; align-items: baseline; gap: 12px; }
+.sec h2 small { font-size: 13px; color: var(--dim); font-weight: 500; }
+.sec p.d { margin: 0 0 16px; color: var(--faint); font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+
+/* card */
+.card { background: linear-gradient(170deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: transform .18s, border-color .18s, box-shadow .18s; }
+.card:hover { transform: translateY(-3px); border-color: var(--tc); box-shadow: 0 14px 40px -18px var(--tc); }
+.shot { position: relative; aspect-ratio: 16/9; background: linear-gradient(135deg, color-mix(in srgb, var(--tc) 30%, #0a0910), #0a0910); overflow: hidden; }
+.shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot .ph { position: absolute; inset: 0; display: grid; place-items: center; font-size: 54px; font-weight: 800; color: color-mix(in srgb, var(--tc) 55%, transparent); }
+.shot .tag { position: absolute; left: 10px; top: 10px; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(10,9,16,.78); color: var(--tc); border: 1px solid color-mix(in srgb, var(--tc) 50%, transparent); backdrop-filter: blur(6px); }
+.shot .st { position: absolute; right: 10px; top: 10px; width: 11px; height: 11px; border-radius: 50%; background: var(--sc); box-shadow: 0 0 0 3px rgba(10,9,16,.7), 0 0 12px var(--sc); }
+.body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.title { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.m { font-size: 11.5px; color: var(--dim); border: 1px solid var(--line); padding: 2px 9px; border-radius: 999px; }
+.desc { color: var(--dim); font-size: 13.5px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; }
+.prog { font-size: 12.5px; color: var(--sc); margin-top: auto; }
+.acts { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+.btn { font: inherit; font-size: 13px; font-weight: 700; text-decoration: none; padding: 7px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; }
+.btn.pri { background: var(--tc); color: #15121c; border-color: transparent; }
+.btn:hover { filter: brightness(1.12); }
+.btn.dis { opacity: .4; pointer-events: none; }
+
+.empty { color: var(--faint); padding: 18px 8px; font-size: 14px; }
+footer { margin-top: 70px; padding-top: 26px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 10px 22px; color: var(--dim); font-size: 14px; }
+footer a { text-decoration: none; border-bottom: 1px dotted var(--faint); }
+footer .gen { margin-left: auto; color: var(--faint); font-size: 12.5px; }
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(30px); opacity: 0; background: var(--text); color: #14121d; padding: 9px 18px; border-radius: 999px; font-weight: 600; transition: .25s; z-index: 50; }
+.toast.on { opacity: 1; transform: translateX(-50%); }
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding-top: 40px; } .search { margin-left: 0; width: 100%; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Describe a game in a sentence</div>
+      <h1><span>GameCraft</span></h1>
+      <p class="lede" id="lede"></p>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <nav class="bar">
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-v="board">Board</button>
+      <button class="tab" data-v="groups">By category</button>
+      <button class="tab" data-v="tracks">By engine</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <span class="pill" id="arcade">checking arcade...</span>
+    <input class="search" id="q" type="search" placeholder="Search games" aria-label="Search games">
+  </nav>
+
+  <main id="main"></main>
+
+  <footer id="foot"></footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const TRACKS = {
+  threejs: { name: "three.js", color: "var(--threejs)", blurb: "Browser games, served locally, verified by headless self-play." },
+  godot: { name: "Godot", color: "var(--godot)", blurb: "Forge-compiled projects with lint, trace replay and recorded play." },
+  bevy: { name: "Bevy", color: "var(--bevy)", blurb: "Native Rust sims, gated by a deterministic run to the win." },
+};
+const STATUS = {
+  planned: { name: "Planned", color: "var(--plan)", sub: "Specified, not built yet" },
+  progress: { name: "In progress", color: "var(--warn)", sub: "Exists, no passing gate on record" },
+  verified: { name: "Verified", color: "var(--ok)", sub: "Gate passes: it can be won" },
+  attention: { name: "Needs attention", color: "var(--bad)", sub: "Last gate run failed" },
+};
+const state = { view: "board", tracks: new Set(Object.keys(TRACKS)), q: "" };
+const G = DATA.games;
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+function toast(t) { const n = $("#toast"); n.textContent = t; n.classList.add("on"); setTimeout(() => n.classList.remove("on"), 1800); }
+function copy(text) { navigator.clipboard.writeText(text).then(() => toast("Copied: " + text), () => toast("Copy failed")); }
+
+/* hero */
+(function hero() {
+  const v = G.filter((g) => g.status === "verified").length;
+  const engines = Object.keys(TRACKS).filter((t) => G.some((g) => g.track === t)).length;
+  $("#lede").innerHTML = "<b>" + G.length + " games</b> across " + engines + " engines, from a one-sentence prompt to a Godot project you can open and play. " +
+    "<b>" + v + "</b> of them have won their own gate: a scripted run that actually finishes the game, with lint and replay on disk.";
+  const stats = [
+    [G.length, "games", ""], [v, "verified", "ok"], [DATA.groups.length, "categories", ""],
+    [G.filter((g) => g.track === "threejs").length, "in the browser", ""],
+    [G.filter((g) => g.track === "godot").length, "godot projects", ""],
+    [G.filter((g) => g.track === "bevy").length, "native bevy sims", ""],
+  ];
+  for (const [n, l, c] of stats) { const s = el("div", "stat " + c); s.append(el("div", "n", n), el("div", "l", l)); $("#stats").append(s); }
+})();
+
+/* filters */
+(function chips() {
+  for (const [k, t] of Object.entries(TRACKS)) {
+    const b = el("button", "chip on"); b.style.setProperty("--c", t.color);
+    const i = el("i"); i.style.background = t.color; b.append(i, document.createTextNode(t.name + " " + G.filter((g) => g.track === k).length));
+    b.onclick = () => { state.tracks.has(k) ? state.tracks.delete(k) : state.tracks.add(k); b.classList.toggle("on"); render(); };
+    $("#chips").append(b);
+  }
+  document.querySelectorAll(".tab").forEach((t) => t.onclick = () => {
+    document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === t)); state.view = t.dataset.v; render();
+  });
+  $("#q").oninput = (e) => { state.q = e.target.value.trim().toLowerCase(); render(); };
+})();
+
+/* arcade server probe */
+(function probe() {
+  const p = $("#arcade");
+  const ctl = new AbortController(); setTimeout(() => ctl.abort(), 1800);
+  fetch(DATA.arcade + "/api/games", { mode: "no-cors", signal: ctl.signal }).then(() => {
+    p.className = "pill on"; p.innerHTML = "arcade server <b>online</b>: play links are live";
+  }).catch(() => {
+    p.className = "pill off"; p.innerHTML = "arcade <b>offline</b>: click to copy start command";
+    p.onclick = () => copy("cd web; bun run serve.ts");
+  });
+})();
+
+function visible() {
+  return G.filter((g) => state.tracks.has(g.track) &&
+    (!state.q || (g.title + " " + g.group + " " + g.desc + " " + TRACKS[g.track].name).toLowerCase().includes(state.q)));
+}
+
+function card(g) {
+  const t = TRACKS[g.track], s = STATUS[g.status];
+  const c = el("article", "card"); c.style.setProperty("--tc", t.color); c.style.setProperty("--sc", s.color);
+  const shot = el("div", "shot");
+  shot.append(el("div", "ph", g.title.charAt(0)));
+  if (g.thumb) {
+    const img = el("img"); img.src = g.thumb; img.alt = ""; img.loading = "lazy"; img.onerror = () => img.remove(); shot.append(img);
+    if (g.gif) { c.onmouseenter = () => { img.src = g.gif; }; c.onmouseleave = () => { img.src = g.thumb; }; }
+  }
+  shot.append(el("span", "tag", t.name), el("span", "st"));
+  shot.lastChild.title = s.name;
+  const body = el("div", "body");
+  body.append(el("div", "title", g.title));
+  const meta = el("div", "meta"); meta.append(el("span", "m", g.group), el("span", "m", s.name));
+  if (g.date) meta.append(el("span", "m", "verified " + g.date));
+  body.append(meta);
+  if (g.desc) body.append(el("p", "desc", g.desc));
+  if (g.progress) body.append(el("div", "prog", g.progress));
+  const acts = el("div", "acts");
+  if (g.track === "threejs") {
+    const base = DATA.arcade + "/games/" + g.slug + "/";
+    const play = el("a", "btn pri", g.playable ? "Play" : "Not playable yet"); if (g.playable) { play.href = base; play.target = "_blank"; } else play.classList.add("dis");
+    acts.append(play);
+    if (g.playable) { const tour = el("a", "btn", "Watch the tour"); tour.href = base + "?autoplay=1"; tour.target = "_blank"; acts.append(tour); }
+  } else if (g.track === "godot") {
+    if (g.gif) { const a = el("a", "btn pri", "Watch replay"); a.href = g.gif; a.target = "_blank"; acts.append(a); }
+    const f = el("a", "btn", "Project folder"); f.href = g.folder; f.target = "_blank"; acts.append(f);
+  } else if (g.cmd) {
+    const b = el("button", "btn pri", "Copy run command"); b.onclick = () => copy(g.cmd); acts.append(b);
+  }
+  if (g.cheat) { const a = el("a", "btn", "Cheatsheet"); a.href = g.cheat; a.target = "_blank"; acts.append(a); }
+  body.append(acts);
+  c.append(shot, body);
+  return c;
+}
+
+function empty() { return el("div", "empty", "Nothing matches these filters."); }
+
+function board(list) {
+  const b = el("div", "board");
+  for (const [k, s] of Object.entries(STATUS)) {
+    const items = list.filter((g) => g.status === k);
+    const col = el("section", "col"); col.style.setProperty("--c", s.color);
+    const h = el("h2"); const d = el("span", "dot"); h.append(d, document.createTextNode(s.name), el("span", "ct", items.length));
+    col.append(h, el("div", "sub", s.sub));
+    const st = el("div", "stack");
+    if (!items.length) st.append(el("div", "empty", k === "attention" ? "Nothing failing. Good." : "Empty."));
+    items.forEach((g) => st.append(card(g)));
+    col.append(st); b.append(col);
+  }
+  return b;
+}
+
+function sections(list, keys, labelOf, descOf, titleOf) {
+  const wrap = el("div");
+  for (const k of keys) {
+    const items = list.filter((g) => labelOf(g) === k);
+    if (!items.length) continue;
+    const s = el("section", "sec");
+    const h = el("h2", null, titleOf ? titleOf(k) : k); h.append(el("small", null, items.length + (items.length === 1 ? " game" : " games") + " - " + items.filter((g) => g.status === "verified").length + " verified"));
+    s.append(h);
+    const d = descOf(k); if (d) s.append(el("p", "d", d));
+    const gr = el("div", "grid"); items.forEach((g) => gr.append(card(g))); s.append(gr); wrap.append(s);
+  }
+  if (!wrap.children.length) wrap.append(empty());
+  return wrap;
+}
+
+function render() {
+  const list = visible(), m = $("#main"); m.replaceChildren();
+  if (state.view === "board") m.append(board(list));
+  else if (state.view === "groups") m.append(sections(list, DATA.groups, (g) => g.group, () => ""));
+  else m.append(sections(list, Object.keys(TRACKS), (g) => g.track, (k) => TRACKS[k].blurb, (k) => TRACKS[k].name));
+}
+
+/* footer */
+(function foot() {
+  const f = $("#foot");
+  for (const d of DATA.docs) { const a = el("a", null, d.label); a.href = d.href; f.append(a); }
+  f.append(el("span", "gen", "Generated " + DATA.generated.slice(0, 16).replace("T", " ") + " UTC by scripts/build-dashboard.mjs"));
+})();
+
+render();
+</script>
+</body>
+</html>
