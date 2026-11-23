@@ -11,3 +11,5 @@ kinds, an empty program never passes, wrong-order programs fail on every shift, 
 every outcome appears at least twice per shift. Tour: drives the real selects and
 Run button: job 1 empty (fails), job 1 fixed, job 2, job 3 in the wrong order
 (fails), job 3 right.
+
+Free play (F): a hands-on mode where Boomy holds each parcel at the junction and you push it into a bin with the arrow keys, A/D/S/Space, or on-screen buttons. It reuses the same jobs and bins; the verified tour does not use it.

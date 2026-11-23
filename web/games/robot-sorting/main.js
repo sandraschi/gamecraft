@@ -140,7 +140,9 @@ $('next').addEventListener('click', () => { if (level + 1 < R.LEVELS.length) sta
 
 const SPEED = 4.2, GAP = 0.75;
 let armTarget = 0;
+let manual = false, manualWait = 0, fp = { right: 0, total: 0, streak: 0, best: 0 };
 function tick(dt) {
+  if (manual && !run) { manualWait -= dt; if (manualWait <= 0) startManualRound(); }
   beltTex.offset.y -= dt * SPEED / 9.4 * 8 * (run ? 1 : 0.15);
   if (run) {
     run.spawnT -= dt;
@@ -158,8 +160,9 @@ function tick(dt) {
         const ahead = run.items.filter((o) => o !== it && o.phase === 'belt' && o.mesh.position.z > m.position.z).map((o) => o.mesh.position.z);
         const limit = Math.min(JUNCTION_Z, ...ahead.map((z) => z - 1.05));
         m.position.z = Math.min(limit, m.position.z + SPEED * dt);
-        if (m.position.z >= JUNCTION_Z - 1e-3 && !run.items.some((o) => o.phase === 'decide' || o.phase === 'push')) { it.phase = 'decide'; it.t = 0; it.dest = R.route(run.program, it.p); }
+        if (m.position.z >= JUNCTION_Z - 1e-3 && !run.items.some((o) => o.phase === 'decide' || o.phase === 'push')) { it.phase = 'decide'; it.t = 0; it.dest = run.manual ? null : R.route(run.program, it.p); }
       } else if (it.phase === 'decide') {
+        if (run.manual && !it.dest) { head.rotation.x = -0.4; led.material.color.setHex(0xffd03a); led.material.emissive.setHex(0xffd03a); armTarget = 0; continue; }   // free play: wait for the player
         it.t += dt;
         head.rotation.x = -0.4; led.material.color.setHex(0xffd03a); led.material.emissive.setHex(0xffd03a);
         armTarget = it.dest === 'left' ? 0.9 : it.dest === 'right' ? -0.9 : 0;
@@ -175,12 +178,14 @@ function tick(dt) {
           const b = BINS[it.dest]; b.count++;
           if (ok) run.correct++; else { b.wrong++; markWrong(m); }
           run.finished++;
+          if (run.manual) fpScore(ok);
           sfx.tone(ok ? 660 : 220, 0.12, { type: ok ? 'sine' : 'square', vol: ok ? 0.05 : 0.03 });
           head.rotation.x = 0; led.material.color.setHex(0x3a8aff); led.material.emissive.setHex(0x3a8aff); armTarget = 0;
         }
       }
     }
-    if (run.finished === run.parcels.length) {
+    if (run && run.manual && run.finished === run.parcels.length) manualRoundDone();
+    if (run && run.finished === run.parcels.length) {
       lastScore = run.correct;
       const total = run.parcels.length;
       if (run.correct === total) {
@@ -256,6 +261,36 @@ const checks = [
 ];
 
 startLevel(0);
+// ------------------------------------------------------------------ free play
+// Hands-on mode: Boomy holds each parcel at the junction and you push it yourself.
+// Keys: Left/A = LEFT bin, Right/D = RIGHT bin, Down/S/Space = ride ON, 1-5 = pick the job, F = toggle.
+// Not part of the verified tour; the rule-writing game is unchanged.
+function fpShow() { $('result').textContent = fp.total ? `${fp.right} of ${fp.total} right - streak ${fp.streak} (best ${fp.best})` : 'Push each parcel into the bin the job asks for.'; }
+function fpScore(ok) { fp.total++; if (ok) { fp.right++; fp.streak++; fp.best = Math.max(fp.best, fp.streak); } else fp.streak = 0; fpShow(); }
+function fpTitle() { const L = R.LEVELS[level]; $('goal-title').textContent = `Free play - ${level + 1}. ${L.title}`; $('goal').textContent = `${L.goal} Left/Right (or A/D) push into a bin, Down or Space lets it ride on. Keys 1-${R.LEVELS.length} pick the job.`; }
+function startManualRound() { clearParcels(); run = { program: [], parcels: R.shift(level, (Math.random() * 2e9) | 0), items: [], next: 0, spawnT: 0, correct: 0, finished: 0, manual: true }; }
+function manualRoundDone() { run = null; manualWait = 1.4; toast('Next shift incoming', 1200); }
+function fpPush(dest) { if (!manual || !run) return; const it = run.items.find((o) => o.phase === 'decide' && !o.dest); if (it) it.dest = dest; }
+function fpLevel(i) { if (!manual || i < 0 || i >= R.LEVELS.length) return; level = i; run = null; clearParcels(); fp = { right: 0, total: 0, streak: 0, best: 0 }; manualWait = 0; fpTitle(); fpShow(); }
+function setManual(on) {
+  if (on === manual) return;
+  manual = on; run = null; clearParcels(); levelDone = false; $('done').hidden = true;
+  $('fp-toggle').classList.toggle('on', on); $('pad').hidden = !on; $('rules').hidden = on;
+  if (on) { fp = { right: 0, total: 0, streak: 0, best: 0 }; setEditable(false); manualWait = 0; fpTitle(); fpShow(); }
+  else startLevel(level);
+}
+$('fp-toggle').addEventListener('click', () => setManual(!manual));
+for (const b of document.querySelectorAll('#pad button')) b.addEventListener('pointerdown', () => fpPush(b.dataset.d));
+addEventListener('keydown', (e) => {
+  if (e.target instanceof HTMLSelectElement || e.target instanceof HTMLInputElement || e.ctrlKey || e.metaKey || e.altKey || help.isOpen()) return;
+  const k = e.key.toLowerCase();
+  if (k === 'f') { setManual(!manual); return; }
+  if (!manual) return;
+  const dest = k === 'arrowleft' || k === 'a' ? 'left' : k === 'arrowright' || k === 'd' ? 'right' : k === 'arrowdown' || k === 's' || k === ' ' ? 'pass' : null;
+  if (dest) { e.preventDefault(); fpPush(dest); return; }
+  if (/^[1-9]$/.test(k)) fpLevel(Number(k) - 1);
+});
+
 const help = wireHelp();
 const api = harness({
   checks, tick, render, selfTest: R.selfTest, bot: botStep,
