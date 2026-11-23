@@ -29,4 +29,3 @@ Pass pipe 10 (x = 48.5).
 Hold-to-lift flappy across 10 pipes. A bang-bang policy was
 rolled out in Rust; every flap became a hint volume, so the headless
 run replays the verified flight exactly.
-

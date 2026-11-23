@@ -21,6 +21,16 @@ compiled from specs and booted headless), **three.js browser games**
 (`bevy/games/`, native executables). 16 + 19 + 3 and counting. The prompt
 path (`new`) targets Godot only.
 
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app and the CLI (Start Menu shortcut, CLI on the user PATH). `-RegisterClients` also registers the MCP exe with the IDEs that are installed. `-Clients cursor,claude-desktop` limits that list. `-Mcpb` installs the Claude Desktop extension bundle.
+
 ## What you get
 
 `new` writes a minimal but complete Godot project:

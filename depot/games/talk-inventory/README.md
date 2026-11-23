@@ -28,4 +28,3 @@ Talk to the keeper 3 times, then open the door.
 
 Talk -> key -> door state machine on the root script.
 Dialogue and the key requirement are scene data, not code.
-

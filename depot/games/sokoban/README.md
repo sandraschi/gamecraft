@@ -28,4 +28,3 @@ All crates on targets.
 
 BFS over (player, crates) proves the room solvable; the GIF
 replays the exact solver trace on the discrete model.
-

@@ -28,4 +28,3 @@ Destroy all 9 enemies.
 
 Twin-stick arena, autofire turret logic on the root.
 Sim mirrors fire interval, damage, drift speed and spawn ticks.
-
