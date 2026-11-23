@@ -131,6 +131,8 @@ footer .gen { margin-left: auto; color: var(--faint); font-size: 12.5px; }
 
 <script>
 const DATA = /*__DATA__*/null;
+/* served by the arcade itself: play links stay on the same origin and port */
+if (location.protocol.startsWith("http")) DATA.arcade = location.origin;
 const TRACKS = {
   threejs: { name: "three.js", color: "var(--threejs)", blurb: "Browser games, served locally, verified by headless self-play." },
   godot: { name: "Godot", color: "var(--godot)", blurb: "Forge-compiled projects with lint, trace replay and recorded play." },
@@ -222,7 +224,7 @@ function card(g) {
     if (g.playable) { const tour = el("a", "btn", "Watch the tour"); tour.href = base + "?autoplay=1"; tour.target = "_blank"; acts.append(tour); }
   } else if (g.track === "godot") {
     if (g.gif) { const a = el("a", "btn pri", "Watch replay"); a.href = g.gif; a.target = "_blank"; acts.append(a); }
-    const f = el("a", "btn", "Project folder"); f.href = g.folder; f.target = "_blank"; acts.append(f);
+    const f = el("a", "btn", "Game notes"); f.href = g.folder + "README.md"; f.target = "_blank"; acts.append(f);
   } else if (g.cmd) {
     const b = el("button", "btn pri", "Copy run command"); b.onclick = () => copy(g.cmd); acts.append(b);
   }
