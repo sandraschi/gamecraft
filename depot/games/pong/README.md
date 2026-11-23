@@ -28,4 +28,3 @@ Outscore the simple AI (first to 2).
 
 Player (right, fast tracker) vs simple AI (left, capped).
 Mirrored sim proves the player takes it 2 first.
-

@@ -28,4 +28,3 @@ Reach the exit in the far corner.
 
 Discrete maze: BFS proves the exit reachable, trace walks it.
 The 60s timer is the par; the trace finishes far inside it.
-

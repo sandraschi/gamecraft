@@ -28,4 +28,3 @@ Reach x = 38.
 
 Auto-scroll runner over two 3-unit gaps. Hint volumes replay
 the verified jumps headless; humans jump with Space.
-

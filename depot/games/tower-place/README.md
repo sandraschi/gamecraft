@@ -28,4 +28,3 @@ Destroy all 8 lane marchers before any leaks.
 
 Fixed-tower defense: three towers, one lane, eight marchers.
 DPS race is verified tick by tick; zero leaks.
-
