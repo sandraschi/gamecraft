@@ -6,7 +6,8 @@
 <link rel="stylesheet" href="../_shared/ui.css">
 <style>
   :root { --accent: #4caf50; --bg: #0c0f0c; }
-  #wrap { display: flex; gap: 12px; align-items: flex-start; justify-content: center; padding: 12px; }
+  #wrap { display: flex; gap: 12px; align-items: flex-start; justify-content: center; padding: 84px 12px 12px; }   /* top padding clears the fixed HUD bar */
+  @media (min-width: 700px) and (min-height: 760px) { #wrap { zoom: 1.45; padding-top: 58px; } #nums { zoom: 1.45; } }   /* roomy screens: bigger board, still clear of the HUD */
   #board { display: grid; gap: 2px; background: #222; padding: 6px; border-radius: 6px; }
   .cell { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font: 700 14px/1 system-ui; background: #3a3f3a; color: #fff; border-radius: 3px; cursor: pointer; user-select: none; }
   .cell.open { background: #1c1f1c; cursor: default; }

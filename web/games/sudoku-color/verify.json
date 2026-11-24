@@ -1,8 +1,8 @@
 {
   "slug": "sudoku-color",
   "title": "Sudoku Color",
-  "date": "2026-11-02T22:24:54.352Z",
-  "boot_ms": 153,
+  "date": "2026-11-24T06:08:26.708Z",
+  "boot_ms": 721,
   "steps": 30,
   "sim_seconds": 0.5,
   "checkpoints": [
@@ -26,7 +26,7 @@
   ],
   "won": true,
   "failed": null,
-  "wall_ms": 830,
+  "wall_ms": 1631,
   "console_errors": [],
   "console_warnings": [],
   "markers": [
