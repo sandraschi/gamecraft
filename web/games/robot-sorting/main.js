@@ -51,8 +51,9 @@ for (const b of Object.values(BINS)) {
 
 // Boomy: a little four-wheeled robot car with a pan-tilt camera head and a pusher arm
 // he stands beside the junction plate, facing it
-const BOOMY_YAW = Math.atan2(-1.6, 1.5);
-const boomy = new THREE.Group(); boomy.position.set(1.6, 0, -1.5); boomy.rotation.y = BOOMY_YAW; scene.add(boomy);
+// 1.7x so he reads at a glance; stood a little further back so the longer arm still reaches the plate
+const BOOMY_YAW = Math.atan2(-2.1, 2.1);
+const boomy = new THREE.Group(); boomy.position.set(2.1, 0, -2.1); boomy.rotation.y = BOOMY_YAW; boomy.scale.setScalar(1.7); scene.add(boomy);
 box(0.9, 0.22, 0.62, 0x1e2024, 0, 0.2, 0, boomy);
 box(0.86, 0.03, 0.58, 0x9ad8f2, 0, 0.34, 0, boomy, new THREE.MeshStandardMaterial({ color: 0x9ad8f2, transparent: true, opacity: 0.55, roughness: 0.2 }));
 for (const [x, z] of [[-0.33, 0.36], [0.33, 0.36], [-0.33, -0.36], [0.33, -0.36]]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.12, 16), M(0xf2c43a, 0.6)); w.rotation.x = Math.PI / 2; w.position.set(x, 0.15, z); w.castShadow = true; boomy.add(w); }
@@ -220,7 +221,7 @@ function resize() {
   renderer.setSize(innerWidth, innerHeight, false);
   camera.aspect = innerWidth / innerHeight; camera.fov = camera.aspect < 1 ? 66 : 42; camera.updateProjectionMatrix();
   // leave room for the rule panel on the left
-  camera.position.set(-2.8, 11.5, 12.5); camera.lookAt(-1.5, 0, -0.2); camera.updateMatrixWorld();
+  camera.position.set(-2.4, 10.0, 11.2); camera.lookAt(-1.0, 0, 1.0); camera.updateMatrixWorld();
 }
 addEventListener('resize', resize); resize();
 
