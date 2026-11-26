@@ -23,6 +23,8 @@ path (`new`) targets Godot only.
 
 ## Install
 
+> **Operator Guide & Crate Docs:** See [`HELP.md`](HELP.md) for the full operator guide and links to all 12 crate/app sub-READMEs (`crates/*/README.md` and `apps/*/README.md`).
+
 Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
 
 ```powershell
